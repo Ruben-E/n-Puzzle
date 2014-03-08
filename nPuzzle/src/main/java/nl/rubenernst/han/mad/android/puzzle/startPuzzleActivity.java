@@ -1,5 +1,8 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -10,7 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import java.lang.reflect.Field;
 
 public class startPuzzleActivity extends ActionBarActivity {
 
@@ -61,9 +68,27 @@ public class startPuzzleActivity extends ActionBarActivity {
             View rootView = inflater.inflate(R.layout.fragment_start_puzzle, container, false);
 
             LinearLayout puzzleChoises = (LinearLayout) rootView.findViewById(R.id.puzzle_choices);
-            for (int i = 0; i < 4; i++) {
-                LinearLayout puzzleChoise = (LinearLayout) inflater.inflate(R.layout.puzzle_choice, null);
-                puzzleChoises.addView(puzzleChoise);
+            for (int i = 0; i < Constants.PUZZLES.length; i++) {
+                try {
+                    String puzzle = Constants.PUZZLES[i];
+
+                    Class res = R.drawable.class;
+                    Field field = res.getField("ic_puzzle_" + (i + 1));
+                    int drawableId = field.getInt(null);
+
+                    Bitmap image = BitmapFactory.decodeResource(getResources(), drawableId);
+                    LinearLayout puzzleChoice = (LinearLayout) inflater.inflate(R.layout.puzzle_choice, null);
+
+                    ImageView puzzleImage = (ImageView) puzzleChoice.findViewById(R.id.puzzle_image);
+                    Button puzzleButton = (Button) puzzleChoice.findViewById(R.id.puzzle_button);
+
+                    puzzleButton.setText(puzzle);
+                    puzzleImage.setImageBitmap(image);
+
+                    puzzleChoises.addView(puzzleChoice);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             return rootView;
