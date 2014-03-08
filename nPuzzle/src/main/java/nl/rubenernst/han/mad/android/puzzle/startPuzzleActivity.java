@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.widget.LinearLayout;
 
 public class startPuzzleActivity extends ActionBarActivity {
 
@@ -28,7 +29,7 @@ public class startPuzzleActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.start_puzzle, menu);
         return true;
@@ -56,8 +57,15 @@ public class startPuzzleActivity extends ActionBarActivity {
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
+                                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_start_puzzle, container, false);
+
+            LinearLayout puzzleChoises = (LinearLayout) rootView.findViewById(R.id.puzzle_choices);
+            for (int i = 0; i < 4; i++) {
+                LinearLayout puzzleChoise = (LinearLayout) inflater.inflate(R.layout.puzzle_choice, null);
+                puzzleChoises.addView(puzzleChoise);
+            }
+
             return rootView;
         }
     }
