@@ -18,13 +18,18 @@
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New RadioButton"
-                android:id="@+id/radioButton"/>
+                android:text="@string/easy_radiobutton"
+                android:id="@+id/easy_radiobutton"/>
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New RadioButton"
-                android:id="@+id/radioButton2"/>
+                android:text="@string/normal_radiobutton"
+                android:id="@+id/normal_radiobutton"/>
+        <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/hard_radiobutton"
+                android:id="@+id/hard_radiobutton"/>
     </RadioGroup>
     <LinearLayout
             android:id="@+id/puzzle_choices"
