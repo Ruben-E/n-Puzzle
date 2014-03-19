@@ -3,17 +3,12 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
+import android.graphics.Point;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Layout;
-import android.util.Log;
 import android.view.*;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.*;
 import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
@@ -62,9 +57,10 @@ public class puzzleGameActivity extends ActionBarActivity {
     }
 
     public static class puzzleGameFragment extends Fragment {
-
+        private final static String TAG = "puzzleGame";
         private Game game;
         private Integer gridSize;
+        private List<Bitmap> imageTiles;
 
         public puzzleGameFragment() {
         }
@@ -74,6 +70,28 @@ public class puzzleGameActivity extends ActionBarActivity {
             super.onCreate(savedInstanceState);
 
             gridSize = 4;
+
+            imageTiles = new ArrayList<Bitmap>();
+
+            Display display = getActivity().getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int screenWidth = size.x;
+
+            Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.puzzle_2), screenWidth, screenWidth, false);
+
+            int pieceHeight = (int) Math.floor(screenWidth / gridSize);
+            int pieceWidth = (int) Math.floor(screenWidth / gridSize);
+
+            for(int i = 0; i < gridSize; i++) {
+                for(int j = 0; j < gridSize; j++) {
+                    int x = (int) Math.floor(j * pieceWidth);
+                    int y = (int) Math.floor(i * pieceHeight);
+
+                    Bitmap tile = Bitmap.createBitmap(icon, x, y, pieceWidth, pieceHeight);
+                    imageTiles.add(tile);
+                }
+            }
         }
 
         @Override
@@ -93,7 +111,11 @@ public class puzzleGameActivity extends ActionBarActivity {
         public void updateUI() {
             LinearLayout grid = (LinearLayout) getView().findViewById(R.id.grid);
             LayoutInflater layoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            Bitmap icon = BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.ic_puzzle_1);
+
+            Display display = getActivity().getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            int screenWidth = size.x;
 
             grid.removeAllViews();
 
@@ -107,20 +129,42 @@ public class puzzleGameActivity extends ActionBarActivity {
                 for (int j = (i * game.getGridSize()); j < ((i * game.getGridSize()) + game.getGridSize()); j++) {
                     final CurrentPosition currentPosition = currentGrid.get(j);
                     View puzzleGameTile = layoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
-                    Button button = (Button) puzzleGameTile.findViewById(R.id.tile_button);
+                    ImageButton button = (ImageButton) puzzleGameTile.findViewById(R.id.tile_button);
+                    button.setLayoutParams(new LinearLayout.LayoutParams(screenWidth / game.getGridSize(), screenWidth / game.getGridSize()));
 
                     if (currentPosition != null) {
-                        button.setText(String.valueOf(currentPosition.getCorrectPosition().getPosition()) + " - " + String.valueOf(currentPosition.getPosition()));
+                        //button.setText(String.valueOf(currentPosition.getCorrectPosition().getPosition()) + " - " + String.valueOf(currentPosition.getPosition()));
+                        button.setImageBitmap(imageTiles.get(currentPosition.getCorrectPosition().getPosition()));
 
-                        button.setOnClickListener(new View.OnClickListener() {
+                        button.setOnTouchListener(new OnTileTouchListener(getActivity().getApplicationContext()) {
                             @Override
-                            public void onClick(View view) {
+                            public void onPress() {
                                 currentPosition.move();
                                 updateUI();
                             }
+
+                            @Override
+                            public void onSwipeTop() {
+                                Toast.makeText(getActivity().getApplicationContext(), "Swipe top on: " + currentPosition.getPosition(), Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onSwipeBottom() {
+                                Toast.makeText(getActivity().getApplicationContext(), "Swipe bottom on: " + currentPosition.getPosition(), Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onSwipeLeft() {
+                                Toast.makeText(getActivity().getApplicationContext(), "Swipe left on: " + currentPosition.getPosition(), Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onSwipeRight() {
+                                Toast.makeText(getActivity().getApplicationContext(), "Swipe Right on: " + currentPosition.getPosition(), Toast.LENGTH_SHORT).show();
+                            }
                         });
                     } else {
-                        button.setText("");
+                        //button.setText("");
                     }
 
                     layout.addView(puzzleGameTile);
@@ -140,21 +184,21 @@ public class puzzleGameActivity extends ActionBarActivity {
 
             Integer tiles = (int) Math.pow(gridSize, 2);
 
-            List<Integer> gridTilesRandomized = new ArrayList<Integer>();
-            for (int j = 0; j < (tiles - 1); j++) {
-                gridTilesRandomized.add(j);
-            }
-
-            // Randomize the grid tiles
-            long seed = System.nanoTime();
-            Collections.shuffle(gridTilesRandomized, new Random(seed));
+//            List<Integer> gridTilesRandomized = new ArrayList<Integer>();
+//            for (int j = 0; j < (tiles - 1); j++) {
+//                gridTilesRandomized.add(j);
+//            }
+//
+//            // Randomize the grid tiles
+//            long seed = System.nanoTime();
+//            Collections.shuffle(gridTilesRandomized, new Random(seed));
 
             for (int i = 0; i < (tiles - 1); i++) {
-                Integer randomPosition = gridTilesRandomized.get(i);
+                //Integer randomPosition = gridTilesRandomized.get(i);
 
                 CurrentPosition currentPosition = new CurrentPosition();
                 currentPosition.setGame(game);
-                currentPosition.setPosition(randomPosition);
+                currentPosition.setPosition(i);
 
                 CorrectPosition correctPosition = new CorrectPosition();
                 correctPosition.setPosition(i);
@@ -163,6 +207,8 @@ public class puzzleGameActivity extends ActionBarActivity {
 
                 game.addCurrentPosition(currentPosition);
             }
+
+            game.randomize();
         }
     }
 }

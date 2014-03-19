@@ -6,6 +6,8 @@ import java.util.*;
  * Created by rubenernst on 18-03-14.
  */
 public class Game {
+    private static final int TIMES_TO_SHUFFLE = 100;
+
     private List<CurrentPosition> currentPositions = new ArrayList<CurrentPosition>();
     private List<Turn> turns = new ArrayList<Turn>();
 
@@ -52,7 +54,7 @@ public class Game {
         return grid;
     }
 
-    public Integer numberOfTiles(){
+    public Integer numberOfTiles() {
         return (int) Math.pow(getGridSize(), 2);
     }
 
@@ -63,7 +65,7 @@ public class Game {
         }
 
         for (int i = 0; i < numberOfTiles(); i++) {
-            if(!tileNumbers.contains(i)) {
+            if (!tileNumbers.contains(i)) {
                 return i;
             }
         }
@@ -73,11 +75,36 @@ public class Game {
 
     public Boolean allPositionsCorrect() {
         for (CurrentPosition position : currentPositions) {
-            if (!position.isCorrectPosition()) {
+            if (!position.isAtCorrectPosition()) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public List<CurrentPosition> getPositionsAroundFreeTile() {
+        //TODO: Implementation
+        List<CurrentPosition> positionsAroundFreeTile = new ArrayList<CurrentPosition>();
+        Integer freeTileNumber = getFreeTileNumber();
+
+        for (CurrentPosition currentPosition : getCurrentPositions()) {
+            if(currentPosition.canMoveToPosition(freeTileNumber)) {
+                positionsAroundFreeTile.add(currentPosition);
+            }
+        }
+
+        return positionsAroundFreeTile;
+    }
+
+    public void randomize() {
+        for (int i = 0; i < TIMES_TO_SHUFFLE; i++) {
+            List<CurrentPosition> positionsAroundFreeTile = getPositionsAroundFreeTile();
+
+            Random rand = new Random();
+            CurrentPosition randomPosition = positionsAroundFreeTile.get(rand.nextInt(positionsAroundFreeTile.size()));
+
+            randomPosition.move();
+        }
     }
 }
