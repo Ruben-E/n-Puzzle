@@ -1,12 +1,15 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.media.Image;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +19,9 @@ import android.os.Build;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
+import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
+import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 
 import java.lang.reflect.Field;
 
@@ -57,7 +63,7 @@ public class startPuzzleActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment implements View.OnClickListener {
 
         public PlaceholderFragment() {
         }
@@ -71,9 +77,10 @@ public class startPuzzleActivity extends ActionBarActivity {
             for (int i = 0; i < Constants.PUZZLES.length; i++) {
                 try {
                     String puzzle = Constants.PUZZLES[i];
+                    String puzzleImageName = "ic_puzzle_" + (i + 1);
 
                     Class res = R.drawable.class;
-                    Field field = res.getField("ic_puzzle_" + (i + 1));
+                    Field field = res.getField(puzzleImageName);
                     int drawableId = field.getInt(null);
 
                     Bitmap image = BitmapFactory.decodeResource(getResources(), drawableId);
@@ -83,6 +90,10 @@ public class startPuzzleActivity extends ActionBarActivity {
                     Button puzzleButton = (Button) puzzleChoice.findViewById(R.id.puzzle_button);
 
                     puzzleButton.setText(puzzle);
+                    puzzleButton.setOnClickListener(this);
+                    puzzleButton.setTag(i);
+
+
                     puzzleImage.setImageBitmap(image);
 
                     puzzleChoises.addView(puzzleChoice);
@@ -92,6 +103,70 @@ public class startPuzzleActivity extends ActionBarActivity {
             }
 
             return rootView;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(getActivity(), puzzleGameActivity.class);
+            intent.putExtra("puzzle", (Integer) view.getTag());
+
+            getActivity().startActivity(intent);
+        }
+    }
+
+    public void testDomain() {
+        String tag = "DomainTest";
+
+        Game game = new Game();
+        game.setGridSize(4);
+
+        for(int i = 0; i < 15; i++) {
+            CurrentPosition currentPosition = new CurrentPosition();
+            currentPosition.setGame(game);
+            currentPosition.setPosition(i);
+
+            CorrectPosition correctPosition = new CorrectPosition();
+            correctPosition.setPosition(i);
+
+            currentPosition.setCorrectPosition(correctPosition);
+
+            game.addCurrentPosition(currentPosition);
+        }
+
+        CurrentPosition currentPosition0 = game.getCurrentPositionAt(14);
+
+        if(game.allPositionsCorrect()) {
+            Log.d(tag, "All positions correct");
+        } else {
+            Log.d(tag, "Some positions not correct");
+        }
+
+        currentPosition0.move();
+
+        if(game.allPositionsCorrect()) {
+            Log.d(tag, "All positions correct");
+        } else {
+            Log.d(tag, "Some positions not correct");
+        }
+
+        for(CurrentPosition currentPosition : game.getCurrentPositions()) {
+            Log.d(tag, "Position: " + currentPosition.getPosition());
+        }
+
+
+        currentPosition0 = game.getCurrentPositionAt(10);
+
+        currentPosition0.move();
+
+        if(game.allPositionsCorrect()) {
+            Log.d(tag, "All positions correct");
+        } else {
+            Log.d(tag, "Some positions not correct");
+        }
+
+
+        for(CurrentPosition currentPosition : game.getCurrentPositions()) {
+            Log.d(tag, "Position: " + currentPosition.getPosition());
         }
     }
 

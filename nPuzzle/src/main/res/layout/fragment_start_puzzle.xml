@@ -31,11 +31,16 @@
                 android:text="@string/hard_radiobutton"
                 android:id="@+id/hard_radiobutton"/>
     </RadioGroup>
-    <LinearLayout
-            android:id="@+id/puzzle_choices"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
+    <ScrollView
+            android:layout_width="fill_parent"
             android:layout_height="0dp" android:layout_weight="3">
+        <LinearLayout
+                android:id="@+id/puzzle_choices"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
 
-    </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
