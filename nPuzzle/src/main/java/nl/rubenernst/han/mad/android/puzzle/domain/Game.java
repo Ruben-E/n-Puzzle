@@ -89,7 +89,7 @@ public class Game {
         Integer freeTileNumber = getFreeTileNumber();
 
         for (CurrentPosition currentPosition : getCurrentPositions()) {
-            if(currentPosition.canMoveToPosition(freeTileNumber)) {
+            if(currentPosition.isPositionInRange(freeTileNumber)) {
                 positionsAroundFreeTile.add(currentPosition);
             }
         }

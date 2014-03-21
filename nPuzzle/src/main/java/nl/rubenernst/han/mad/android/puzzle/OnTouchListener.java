@@ -8,19 +8,32 @@ import android.view.View;
 /**
  * Detects left and right swipes across a view.
  */
-public abstract class OnTileTouchListener implements View.OnTouchListener {
+public class OnTouchListener implements View.OnTouchListener {
 
     private final GestureDetector gestureDetector;
 
-    public OnTileTouchListener(Context context) {
+    public OnTouchListener(Context context) {
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
-    public abstract void onPress();
-    public abstract void onSwipeTop();
-    public abstract void onSwipeBottom();
-    public abstract void onSwipeLeft();
-    public abstract void onSwipeRight();
+    public void onPress() {
+    }
+
+    public void onLongPress() {
+
+    }
+
+    public void onSwipeTop() {
+    }
+
+    public void onSwipeBottom() {
+    }
+
+    public void onSwipeLeft() {
+    }
+
+    public void onSwipeRight() {
+    }
 
     public boolean onTouch(View v, MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
@@ -29,12 +42,16 @@ public abstract class OnTileTouchListener implements View.OnTouchListener {
     private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
         private static final int SWIPE_DISTANCE_THRESHOLD = 50;
-        private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+        private static final int SWIPE_VELOCITY_THRESHOLD = 30;
 
         @Override
         public boolean onDown(MotionEvent e) {
-
             return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            OnTouchListener.this.onLongPress();
         }
 
         @Override

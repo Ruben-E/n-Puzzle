@@ -7,6 +7,10 @@ public class Position implements Comparable {
     protected Game game;
     private Integer position;
 
+    public enum Directions {
+        LEFT, TOP, RIGHT, BOTTOM
+    }
+
     public Integer getPosition() {
         return position;
     }
@@ -19,108 +23,6 @@ public class Position implements Comparable {
     public int compareTo(Object o) {
         Position otherPosition = (Position) o;
         return this.getPosition() - otherPosition.getPosition();
-    }
-
-    public Boolean canMoveToPosition(Integer position) {
-        if(isAtLeftTopCorner()) {
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-        } else if (isAtRightTopCorner()) {
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-        } else if (isAtLeftBottomCorner()) {
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-        } else if (isAtRightBottomCorner()) {
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-        } else if (isAtLeftBorder()) {
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-        } else if (isAtRightBorder()) {
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-        } else if (isAtTopBorder()) {
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-        } else if (isAtBottomBorder()) {
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-        } else {
-            if(position == (getPosition() - 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + 1)) {
-                return true;
-            }
-
-            if(position == (getPosition() + getGame().getGridSize())) {
-                return true;
-            }
-
-            if(position == (getPosition() - getGame().getGridSize())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public Game getGame() {
@@ -153,7 +55,7 @@ public class Position implements Comparable {
 
     public Boolean isAtLeftBorder() {
         double calculation = this.getPosition() / (double) getGame().getGridSize();
-        if (calculation % getGame().getGridSize() == 0) {
+        if (calculation % 1 == 0) {
             return true;
         }
 
@@ -170,7 +72,7 @@ public class Position implements Comparable {
 
     public Boolean isAtRightBorder() {
         double calculation = (this.getPosition() + 1) / (double) getGame().getGridSize();
-        if (calculation % getGame().getGridSize() == 0) {
+        if (calculation % 1 == 0) {
             return true;
         }
 
