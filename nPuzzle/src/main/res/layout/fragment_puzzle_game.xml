@@ -2,23 +2,24 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" android:gravity="bottom">
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/status_bar">
+            android:layout_height="70dp"
+            android:id="@+id/status_bar"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:textSize="40sp"
                 android:textColor="@android:color/holo_blue_light"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
                 android:text="Large Text"
-                android:id="@+id/status_text"/>
+                android:id="@+id/status_text"
+                android:gravity="center|left"/>
     </LinearLayout>
     <LinearLayout
                   android:orientation="vertical"

@@ -8,6 +8,7 @@ import java.util.Hashtable;
  */
 final public class Constants {
     public static final String[] PUZZLES = {"Mountains", "Car", "Penguins", "House"};
+    public static enum DIFFICULTY {HARD, MEDIUM, EASY}
 
     //private constructor to prevent instantiation/inheritance
     private Constants() {

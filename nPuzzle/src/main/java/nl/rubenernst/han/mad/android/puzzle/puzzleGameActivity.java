@@ -17,6 +17,8 @@ import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.domain.Position;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
+import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 
 import java.util.*;
 
@@ -112,6 +114,18 @@ public class puzzleGameActivity extends ActionBarActivity {
             setupGame();
             updateUI();
 
+            final Game[] randomizedGame = new Game[1];
+
+            GameInitializationTask gameInitializationTask = new GameInitializationTask();
+            gameInitializationTask.setTaskFinishedListener(new TaskFinishedListener() {
+                @Override
+                public void onTaskFinished(Object result, String message) {
+                    if(result instanceof Game) {
+                        randomizedGame[0] = (Game) result;
+                    }
+                }
+            });
+
             new CountDownTimer(4000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
@@ -123,10 +137,22 @@ public class puzzleGameActivity extends ActionBarActivity {
                     TextView textView = (TextView) getView().findViewById(R.id.status_text);
                     textView.setText("GO!");
 
-                    randomizeGame();
+                    if(randomizedGame[0] != null) {
+                        game = randomizedGame[0];
+                    } else {
+                        randomizeGame();
+                    }
+
                     updateUI();
                 }
             }.start();
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+
+
         }
 
         public void updateUI() {
