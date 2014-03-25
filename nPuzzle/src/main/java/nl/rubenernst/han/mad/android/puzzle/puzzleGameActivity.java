@@ -19,6 +19,7 @@ import nl.rubenernst.han.mad.android.puzzle.domain.Position;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -29,19 +30,32 @@ public class puzzleGameActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_puzzle_game);
+        try {
+            setContentView(R.layout.activity_puzzle_game);
 
-        Intent intent = getIntent();
-        Constants.Difficulty difficulty = (Constants.Difficulty) intent.getSerializableExtra("difficulty");
+            Intent intent = getIntent();
+            Constants.Difficulty difficulty = (Constants.Difficulty) intent.getSerializableExtra("difficulty");
+            Integer puzzleId = intent.getIntExtra("puzzle", 0);
 
-        PuzzleGameFragment puzzleGameFragment = new PuzzleGameFragment();
-        puzzleGameFragment.setDifficulty(difficulty);
+            String puzzleImageName = "puzzle_" + (puzzleId + 1);
 
+            Class res = R.drawable.class;
+            Field field = res.getField(puzzleImageName);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, puzzleGameFragment)
-                    .commit();
+            Integer puzzleDrawableId = field.getInt(null);
+
+            PuzzleGameFragment puzzleGameFragment = new PuzzleGameFragment();
+            puzzleGameFragment.setDifficulty(difficulty);
+            puzzleGameFragment.setPuzzleDrawableId(puzzleDrawableId);
+
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.container, puzzleGameFragment)
+                        .commit();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            finish();
         }
     }
 
@@ -69,6 +83,7 @@ public class puzzleGameActivity extends ActionBarActivity {
         private final static String TAG = "puzzleGame";
         private Game mGame;
         private Integer mGridSize;
+        private Integer mPuzzleDrawableId;
         private List<Bitmap> mImageTiles;
         private Constants.Difficulty mDifficulty;
 
@@ -88,13 +103,13 @@ public class puzzleGameActivity extends ActionBarActivity {
             display.getSize(size);
             int screenWidth = size.x;
 
-            Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.puzzle_2), screenWidth, screenWidth, false);
+            Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), mPuzzleDrawableId), screenWidth, screenWidth, false);
 
             int pieceHeight = (int) Math.floor(screenWidth / mGridSize);
             int pieceWidth = (int) Math.floor(screenWidth / mGridSize);
 
-            for(int i = 0; i < mGridSize; i++) {
-                for(int j = 0; j < mGridSize; j++) {
+            for (int i = 0; i < mGridSize; i++) {
+                for (int j = 0; j < mGridSize; j++) {
                     int x = (int) Math.floor(j * pieceWidth);
                     int y = (int) Math.floor(i * pieceHeight);
 
@@ -123,7 +138,7 @@ public class puzzleGameActivity extends ActionBarActivity {
             gameInitializationTask.setTaskFinishedListener(new TaskFinishedListener() {
                 @Override
                 public void onTaskFinished(Object result, String message) {
-                    if(result instanceof Game) {
+                    if (result instanceof Game) {
                         randomizedGame[0] = (Game) result;
                     }
                 }
@@ -141,7 +156,7 @@ public class puzzleGameActivity extends ActionBarActivity {
                     TextView textView = (TextView) getView().findViewById(R.id.status_text);
                     textView.setText("GO!");
 
-                    if(randomizedGame[0] != null) {
+                    if (randomizedGame[0] != null) {
                         mGame = randomizedGame[0];
                     } else {
                         randomizeGame();
@@ -193,7 +208,7 @@ public class puzzleGameActivity extends ActionBarActivity {
                                 currentPosition.move();
                                 updateUI();
 
-                                Animation animation = new TranslateAnimation(0, 500,0, 0);
+                                Animation animation = new TranslateAnimation(0, 500, 0, 0);
                                 animation.setDuration(1000);
                                 button.startAnimation(animation);
                             }
@@ -277,6 +292,10 @@ public class puzzleGameActivity extends ActionBarActivity {
             }
 
             return mDifficulty;
+        }
+
+        public void setPuzzleDrawableId(Integer puzzleDrawableId) {
+            this.mPuzzleDrawableId = puzzleDrawableId;
         }
     }
 }
