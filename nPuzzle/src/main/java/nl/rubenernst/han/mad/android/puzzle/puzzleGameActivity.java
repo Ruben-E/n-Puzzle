@@ -1,10 +1,7 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.*;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -81,6 +78,8 @@ public class puzzleGameActivity extends ActionBarActivity {
 
     public static class PuzzleGameFragment extends Fragment {
         private final static String TAG = "puzzleGame";
+        private static final String CORRECT_COLOR = "#659D32";
+
         private Game mGame;
         private Integer mGridSize;
         private Integer mPuzzleDrawableId;
@@ -123,6 +122,7 @@ public class puzzleGameActivity extends ActionBarActivity {
                     int y = (int) Math.floor(i * pieceHeight);
 
                     Bitmap tile = Bitmap.createBitmap(icon, x, y, pieceWidth, pieceHeight);
+                    tile = addBlackBorder(tile, 1);
                     mImageTiles.add(tile);
                 }
             }
@@ -156,10 +156,12 @@ public class puzzleGameActivity extends ActionBarActivity {
                 }
 
                 public void onFinish() {
-                    statusText.setText("GO!");
-                    mIsPlayable = true;
+                    if (statusText != null) {
+                        statusText.setText("GO!");
+                        mIsPlayable = true;
 
-                    updateUI();
+                        updateUI();
+                    }
                 }
             };
 
@@ -229,19 +231,21 @@ public class puzzleGameActivity extends ActionBarActivity {
                             public void onLongPress() {
                                 if (mIsPlayable) {
                                     final ImageButton correctButton = (ImageButton) grid.getChildAt(currentPosition.getCorrectPosition().getPosition());
-                                    final CurrentPosition currentPosition1 = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
+                                    final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
 
-                                    correctButton.setBackgroundColor(Color.parseColor("#76EE00"));
+                                    correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
                                     correctButton.setImageBitmap(null);
-                                    Toast.makeText(getActivity().getApplicationContext(), "" + (currentPosition.getCorrectPosition().getPosition() + 1), Toast.LENGTH_SHORT).show();
 
                                     new CountDownTimer(1500, 1000) {
                                         public void onTick(long millisUntilFinished) {
                                         }
 
                                         public void onFinish() {
-                                            //TODO: Crash at multiple fingers on screen.
-                                            correctButton.setImageBitmap(currentPosition1.getImage().getBitmap());
+                                            if (correctButton != null && correctPosition != null) {
+                                                correctButton.setImageBitmap(correctPosition.getImage().getBitmap());
+                                            } else if (correctPosition == null) {
+                                                correctButton.getBackground().setAlpha(256);
+                                            }
                                         }
                                     }.start();
                                 }
@@ -330,6 +334,15 @@ public class puzzleGameActivity extends ActionBarActivity {
 
         public void setPuzzleDrawableId(Integer puzzleDrawableId) {
             this.mPuzzleDrawableId = puzzleDrawableId;
+        }
+
+        //TODO: Improve border. Now there is no border at the bottom and the right side
+        private Bitmap addBlackBorder(Bitmap bmp, int borderSize) {
+            Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth() + borderSize * 2, bmp.getHeight() + borderSize * 2, bmp.getConfig());
+            Canvas canvas = new Canvas(bmpWithBorder);
+            canvas.drawColor(Color.BLACK);
+            canvas.drawBitmap(bmp, borderSize, borderSize, null);
+            return bmpWithBorder;
         }
     }
 }
