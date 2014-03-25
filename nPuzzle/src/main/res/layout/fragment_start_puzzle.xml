@@ -14,21 +14,26 @@
             android:layout_height="0dp" android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
             android:orientation="horizontal"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:id="@+id/difficulty">
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/easy_radiobutton"
-                android:id="@+id/easy_radiobutton"/>
+                android:id="@+id/easy_radiobutton"
+                android:tag="easy"/>
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/normal_radiobutton"
+                android:tag="normal"
+                android:checked="true"
                 android:id="@+id/normal_radiobutton"/>
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hard_radiobutton"
+                android:tag="hard"
                 android:id="@+id/hard_radiobutton"/>
     </RadioGroup>
     <ScrollView

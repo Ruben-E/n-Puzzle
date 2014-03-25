@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -26,7 +25,6 @@ import java.util.*;
  * Created by rubenernst on 14-03-14.
  */
 public class puzzleGameActivity extends ActionBarActivity {
-    protected String test = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +32,15 @@ public class puzzleGameActivity extends ActionBarActivity {
         setContentView(R.layout.activity_puzzle_game);
 
         Intent intent = getIntent();
+        Constants.Difficulty difficulty = (Constants.Difficulty) intent.getSerializableExtra("difficulty");
+
+        PuzzleGameFragment puzzleGameFragment = new PuzzleGameFragment();
+        puzzleGameFragment.setDifficulty(difficulty);
 
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new puzzleGameFragment())
+                    .add(R.id.container, puzzleGameFragment)
                     .commit();
         }
     }
@@ -63,20 +65,21 @@ public class puzzleGameActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static class puzzleGameFragment extends Fragment {
+    public static class PuzzleGameFragment extends Fragment {
         private final static String TAG = "puzzleGame";
         private Game game;
         private Integer gridSize;
         private List<Bitmap> imageTiles;
+        private Constants.Difficulty difficulty;
 
-        public puzzleGameFragment() {
+        public PuzzleGameFragment() {
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            gridSize = 4;
+            gridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
 
             imageTiles = new ArrayList<Bitmap>();
 
@@ -126,6 +129,7 @@ public class puzzleGameActivity extends ActionBarActivity {
                 }
             });
 
+            //TODO: Fix crash when user presses the back button
             new CountDownTimer(4000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
@@ -261,6 +265,18 @@ public class puzzleGameActivity extends ActionBarActivity {
 
         public void randomizeGame() {
             game.randomize();
+        }
+
+        public void setDifficulty(Constants.Difficulty difficulty) {
+            this.difficulty = difficulty;
+        }
+
+        public Constants.Difficulty getDifficulty() {
+            if (difficulty == null) {
+                difficulty = Constants.Difficulty.NORMAL;
+            }
+
+            return difficulty;
         }
     }
 }

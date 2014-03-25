@@ -3,10 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.media.Image;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,10 +12,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
@@ -109,8 +106,27 @@ public class startPuzzleActivity extends ActionBarActivity {
         public void onClick(View view) {
             Intent intent = new Intent(getActivity(), puzzleGameActivity.class);
             intent.putExtra("puzzle", (Integer) view.getTag());
+            intent.putExtra("difficulty", getDifficulty());
 
             getActivity().startActivity(intent);
+        }
+
+        private Constants.Difficulty getDifficulty() {
+            RadioGroup difficultyGroup = (RadioGroup) getView().findViewById(R.id.difficulty);
+
+            int radioButtonID = difficultyGroup.getCheckedRadioButtonId();
+            View radioButton = difficultyGroup.findViewById(radioButtonID);
+
+            if (radioButton != null) {
+                String tag = (String) radioButton.getTag();
+                Constants.Difficulty difficulty = Constants.Difficulty.valueOf(tag.toUpperCase());
+
+                if (difficulty != null) {
+                    return difficulty;
+                }
+            }
+
+            return Constants.Difficulty.NORMAL;
         }
     }
 
@@ -120,7 +136,7 @@ public class startPuzzleActivity extends ActionBarActivity {
         Game game = new Game();
         game.setGridSize(4);
 
-        for(int i = 0; i < 15; i++) {
+        for (int i = 0; i < 15; i++) {
             CurrentPosition currentPosition = new CurrentPosition();
             currentPosition.setGame(game);
             currentPosition.setPosition(i);
@@ -135,7 +151,7 @@ public class startPuzzleActivity extends ActionBarActivity {
 
         CurrentPosition currentPosition0 = game.getCurrentPositionAt(14);
 
-        if(game.allPositionsCorrect()) {
+        if (game.allPositionsCorrect()) {
             Log.d(tag, "All positions correct");
         } else {
             Log.d(tag, "Some positions not correct");
@@ -143,13 +159,13 @@ public class startPuzzleActivity extends ActionBarActivity {
 
         currentPosition0.move();
 
-        if(game.allPositionsCorrect()) {
+        if (game.allPositionsCorrect()) {
             Log.d(tag, "All positions correct");
         } else {
             Log.d(tag, "Some positions not correct");
         }
 
-        for(CurrentPosition currentPosition : game.getCurrentPositions()) {
+        for (CurrentPosition currentPosition : game.getCurrentPositions()) {
             Log.d(tag, "Position: " + currentPosition.getPosition());
         }
 
@@ -158,14 +174,14 @@ public class startPuzzleActivity extends ActionBarActivity {
 
         currentPosition0.move();
 
-        if(game.allPositionsCorrect()) {
+        if (game.allPositionsCorrect()) {
             Log.d(tag, "All positions correct");
         } else {
             Log.d(tag, "Some positions not correct");
         }
 
 
-        for(CurrentPosition currentPosition : game.getCurrentPositions()) {
+        for (CurrentPosition currentPosition : game.getCurrentPositions()) {
             Log.d(tag, "Position: " + currentPosition.getPosition());
         }
     }
