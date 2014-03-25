@@ -23,7 +23,8 @@ public class Game {
     }
 
     public CurrentPosition getCurrentPositionAt(Integer index) {
-        return currentPositions.get(index);
+        HashMap<Integer, CurrentPosition> grid = getCurrentGrid();
+        return grid.get(index);
     }
 
     public void addTurn(Turn turn) {

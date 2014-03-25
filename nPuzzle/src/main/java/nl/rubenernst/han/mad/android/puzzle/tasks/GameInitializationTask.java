@@ -15,6 +15,8 @@ public class GameInitializationTask extends AsyncTask<Game, Void, Game> {
         Game game = games[0];
         game.randomize();
 
+        onCompleted(game);
+
         return game;
     }
 

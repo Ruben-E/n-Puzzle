@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
@@ -12,10 +13,9 @@ import android.view.*;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
-import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
-import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
-import nl.rubenernst.han.mad.android.puzzle.domain.Game;
-import nl.rubenernst.han.mad.android.puzzle.domain.Position;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 
@@ -86,6 +86,12 @@ public class puzzleGameActivity extends ActionBarActivity {
         private Integer mPuzzleDrawableId;
         private List<Bitmap> mImageTiles;
         private Constants.Difficulty mDifficulty;
+        private Boolean mIsPlayable = false;
+
+        @InjectView(R.id.status_text)
+        TextView statusText;
+        @InjectView(R.id.grid)
+        RelativeLayout grid;
 
         public PuzzleGameFragment() {
         }
@@ -95,9 +101,12 @@ public class puzzleGameActivity extends ActionBarActivity {
             super.onCreate(savedInstanceState);
 
             mGridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
-
             mImageTiles = new ArrayList<Bitmap>();
 
+            splicePuzzle();
+        }
+
+        private void splicePuzzle() {
             Display display = getActivity().getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
@@ -122,9 +131,11 @@ public class puzzleGameActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_puzzle_game, container, false);
+            View view = inflater.inflate(R.layout.fragment_puzzle_game, container, false);
 
-            return rootView;
+            ButterKnife.inject(this, view);
+
+            return view;
         }
 
         @Override
@@ -132,129 +143,149 @@ public class puzzleGameActivity extends ActionBarActivity {
             setupGame();
             updateUI();
 
-            final Game[] randomizedGame = new Game[1];
+            startGame();
+        }
+
+        private void startGame() {
+            statusText.setText("Loading...");
+
+            //TODO: Fix crash when user presses the back button
+            final CountDownTimer countDownTimer = new CountDownTimer(4000, 1000) {
+                public void onTick(long millisUntilFinished) {
+                    statusText.setText("" + (int) Math.floor(millisUntilFinished / 1000));
+                }
+
+                public void onFinish() {
+                    statusText.setText("GO!");
+                    mIsPlayable = true;
+
+                    updateUI();
+                }
+            };
 
             GameInitializationTask gameInitializationTask = new GameInitializationTask();
             gameInitializationTask.setTaskFinishedListener(new TaskFinishedListener() {
                 @Override
                 public void onTaskFinished(Object result, String message) {
                     if (result instanceof Game) {
-                        randomizedGame[0] = (Game) result;
+                        PuzzleGameFragment.this.mGame = (Game) result;
+                        countDownTimer.start();
                     }
                 }
             });
 
-            //TODO: Fix crash when user presses the back button
-            new CountDownTimer(4000, 1000) {
-
-                public void onTick(long millisUntilFinished) {
-                    TextView textView = (TextView) getView().findViewById(R.id.status_text);
-                    textView.setText("" + millisUntilFinished / 1000);
-                }
-
-                public void onFinish() {
-                    TextView textView = (TextView) getView().findViewById(R.id.status_text);
-                    textView.setText("GO!");
-
-                    if (randomizedGame[0] != null) {
-                        mGame = randomizedGame[0];
-                    } else {
-                        randomizeGame();
-                    }
-
-                    updateUI();
-                }
-            }.start();
+            gameInitializationTask.execute(mGame);
         }
 
         @Override
-        public void onStart() {
-            super.onStart();
-
-
+        public void onDestroyView() {
+            super.onDestroyView();
+            ButterKnife.reset(this);
         }
 
         public void updateUI() {
-            LinearLayout grid = (LinearLayout) getView().findViewById(R.id.grid);
             LayoutInflater layoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+            HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
 
             Display display = getActivity().getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
-            int screenWidth = size.x;
+            Integer screenWidth = size.x;
+
+            Integer buttonWidth = screenWidth / mGame.getGridSize();
 
             grid.removeAllViews();
 
-            HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
-
             for (int i = 0; i < mGame.getGridSize(); i++) {
-                LinearLayout layout = new LinearLayout(getActivity());
-                layout.setOrientation(LinearLayout.HORIZONTAL);
-                layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                for (int j = 0; j < mGame.getGridSize(); j++) {
+                    final Integer tileNumber = (i * mGame.getGridSize()) + j;
+                    final CurrentPosition currentPosition = currentGrid.get(tileNumber);
+                    final View puzzleGameTile = layoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
+                    final ImageButton tileButton = ButterKnife.findById(puzzleGameTile, R.id.tile_button);
 
-                for (int j = (i * mGame.getGridSize()); j < ((i * mGame.getGridSize()) + mGame.getGridSize()); j++) {
-                    final CurrentPosition currentPosition = currentGrid.get(j);
-                    View puzzleGameTile = layoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
-                    final ImageButton button = (ImageButton) puzzleGameTile.findViewById(R.id.tile_button);
-                    button.setLayoutParams(new LinearLayout.LayoutParams(screenWidth / mGame.getGridSize(), screenWidth / mGame.getGridSize()));
+                    Integer x = buttonWidth * j;
+                    Integer y = buttonWidth * i;
+
+                    RelativeLayout.LayoutParams buttonParams = new RelativeLayout.LayoutParams(screenWidth / mGame.getGridSize(), screenWidth / mGame.getGridSize());
+                    buttonParams.addRule(RelativeLayout.ALIGN_LEFT, 1);
+                    buttonParams.addRule(RelativeLayout.ALIGN_TOP, 1);
+                    buttonParams.setMargins(x, y, 0, 0);
+
+                    tileButton.setLayoutParams(buttonParams);
 
                     if (currentPosition != null) {
-                        //button.setText(String.valueOf(currentPosition.getCorrectPosition().getPosition()) + " - " + String.valueOf(currentPosition.getPosition()));
-                        button.setImageBitmap(mImageTiles.get(currentPosition.getCorrectPosition().getPosition()));
+                        tileButton.setImageBitmap(currentPosition.getImage().getBitmap());
 
-                        button.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
+                        tileButton.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
                             @Override
                             public void onPress() {
-                                currentPosition.move();
-                                updateUI();
-
-                                Animation animation = new TranslateAnimation(0, 500, 0, 0);
-                                animation.setDuration(1000);
-                                button.startAnimation(animation);
+                                if (mIsPlayable) {
+                                    currentPosition.move();
+                                    updateUI();
+                                }
                             }
 
                             @Override
                             public void onLongPress() {
-                                Toast.makeText(getActivity().getApplicationContext(), "This should be on tile " + (currentPosition.getCorrectPosition().getPosition() + 1), Toast.LENGTH_SHORT).show();
+                                if (mIsPlayable) {
+                                    final ImageButton correctButton = (ImageButton) grid.getChildAt(currentPosition.getCorrectPosition().getPosition());
+                                    final CurrentPosition currentPosition1 = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
+
+                                    correctButton.setBackgroundColor(Color.parseColor("#76EE00"));
+                                    correctButton.setImageBitmap(null);
+                                    Toast.makeText(getActivity().getApplicationContext(), "" + (currentPosition.getCorrectPosition().getPosition() + 1), Toast.LENGTH_SHORT).show();
+
+                                    new CountDownTimer(1500, 1000) {
+                                        public void onTick(long millisUntilFinished) {
+                                        }
+
+                                        public void onFinish() {
+                                            //TODO: Crash at multiple fingers on screen.
+                                            correctButton.setImageBitmap(currentPosition1.getImage().getBitmap());
+                                        }
+                                    }.start();
+                                }
                             }
 
                             @Override
                             public void onSwipeTop() {
-                                currentPosition.moveToDirection(Position.Directions.TOP);
-                                updateUI();
+                                if (mIsPlayable) {
+                                    currentPosition.moveToDirection(Position.Directions.TOP);
+                                    updateUI();
+                                }
                             }
 
                             @Override
                             public void onSwipeBottom() {
-                                currentPosition.moveToDirection(Position.Directions.BOTTOM);
-                                updateUI();
+                                if (mIsPlayable) {
+                                    currentPosition.moveToDirection(Position.Directions.BOTTOM);
+                                    updateUI();
+                                }
                             }
 
                             @Override
                             public void onSwipeLeft() {
-                                currentPosition.moveToDirection(Position.Directions.LEFT);
-                                updateUI();
+                                if (mIsPlayable) {
+                                    currentPosition.moveToDirection(Position.Directions.LEFT);
+                                    updateUI();
+                                }
                             }
 
                             @Override
                             public void onSwipeRight() {
-                                currentPosition.moveToDirection(Position.Directions.RIGHT);
-                                updateUI();
+                                if (mIsPlayable) {
+                                    currentPosition.moveToDirection(Position.Directions.RIGHT);
+                                    updateUI();
+                                }
                             }
                         });
+
                     } else {
-                        //button.setText("");
-                        button.getBackground().setAlpha(256);
+                        tileButton.getBackground().setAlpha(256);
                     }
 
-                    layout.addView(puzzleGameTile);
+                    grid.addView(tileButton);
                 }
-
-                grid.addView(layout);
-            }
-
-            for (int i = 0; i < mGame.numberOfTiles(); i++) {
-
             }
         }
 
@@ -269,6 +300,11 @@ public class puzzleGameActivity extends ActionBarActivity {
                 currentPosition.setGame(mGame);
                 currentPosition.setPosition(i);
 
+                Image image = new Image();
+                image.setBitmap(mImageTiles.get(i));
+
+                currentPosition.setImage(image);
+
                 CorrectPosition correctPosition = new CorrectPosition();
                 correctPosition.setPosition(i);
 
@@ -276,10 +312,8 @@ public class puzzleGameActivity extends ActionBarActivity {
 
                 mGame.addCurrentPosition(currentPosition);
             }
-        }
 
-        public void randomizeGame() {
-            mGame.randomize();
+            mImageTiles = null;
         }
 
         public void setDifficulty(Constants.Difficulty difficulty) {

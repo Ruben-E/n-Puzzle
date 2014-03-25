@@ -21,13 +21,12 @@
                 android:id="@+id/status_text"
                 android:gravity="center|left"/>
     </LinearLayout>
-    <LinearLayout
-                  android:orientation="vertical"
+    <RelativeLayout
                   android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:layout_below="@+id/status_bar"
                   android:id="@+id/grid">
-    </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>
 
 
