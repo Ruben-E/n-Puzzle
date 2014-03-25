@@ -67,10 +67,10 @@ public class puzzleGameActivity extends ActionBarActivity {
 
     public static class PuzzleGameFragment extends Fragment {
         private final static String TAG = "puzzleGame";
-        private Game game;
-        private Integer gridSize;
-        private List<Bitmap> imageTiles;
-        private Constants.Difficulty difficulty;
+        private Game mGame;
+        private Integer mGridSize;
+        private List<Bitmap> mImageTiles;
+        private Constants.Difficulty mDifficulty;
 
         public PuzzleGameFragment() {
         }
@@ -79,9 +79,9 @@ public class puzzleGameActivity extends ActionBarActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            gridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
+            mGridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
 
-            imageTiles = new ArrayList<Bitmap>();
+            mImageTiles = new ArrayList<Bitmap>();
 
             Display display = getActivity().getWindowManager().getDefaultDisplay();
             Point size = new Point();
@@ -90,16 +90,16 @@ public class puzzleGameActivity extends ActionBarActivity {
 
             Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), R.drawable.puzzle_2), screenWidth, screenWidth, false);
 
-            int pieceHeight = (int) Math.floor(screenWidth / gridSize);
-            int pieceWidth = (int) Math.floor(screenWidth / gridSize);
+            int pieceHeight = (int) Math.floor(screenWidth / mGridSize);
+            int pieceWidth = (int) Math.floor(screenWidth / mGridSize);
 
-            for(int i = 0; i < gridSize; i++) {
-                for(int j = 0; j < gridSize; j++) {
+            for(int i = 0; i < mGridSize; i++) {
+                for(int j = 0; j < mGridSize; j++) {
                     int x = (int) Math.floor(j * pieceWidth);
                     int y = (int) Math.floor(i * pieceHeight);
 
                     Bitmap tile = Bitmap.createBitmap(icon, x, y, pieceWidth, pieceHeight);
-                    imageTiles.add(tile);
+                    mImageTiles.add(tile);
                 }
             }
         }
@@ -142,7 +142,7 @@ public class puzzleGameActivity extends ActionBarActivity {
                     textView.setText("GO!");
 
                     if(randomizedGame[0] != null) {
-                        game = randomizedGame[0];
+                        mGame = randomizedGame[0];
                     } else {
                         randomizeGame();
                     }
@@ -170,22 +170,22 @@ public class puzzleGameActivity extends ActionBarActivity {
 
             grid.removeAllViews();
 
-            HashMap<Integer, CurrentPosition> currentGrid = game.getCurrentGrid();
+            HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
 
-            for (int i = 0; i < game.getGridSize(); i++) {
+            for (int i = 0; i < mGame.getGridSize(); i++) {
                 LinearLayout layout = new LinearLayout(getActivity());
                 layout.setOrientation(LinearLayout.HORIZONTAL);
                 layout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-                for (int j = (i * game.getGridSize()); j < ((i * game.getGridSize()) + game.getGridSize()); j++) {
+                for (int j = (i * mGame.getGridSize()); j < ((i * mGame.getGridSize()) + mGame.getGridSize()); j++) {
                     final CurrentPosition currentPosition = currentGrid.get(j);
                     View puzzleGameTile = layoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
                     final ImageButton button = (ImageButton) puzzleGameTile.findViewById(R.id.tile_button);
-                    button.setLayoutParams(new LinearLayout.LayoutParams(screenWidth / game.getGridSize(), screenWidth / game.getGridSize()));
+                    button.setLayoutParams(new LinearLayout.LayoutParams(screenWidth / mGame.getGridSize(), screenWidth / mGame.getGridSize()));
 
                     if (currentPosition != null) {
                         //button.setText(String.valueOf(currentPosition.getCorrectPosition().getPosition()) + " - " + String.valueOf(currentPosition.getPosition()));
-                        button.setImageBitmap(imageTiles.get(currentPosition.getCorrectPosition().getPosition()));
+                        button.setImageBitmap(mImageTiles.get(currentPosition.getCorrectPosition().getPosition()));
 
                         button.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
                             @Override
@@ -238,20 +238,20 @@ public class puzzleGameActivity extends ActionBarActivity {
                 grid.addView(layout);
             }
 
-            for (int i = 0; i < game.numberOfTiles(); i++) {
+            for (int i = 0; i < mGame.numberOfTiles(); i++) {
 
             }
         }
 
         public void setupGame() {
-            game = new Game();
-            game.setGridSize(gridSize);
+            mGame = new Game();
+            mGame.setGridSize(mGridSize);
 
-            Integer tiles = (int) Math.pow(gridSize, 2);
+            Integer tiles = (int) Math.pow(mGridSize, 2);
 
             for (int i = 0; i < (tiles - 1); i++) {
                 CurrentPosition currentPosition = new CurrentPosition();
-                currentPosition.setGame(game);
+                currentPosition.setGame(mGame);
                 currentPosition.setPosition(i);
 
                 CorrectPosition correctPosition = new CorrectPosition();
@@ -259,24 +259,24 @@ public class puzzleGameActivity extends ActionBarActivity {
 
                 currentPosition.setCorrectPosition(correctPosition);
 
-                game.addCurrentPosition(currentPosition);
+                mGame.addCurrentPosition(currentPosition);
             }
         }
 
         public void randomizeGame() {
-            game.randomize();
+            mGame.randomize();
         }
 
         public void setDifficulty(Constants.Difficulty difficulty) {
-            this.difficulty = difficulty;
+            this.mDifficulty = difficulty;
         }
 
         public Constants.Difficulty getDifficulty() {
-            if (difficulty == null) {
-                difficulty = Constants.Difficulty.NORMAL;
+            if (mDifficulty == null) {
+                mDifficulty = Constants.Difficulty.NORMAL;
             }
 
-            return difficulty;
+            return mDifficulty;
         }
     }
 }
