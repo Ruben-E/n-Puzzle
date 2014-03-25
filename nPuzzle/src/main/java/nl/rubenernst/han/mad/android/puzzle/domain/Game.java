@@ -6,7 +6,7 @@ import java.util.*;
  * Created by rubenernst on 18-03-14.
  */
 public class Game {
-    private static final int TIMES_TO_SHUFFLE = 100;
+    private static final int SHUFFLE_INDEX = 30;
 
     private List<CurrentPosition> currentPositions = new ArrayList<CurrentPosition>();
     private List<Turn> turns = new ArrayList<Turn>();
@@ -84,7 +84,6 @@ public class Game {
     }
 
     public List<CurrentPosition> getPositionsAroundFreeTile() {
-        //TODO: Implementation
         List<CurrentPosition> positionsAroundFreeTile = new ArrayList<CurrentPosition>();
         Integer freeTileNumber = getFreeTileNumber();
 
@@ -98,7 +97,7 @@ public class Game {
     }
 
     public void randomize() {
-        for (int i = 0; i < TIMES_TO_SHUFFLE; i++) {
+        for (int i = 0; i < (getPuzzleShuffleNumber()); i++) {
             List<CurrentPosition> positionsAroundFreeTile = getPositionsAroundFreeTile();
 
             Random rand = new Random();
@@ -106,5 +105,9 @@ public class Game {
 
             randomPosition.move();
         }
+    }
+
+    private Integer getPuzzleShuffleNumber() {
+        return getGridSize() * SHUFFLE_INDEX;
     }
 }
