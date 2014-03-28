@@ -1,4 +1,4 @@
-package nl.rubenernst.han.mad.android.puzzle;
+package nl.rubenernst.han.mad.android.puzzle.utils;
 
 import android.content.Context;
 import android.view.GestureDetector;

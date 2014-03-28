@@ -7,14 +7,14 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import nl.rubenernst.han.mad.android.puzzle.utils.OnTouchListener;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * Created by rubenernst on 14-03-14.
  */
-public class puzzleGameActivity extends ActionBarActivity {
+public class GamePlayActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

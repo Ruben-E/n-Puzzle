@@ -1,4 +1,4 @@
-package nl.rubenernst.han.mad.android.puzzle;
+package nl.rubenernst.han.mad.android.puzzle.utils;
 
 import java.util.Arrays;
 import java.util.HashMap;

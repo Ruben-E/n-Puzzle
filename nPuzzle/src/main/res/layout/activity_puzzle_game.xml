@@ -3,5 +3,5 @@
              android:id="@+id/container"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="nl.rubenernst.han.mad.android.puzzle.puzzleGameActivity"
+             tools:context="nl.rubenernst.han.mad.android.puzzle.GamePlayActivity"
              tools:ignore="MergeRootFrame" />

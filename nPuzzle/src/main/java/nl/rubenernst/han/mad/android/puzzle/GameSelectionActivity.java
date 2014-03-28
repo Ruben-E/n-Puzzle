@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,13 +15,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition;
-import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
-import nl.rubenernst.han.mad.android.puzzle.domain.Game;
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 
 import java.lang.reflect.Field;
 
-public class startPuzzleActivity extends ActionBarActivity {
+public class GameSelectionActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +101,7 @@ public class startPuzzleActivity extends ActionBarActivity {
 
         @Override
         public void onClick(View view) {
-            Intent intent = new Intent(getActivity(), puzzleGameActivity.class);
+            Intent intent = new Intent(getActivity(), GamePlayActivity.class);
             intent.putExtra("puzzle", (Integer) view.getTag());
             intent.putExtra("difficulty", getDifficulty());
 
