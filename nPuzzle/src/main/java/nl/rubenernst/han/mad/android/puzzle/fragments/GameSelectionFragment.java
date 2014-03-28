@@ -29,7 +29,7 @@ public class GameSelectionFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_start_puzzle, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_game_selection, container, false);
 
         LinearLayout puzzleChoises = (LinearLayout) rootView.findViewById(R.id.puzzle_choices);
         for (int i = 0; i < Constants.PUZZLES.length; i++) {

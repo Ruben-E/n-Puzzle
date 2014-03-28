@@ -1,5 +1,7 @@
 package nl.rubenernst.han.mad.android.puzzle.domain;
 
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+
 import java.util.*;
 
 /**
@@ -12,6 +14,12 @@ public class Game {
     private List<Turn> turns = new ArrayList<Turn>();
 
     private Integer gridSize;
+
+    private Constants.GameState gameState;
+
+    public Game() {
+        setGameState(Constants.GameState.INITIALIZING);
+    }
 
     public void addCurrentPosition(CurrentPosition currentPosition) {
         currentPositions.add(currentPosition);
@@ -29,6 +37,11 @@ public class Game {
 
     public void addTurn(Turn turn) {
         turns.add(turn);
+    }
+
+    public void createTurn() {
+        Turn turn = new Turn();
+        addTurn(turn);
     }
 
     public List<Turn> getTurns() {
@@ -81,6 +94,7 @@ public class Game {
             }
         }
 
+        setGameState(Constants.GameState.FINISHED);
         return true;
     }
 
@@ -110,5 +124,22 @@ public class Game {
 
     private Integer getPuzzleShuffleNumber() {
         return getGridSize() * SHUFFLE_MULTIPLIER;
+    }
+
+    public Constants.GameState getGameState() {
+        return gameState;
+    }
+
+    public void setGameState(Constants.GameState gameState) {
+        this.gameState = gameState;
+    }
+
+    public Boolean isPlayable() {
+        return getGameState() == Constants.GameState.PLAYABLE;
+    }
+
+    public void startGame() {
+        setGameState(Constants.GameState.PLAYABLE);
+        getTurns().clear();
     }
 }

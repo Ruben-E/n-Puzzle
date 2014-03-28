@@ -10,6 +10,7 @@ import java.util.Hashtable;
 final public class Constants {
     public static final String[] PUZZLES = {"Mountains", "Car", "Penguins", "House"};
     public static enum Difficulty {HARD, NORMAL, EASY}
+    public static enum GameState {INITIALIZING, PLAYABLE, FINISHED};
     public static HashMap<Difficulty, Integer> DIFFICULTY_GRIDSIZE;
 
     static {

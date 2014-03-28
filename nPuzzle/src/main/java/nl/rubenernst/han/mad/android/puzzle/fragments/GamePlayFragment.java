@@ -11,12 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity;
-import nl.rubenernst.han.mad.android.puzzle.GamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
@@ -35,17 +35,18 @@ public class GamePlayFragment extends Fragment {
     private final static String TAG = "puzzleGame";
     private static final String CORRECT_COLOR = "#659D32";
 
+    private LayoutInflater mLayoutInflater;
+
     private Game mGame;
     private Integer mGridSize;
     private Integer mPuzzleDrawableId;
     private List<Bitmap> mImageTiles;
     private Constants.Difficulty mDifficulty;
-    private Boolean mIsPlayable = false;
 
-    @InjectView(R.id.status_text)
-    TextView statusText;
+    @InjectView(R.id.status_bar)
+    LinearLayout mStatusBar;
     @InjectView(R.id.grid)
-    RelativeLayout grid;
+    RelativeLayout mGrid;
 
     public GamePlayFragment() {
     }
@@ -54,6 +55,7 @@ public class GamePlayFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mGridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
         mImageTiles = new ArrayList<Bitmap>();
 
@@ -86,7 +88,7 @@ public class GamePlayFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_puzzle_game, container, false);
+        View view = inflater.inflate(R.layout.fragment_game_play, container, false);
 
         ButterKnife.inject(this, view);
 
@@ -102,6 +104,9 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void startGame() {
+        setStatusBarContent(R.layout.fragment_game_play_statusbar_initializing);
+        final TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_initializing);
+
         statusText.setText("Loading...");
 
         //TODO: Fix crash when user presses the back button
@@ -112,8 +117,12 @@ public class GamePlayFragment extends Fragment {
 
             public void onFinish() {
                 if (statusText != null) {
-                    statusText.setText("GO!");
-                    mIsPlayable = true;
+                    setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
+
+                    TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
+                    statusText.setText("Turns: 0");
+
+                    mGame.startGame();
 
                     updateUI();
                 }
@@ -141,14 +150,20 @@ public class GamePlayFragment extends Fragment {
     }
 
     public void updateUI() {
-        if(mIsPlayable && mGame.allPositionsCorrect()) {
-            mIsPlayable = false;
+        if(mGame.isPlayable() && mGame.allPositionsCorrect()) {
+            setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
+
+            TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
+
+            statusText.setText("You won!");
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
             startActivity(intent);
+        } else if(mGame.isPlayable()) {
+            TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
+            statusText.setText("Turns: " + mGame.getTurns().size());
         }
 
-        LayoutInflater layoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
 
         Display display = getActivity().getWindowManager().getDefaultDisplay();
@@ -158,13 +173,13 @@ public class GamePlayFragment extends Fragment {
 
         Integer buttonWidth = screenWidth / mGame.getGridSize();
 
-        grid.removeAllViews();
+        mGrid.removeAllViews();
 
         for (int i = 0; i < mGame.getGridSize(); i++) {
             for (int j = 0; j < mGame.getGridSize(); j++) {
                 final Integer tileNumber = (i * mGame.getGridSize()) + j;
                 final CurrentPosition currentPosition = currentGrid.get(tileNumber);
-                final View puzzleGameTile = layoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
+                final View puzzleGameTile = mLayoutInflater.inflate(R.layout.puzzle_game_tile, null, false);
                 final ImageButton tileButton = ButterKnife.findById(puzzleGameTile, R.id.tile_button);
 
                 Integer x = buttonWidth * j;
@@ -183,7 +198,7 @@ public class GamePlayFragment extends Fragment {
                     tileButton.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
                         @Override
                         public void onPress() {
-                            if (mIsPlayable) {
+                            if (mGame.isPlayable()) {
                                 currentPosition.move();
                                 updateUI();
                             }
@@ -191,8 +206,8 @@ public class GamePlayFragment extends Fragment {
 
                         @Override
                         public void onLongPress() {
-                            if (mIsPlayable) {
-                                final ImageButton correctButton = (ImageButton) grid.getChildAt(currentPosition.getCorrectPosition().getPosition());
+                            if (mGame.isPlayable()) {
+                                final ImageButton correctButton = (ImageButton) mGrid.getChildAt(currentPosition.getCorrectPosition().getPosition());
                                 final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
 
                                 correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
@@ -215,7 +230,7 @@ public class GamePlayFragment extends Fragment {
 
                         @Override
                         public void onSwipeTop() {
-                            if (mIsPlayable) {
+                            if (mGame.isPlayable()) {
                                 currentPosition.moveToDirection(Position.Directions.TOP);
                                 updateUI();
                             }
@@ -223,7 +238,7 @@ public class GamePlayFragment extends Fragment {
 
                         @Override
                         public void onSwipeBottom() {
-                            if (mIsPlayable) {
+                            if (mGame.isPlayable()) {
                                 currentPosition.moveToDirection(Position.Directions.BOTTOM);
                                 updateUI();
                             }
@@ -231,7 +246,7 @@ public class GamePlayFragment extends Fragment {
 
                         @Override
                         public void onSwipeLeft() {
-                            if (mIsPlayable) {
+                            if (mGame.isPlayable()) {
                                 currentPosition.moveToDirection(Position.Directions.LEFT);
                                 updateUI();
                             }
@@ -239,7 +254,7 @@ public class GamePlayFragment extends Fragment {
 
                         @Override
                         public void onSwipeRight() {
-                            if (mIsPlayable) {
+                            if (mGame.isPlayable()) {
                                 currentPosition.moveToDirection(Position.Directions.RIGHT);
                                 updateUI();
                             }
@@ -250,7 +265,7 @@ public class GamePlayFragment extends Fragment {
                     tileButton.getBackground().setAlpha(256);
                 }
 
-                grid.addView(tileButton);
+                mGrid.addView(tileButton);
             }
         }
     }
@@ -305,5 +320,11 @@ public class GamePlayFragment extends Fragment {
         canvas.drawColor(Color.BLACK);
         canvas.drawBitmap(bmp, borderSize, borderSize, null);
         return bmpWithBorder;
+    }
+
+    private void setStatusBarContent(int layoutId) {
+        View content = mLayoutInflater.inflate(layoutId, null, false);
+        mStatusBar.removeAllViews();
+        mStatusBar.addView(content);
     }
 }

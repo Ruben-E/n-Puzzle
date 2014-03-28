@@ -179,4 +179,11 @@ public class CurrentPosition extends Position {
     public Boolean canMoveToPosition(Integer position) {
         return (isValidPosition(position) && isFreePosition(position) && isPositionInRange(position));
     }
+
+    @Override
+    public void setPosition(Integer position) {
+        super.setPosition(position);
+
+        getGame().createTurn();
+    }
 }
