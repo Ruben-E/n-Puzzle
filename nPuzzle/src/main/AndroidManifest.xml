@@ -21,6 +21,10 @@
                 android:name=".GamePlayActivity"
                 android:label="@string/app_name" >
         </activity>
+
+        <activity android:name=".GameFinishedActivity">
+
+        </activity>
     </application>
 
 </manifest>
