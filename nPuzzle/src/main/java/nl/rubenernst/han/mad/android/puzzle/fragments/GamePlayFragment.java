@@ -6,6 +6,7 @@ import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 import nl.rubenernst.han.mad.android.puzzle.utils.OnTouchListener;
 
 import java.util.ArrayList;
@@ -29,11 +31,13 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
-* Created by rubenernst on 28-03-14.
-*/
+ * Created by rubenernst on 28-03-14.
+ */
 public class GamePlayFragment extends Fragment {
     private final static String TAG = "puzzleGame";
     private static final String CORRECT_COLOR = "#659D32";
+    public static final int COUNTDOWN_TIMER_MILISECONDS = 3000;
+    public static final int COUNTDOWN_INTERVAL = 500;
 
     private LayoutInflater mLayoutInflater;
 
@@ -41,7 +45,7 @@ public class GamePlayFragment extends Fragment {
     private Integer mGridSize;
     private Integer mPuzzleDrawableId;
     private List<Bitmap> mImageTiles;
-    private Constants.Difficulty mDifficulty;
+    private Difficulty mDifficulty;
 
     @InjectView(R.id.status_bar)
     LinearLayout mStatusBar;
@@ -56,7 +60,7 @@ public class GamePlayFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mGridSize = Constants.DIFFICULTY_GRIDSIZE.get(getDifficulty());
+        mGridSize = getDifficulty().getGridSize();
         mImageTiles = new ArrayList<Bitmap>();
 
         splicePuzzle();
@@ -110,13 +114,13 @@ public class GamePlayFragment extends Fragment {
         statusText.setText("Loading...");
 
         //TODO: Fix crash when user presses the back button
-        final CountDownTimer countDownTimer = new CountDownTimer(4000, 1000) {
+        final CountDownTimer countDownTimer = new CountDownTimer(COUNTDOWN_TIMER_MILISECONDS, COUNTDOWN_INTERVAL) {
             public void onTick(long millisUntilFinished) {
-                statusText.setText("" + (int) Math.floor(millisUntilFinished / 1000));
+                statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));
             }
 
             public void onFinish() {
-                if (statusText != null) {
+                if (mStatusBar != null) {
                     setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
 
                     TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
@@ -150,7 +154,7 @@ public class GamePlayFragment extends Fragment {
     }
 
     public void updateUI() {
-        if(mGame.isPlayable() && mGame.allPositionsCorrect()) {
+        if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
             setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
 
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
@@ -159,7 +163,7 @@ public class GamePlayFragment extends Fragment {
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
             startActivity(intent);
-        } else if(mGame.isPlayable()) {
+        } else if (mGame.isPlayable()) {
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
             statusText.setText("Turns: " + mGame.getTurns().size());
         }
@@ -297,13 +301,13 @@ public class GamePlayFragment extends Fragment {
         mImageTiles = null;
     }
 
-    public void setDifficulty(Constants.Difficulty difficulty) {
+    public void setDifficulty(Difficulty difficulty) {
         this.mDifficulty = difficulty;
     }
 
-    public Constants.Difficulty getDifficulty() {
+    public Difficulty getDifficulty() {
         if (mDifficulty == null) {
-            mDifficulty = Constants.Difficulty.NORMAL;
+            mDifficulty = Difficulty.MEDIUM;
         }
 
         return mDifficulty;

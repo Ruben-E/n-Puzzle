@@ -11,8 +11,7 @@
         tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.GameSelectionFragment">
     <RadioGroup
             android:layout_width="fill_parent"
-            android:layout_height="0dp" android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
+            android:layout_height="0dp"
             android:orientation="horizontal"
             android:layout_weight="1"
             android:id="@+id/difficulty">
@@ -26,7 +25,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/normal_radiobutton"
-                android:tag="normal"
+                android:tag="medium"
                 android:checked="true"
                 android:id="@+id/normal_radiobutton"/>
         <RadioButton
@@ -43,7 +42,7 @@
                 android:id="@+id/puzzle_choices"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 >
 
         </LinearLayout>

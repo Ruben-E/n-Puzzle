@@ -15,6 +15,7 @@ import android.widget.RadioGroup;
 import nl.rubenernst.han.mad.android.puzzle.GamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.lang.reflect.Field;
 
@@ -72,21 +73,23 @@ public class GameSelectionFragment extends Fragment implements View.OnClickListe
         getActivity().startActivity(intent);
     }
 
-    private Constants.Difficulty getDifficulty() {
-        RadioGroup difficultyGroup = (RadioGroup) getView().findViewById(R.id.difficulty);
+    private Difficulty getDifficulty() {
+        try {
+            RadioGroup difficultyGroup = (RadioGroup) getView().findViewById(R.id.difficulty);
 
-        int radioButtonID = difficultyGroup.getCheckedRadioButtonId();
-        View radioButton = difficultyGroup.findViewById(radioButtonID);
+            int radioButtonID = difficultyGroup.getCheckedRadioButtonId();
+            View radioButton = difficultyGroup.findViewById(radioButtonID);
 
-        if (radioButton != null) {
-            String tag = (String) radioButton.getTag();
-            Constants.Difficulty difficulty = Constants.Difficulty.valueOf(tag.toUpperCase());
+            if (radioButton != null) {
+                String tag = (String) radioButton.getTag();
+                Difficulty difficulty = Difficulty.valueOf(tag.toUpperCase());
 
-            if (difficulty != null) {
-                return difficulty;
+                if (difficulty != null) {
+                    return difficulty;
+                }
             }
+        } finally {
+            return Difficulty.MEDIUM;
         }
-
-        return Constants.Difficulty.NORMAL;
     }
 }

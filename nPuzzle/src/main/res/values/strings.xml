@@ -5,7 +5,11 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="easy_radiobutton">Easy</string>
-    <string name="normal_radiobutton">Normal</string>
+    <string name="normal_radiobutton">Medium</string>
     <string name="hard_radiobutton">Hard</string>
+    <string name="action_restart">Restart</string>
+    <string name="action_change_difficulty">Change difficulty</string>
+    <string name="change_difficulty_dialog_title">Change difficulty</string>
+    <string name="you_won">You won!</string>
 
 </resources>

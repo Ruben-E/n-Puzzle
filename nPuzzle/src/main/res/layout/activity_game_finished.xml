@@ -10,7 +10,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="You won!"
+            android:text="@string/you_won"
             android:id="@+id/textView" android:layout_gravity="center_horizontal" android:textSize="48sp"
             android:textColor="@android:color/holo_blue_dark"/>
 </LinearLayout>
