@@ -1,15 +1,14 @@
 package nl.rubenernst.han.mad.android.puzzle.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
-import android.view.Display;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -113,7 +112,6 @@ public class GamePlayFragment extends Fragment {
 
         statusText.setText("Loading...");
 
-        //TODO: Fix crash when user presses the back button
         mCountDownTimer = new CountDownTimer(COUNTDOWN_TIMER_MILISECONDS, COUNTDOWN_INTERVAL) {
             public void onTick(long millisUntilFinished) {
                 statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));

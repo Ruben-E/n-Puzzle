@@ -2,14 +2,19 @@
 <resources>
 
     <string name="app_name">nPuzzle</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="easy_radiobutton">Easy</string>
     <string name="normal_radiobutton">Medium</string>
     <string name="hard_radiobutton">Hard</string>
     <string name="action_restart">Restart</string>
     <string name="action_change_difficulty">Change difficulty</string>
-    <string name="change_difficulty_dialog_title">Change difficulty</string>
     <string name="you_won">You won!</string>
+    <string name="dialog_stop_game_title">Stop this game</string>
+    <string name="dialog_stop_game_message">Are you sure you want to stop this game?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="dialog_change_difficulty_title">Change difficulty</string>
+    <string name="dialog_restart_game_title">Restart this game</string>
+    <string name="dialog_restart_game_message">Are you sure you want to restart this game?</string>
 
 </resources>

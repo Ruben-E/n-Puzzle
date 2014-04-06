@@ -73,17 +73,43 @@ public class GamePlayActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.dialog_stop_game_title)
+                    .setMessage(R.string.dialog_stop_game_message)
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            GamePlayActivity.this.finish();
+                        }
+
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+
+            return true;
+        }
+        else {
+            return super.onKeyDown(keyCode, event);
+        }
+
+    }
+
     private void showRestartDialog() {
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.change_difficulty_dialog_title))
-                .setTitle("Are you sure you want to restart the game?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.dialog_restart_game_title))
+                .setMessage(getString(R.string.dialog_restart_game_message))
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         restartGame(mDifficulty);
                     }
                 })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -95,7 +121,7 @@ public class GamePlayActivity extends ActionBarActivity {
 
     private void showChangeDifficultyDialog() {
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.change_difficulty_dialog_title))
+                .setTitle(getString(R.string.dialog_change_difficulty_title))
                 .setItems(R.array.difficulties, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         restartGame(Difficulty.fromString(getResources().obtainTypedArray(R.array.difficulties).getString(which)));
