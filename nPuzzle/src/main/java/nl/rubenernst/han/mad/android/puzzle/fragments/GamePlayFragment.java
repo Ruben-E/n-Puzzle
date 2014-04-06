@@ -6,7 +6,6 @@ import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +45,7 @@ public class GamePlayFragment extends Fragment {
     private Integer mPuzzleDrawableId;
     private List<Bitmap> mImageTiles;
     private Difficulty mDifficulty;
+    private CountDownTimer mCountDownTimer;
 
     @InjectView(R.id.status_bar)
     LinearLayout mStatusBar;
@@ -114,12 +114,13 @@ public class GamePlayFragment extends Fragment {
         statusText.setText("Loading...");
 
         //TODO: Fix crash when user presses the back button
-        final CountDownTimer countDownTimer = new CountDownTimer(COUNTDOWN_TIMER_MILISECONDS, COUNTDOWN_INTERVAL) {
+        mCountDownTimer = new CountDownTimer(COUNTDOWN_TIMER_MILISECONDS, COUNTDOWN_INTERVAL) {
             public void onTick(long millisUntilFinished) {
                 statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));
             }
 
             public void onFinish() {
+                mCountDownTimer = null;
                 if (mStatusBar != null) {
                     setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
 
@@ -139,7 +140,7 @@ public class GamePlayFragment extends Fragment {
             public void onTaskFinished(Object result, String message) {
                 if (result instanceof Game) {
                     GamePlayFragment.this.mGame = (Game) result;
-                    countDownTimer.start();
+                    mCountDownTimer.start();
                 }
             }
         });
@@ -151,6 +152,22 @@ public class GamePlayFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.reset(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mCountDownTimer != null) {
+            mCountDownTimer.cancel();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mCountDownTimer != null) {
+            mCountDownTimer.start();
+        }
     }
 
     public void updateUI() {
