@@ -177,6 +177,9 @@ public class GamePlayFragment extends Fragment {
             statusText.setText("You won!");
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
+            intent.putExtra("puzzle_drawable_id", mPuzzleDrawableId);
+            intent.putExtra("number_of_turns", mGame.getTurns().size());
+
             startActivity(intent);
         } else if (mGame.isPlayable()) {
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
