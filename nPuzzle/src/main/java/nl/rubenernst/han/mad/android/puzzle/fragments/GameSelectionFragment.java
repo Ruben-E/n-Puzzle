@@ -3,15 +3,15 @@ package nl.rubenernst.han.mad.android.puzzle.fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
+import android.widget.*;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.GamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
@@ -24,6 +24,11 @@ import java.lang.reflect.Field;
  */
 public class GameSelectionFragment extends Fragment implements View.OnClickListener {
 
+    private Difficulty mDifficulty = Difficulty.MEDIUM;
+
+    @InjectView(R.id.puzzle_choices)
+    LinearLayout puzzleChoices;
+
     public GameSelectionFragment() {
     }
 
@@ -32,36 +37,53 @@ public class GameSelectionFragment extends Fragment implements View.OnClickListe
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_game_selection, container, false);
 
-        LinearLayout puzzleChoises = (LinearLayout) rootView.findViewById(R.id.puzzle_choices);
+        ButterKnife.inject(this, rootView);
+
+        LinearLayout horizontalLayout = null;
+
         for (int i = 0; i < Constants.PUZZLES.length; i++) {
             try {
+                if (horizontalLayout == null || i % 2 == 0) {
+                    horizontalLayout = new LinearLayout(getActivity());
+                    horizontalLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    horizontalLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+
+                    puzzleChoices.addView(horizontalLayout);
+                }
+
                 String puzzle = Constants.PUZZLES[i];
-                String puzzleImageName = "ic_puzzle_" + (i + 1);
+                String puzzleImageName = "puzzle_" + (i + 1);
 
                 Class res = R.drawable.class;
                 Field field = res.getField(puzzleImageName);
                 int drawableId = field.getInt(null);
 
-                Bitmap image = BitmapFactory.decodeResource(getResources(), drawableId);
-                LinearLayout puzzleChoice = (LinearLayout) inflater.inflate(R.layout.puzzle_choice, null);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, .50f);
+                layoutParams.setMargins(12, 8, 12, 8);
 
-                ImageView puzzleImage = (ImageView) puzzleChoice.findViewById(R.id.puzzle_image);
-                Button puzzleButton = (Button) puzzleChoice.findViewById(R.id.puzzle_button);
+                ImageButton imageButton = new ImageButton(getActivity());
+                imageButton.setLayoutParams(layoutParams);
+                imageButton.setImageResource(drawableId);
+                imageButton.setBackgroundResource(R.drawable.card);
+                imageButton.setTag(i);
+                imageButton.setOnClickListener(this);
+                imageButton.setAdjustViewBounds(true);
 
-                puzzleButton.setText(puzzle);
-                puzzleButton.setOnClickListener(this);
-                puzzleButton.setTag(i);
-
-
-                puzzleImage.setImageBitmap(image);
-
-                puzzleChoises.addView(puzzleChoice);
+                horizontalLayout.addView(imageButton);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        ButterKnife.reset(this);
     }
 
     @Override
@@ -73,20 +95,12 @@ public class GameSelectionFragment extends Fragment implements View.OnClickListe
         getActivity().startActivity(intent);
     }
 
+    //TODO: Crash bij het draaien van het scherm
     private Difficulty getDifficulty() {
-        RadioGroup difficultyGroup = (RadioGroup) getView().findViewById(R.id.difficulty);
+        return this.mDifficulty;
+    }
 
-        int radioButtonID = difficultyGroup.getCheckedRadioButtonId();
-        View radioButton = difficultyGroup.findViewById(radioButtonID);
-
-        if (radioButton != null) {
-            String tag = (String) radioButton.getTag();
-            Difficulty difficulty = Difficulty.fromString(tag);
-
-            if (difficulty != null) {
-                return difficulty;
-            }
-        }
-        return Difficulty.MEDIUM;
+    public void setDifficulty(Difficulty difficulty) {
+        this.mDifficulty = difficulty;
     }
 }

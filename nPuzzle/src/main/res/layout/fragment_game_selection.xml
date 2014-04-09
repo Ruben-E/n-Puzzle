@@ -8,33 +8,18 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
+        android:background="#E2E2E2"
         tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.GameSelectionFragment">
-    <RadioGroup
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:layout_weight="1"
-            android:id="@+id/difficulty">
-        <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/easy_radiobutton"
-                android:id="@+id/easy_radiobutton"
-                android:tag="easy"/>
-        <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/normal_radiobutton"
-                android:tag="medium"
-                android:checked="true"
-                android:id="@+id/normal_radiobutton"/>
-        <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/hard_radiobutton"
-                android:tag="hard"
-                android:id="@+id/hard_radiobutton"/>
-    </RadioGroup>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="48sp"
+            android:text="@string/choose_puzzle_label"
+            android:id="@+id/textView"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+
     <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="0dp" android:layout_weight="3">

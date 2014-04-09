@@ -1,13 +1,12 @@
 package nl.rubenernst.han.mad.android.puzzle.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.*;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -20,7 +19,6 @@ import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
-import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 import nl.rubenernst.han.mad.android.puzzle.utils.OnTouchListener;
 
@@ -36,6 +34,7 @@ public class GamePlayFragment extends Fragment {
     private static final String CORRECT_COLOR = "#659D32";
     public static final int COUNTDOWN_TIMER_MILISECONDS = 3000;
     public static final int COUNTDOWN_INTERVAL = 500;
+    public static final int BORDER_SIZE = 1;
 
     private LayoutInflater mLayoutInflater;
 
@@ -45,6 +44,7 @@ public class GamePlayFragment extends Fragment {
     private List<Bitmap> mImageTiles;
     private Difficulty mDifficulty;
     private CountDownTimer mCountDownTimer;
+    private Bitmap mEmptyTile;
 
     @InjectView(R.id.status_bar)
     LinearLayout mStatusBar;
@@ -66,15 +66,17 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void splicePuzzle() {
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int screenWidth = size.x;
+        DisplayMetrics display = this.getResources().getDisplayMetrics();
+
+        int screenWidth = display.widthPixels;
+        int screenHeight = display.heightPixels;
 
         Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), mPuzzleDrawableId), screenWidth, screenWidth, false);
 
         int pieceHeight = (int) Math.floor(screenWidth / mGridSize);
         int pieceWidth = (int) Math.floor(screenWidth / mGridSize);
+
+        mEmptyTile = generateEmptyTile(pieceWidth, pieceHeight);
 
         for (int i = 0; i < mGridSize; i++) {
             for (int j = 0; j < mGridSize; j++) {
@@ -82,7 +84,7 @@ public class GamePlayFragment extends Fragment {
                 int y = (int) Math.floor(i * pieceHeight);
 
                 Bitmap tile = Bitmap.createBitmap(icon, x, y, pieceWidth, pieceHeight);
-                tile = addBlackBorder(tile, 1);
+                tile = addBorderToBitmap(tile, BORDER_SIZE);
                 mImageTiles.add(tile);
             }
         }
@@ -188,10 +190,10 @@ public class GamePlayFragment extends Fragment {
 
         HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
 
-        Display display = getActivity().getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        Integer screenWidth = size.x;
+        DisplayMetrics display = this.getResources().getDisplayMetrics();
+
+        int screenWidth = display.widthPixels;
+        int screenHeight = display.heightPixels;
 
         Integer buttonWidth = screenWidth / mGame.getGridSize();
 
@@ -284,7 +286,8 @@ public class GamePlayFragment extends Fragment {
                     });
 
                 } else {
-                    tileButton.getBackground().setAlpha(256);
+                    //tileButton.getBackground().setAlpha(256);
+                    tileButton.setImageBitmap(mEmptyTile);
                 }
 
                 mGrid.addView(tileButton);
@@ -315,8 +318,6 @@ public class GamePlayFragment extends Fragment {
 
             mGame.addCurrentPosition(currentPosition);
         }
-
-        mImageTiles = null;
     }
 
     public void setDifficulty(Difficulty difficulty) {
@@ -335,13 +336,31 @@ public class GamePlayFragment extends Fragment {
         this.mPuzzleDrawableId = puzzleDrawableId;
     }
 
-    //TODO: Improve border. Now there is no border at the bottom and the right side
-    private Bitmap addBlackBorder(Bitmap bmp, int borderSize) {
-        Bitmap bmpWithBorder = Bitmap.createBitmap(bmp.getWidth() + borderSize * 2, bmp.getHeight() + borderSize * 2, bmp.getConfig());
-        Canvas canvas = new Canvas(bmpWithBorder);
-        canvas.drawColor(Color.BLACK);
-        canvas.drawBitmap(bmp, borderSize, borderSize, null);
-        return bmpWithBorder;
+    private Bitmap addBorderToBitmap(Bitmap bmp, int borderSize, int colorCode) {
+        Canvas canvas = new Canvas(bmp);
+        Paint p = new Paint();
+        p.setStrokeWidth(borderSize);
+        p.setColor(colorCode);
+
+        canvas.drawLine(0, 0, bmp.getWidth(), 0, p);
+        canvas.drawLine(bmp.getWidth() - borderSize, 0, bmp.getWidth() - borderSize, bmp.getHeight(), p);
+        canvas.drawLine(bmp.getWidth(), bmp.getHeight() - borderSize, 0, bmp.getHeight() - borderSize, p);
+        canvas.drawLine(0, bmp.getHeight(), 0, 0, p);
+
+        return bmp;
+    }
+
+    private Bitmap addBorderToBitmap(Bitmap bmp, int borderSize) {
+        return addBorderToBitmap(bmp, borderSize, Color.BLACK);
+    }
+
+    private Bitmap generateEmptyTile(int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.WHITE);
+
+        return addBorderToBitmap(bitmap, BORDER_SIZE);
     }
 
     private void setStatusBarContent(int layoutId) {

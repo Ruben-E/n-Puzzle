@@ -16,5 +16,6 @@
     <string name="dialog_change_difficulty_title">Change difficulty</string>
     <string name="dialog_restart_game_title">Restart this game</string>
     <string name="dialog_restart_game_message">Are you sure you want to restart this game?</string>
+    <string name="choose_puzzle_label">Puzzle ...</string>
 
 </resources>
