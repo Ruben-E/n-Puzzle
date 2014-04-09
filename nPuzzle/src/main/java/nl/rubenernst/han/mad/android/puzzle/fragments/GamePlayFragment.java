@@ -2,11 +2,14 @@ package nl.rubenernst.han.mad.android.puzzle.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.*;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -45,9 +48,14 @@ public class GamePlayFragment extends Fragment {
     private Difficulty mDifficulty;
     private CountDownTimer mCountDownTimer;
     private Bitmap mEmptyTile;
+    private Bitmap mCorrectTile;
+
+    @InjectView(R.id.game_layout)
+    RelativeLayout mGameLayout;
 
     @InjectView(R.id.status_bar)
     LinearLayout mStatusBar;
+
     @InjectView(R.id.grid)
     RelativeLayout mGrid;
 
@@ -60,10 +68,28 @@ public class GamePlayFragment extends Fragment {
 
         mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mGridSize = getDifficulty().getGridSize();
-        mImageTiles = new ArrayList<Bitmap>();
 
         splicePuzzle();
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        final View view = getView();
+
+        ViewTreeObserver observer = view.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
+            @Override
+            public void onGlobalLayout() {
+                updateUI();
+                view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
+    }
+
+
 
     private void splicePuzzle() {
         DisplayMetrics display = this.getResources().getDisplayMetrics();
@@ -71,12 +97,20 @@ public class GamePlayFragment extends Fragment {
         int screenWidth = display.widthPixels;
         int screenHeight = display.heightPixels;
 
-        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), mPuzzleDrawableId), screenWidth, screenWidth, false);
+        int aspect = screenWidth;
+        if (screenHeight < screenWidth) {
+            aspect = screenHeight;
+        }
 
-        int pieceHeight = (int) Math.floor(screenWidth / mGridSize);
-        int pieceWidth = (int) Math.floor(screenWidth / mGridSize);
+        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), mPuzzleDrawableId), aspect, aspect, false);
+
+        int pieceHeight = (int) Math.floor(aspect / mGridSize);
+        int pieceWidth = (int) Math.floor(aspect / mGridSize);
 
         mEmptyTile = generateEmptyTile(pieceWidth, pieceHeight);
+        mCorrectTile = generateCorrectTile(pieceWidth, pieceHeight);
+
+        mImageTiles = new ArrayList<Bitmap>();
 
         for (int i = 0; i < mGridSize; i++) {
             for (int j = 0; j < mGridSize; j++) {
@@ -170,7 +204,39 @@ public class GamePlayFragment extends Fragment {
         }
     }
 
+    private int getGridWidth() {
+        DisplayMetrics display = this.getResources().getDisplayMetrics();
+
+        int screenWidth = display.widthPixels;
+        int screenHeight = display.heightPixels;
+
+        int aspect = screenWidth;
+        if (screenHeight < screenWidth) {
+            View content = getActivity().getWindow().findViewById(Window.ID_ANDROID_CONTENT);
+
+            aspect = content.getHeight();
+        }
+
+        return aspect;
+    }
+
+    private void updateLayoutPositions() {
+        int gridWidth = getGridWidth();
+
+        RelativeLayout.LayoutParams statusBarParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, getResources().getDisplayMetrics()));
+        statusBarParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        statusBarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        mStatusBar.setLayoutParams(statusBarParams);
+
+        RelativeLayout.LayoutParams gridParams = new RelativeLayout.LayoutParams(gridWidth, gridWidth);
+        gridParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        gridParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        mGrid.setLayoutParams(gridParams);
+    }
+
     public void updateUI() {
+        updateLayoutPositions();
+
         if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
             setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
 
@@ -190,12 +256,9 @@ public class GamePlayFragment extends Fragment {
 
         HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
 
-        DisplayMetrics display = this.getResources().getDisplayMetrics();
+        int aspect = getGridWidth();
 
-        int screenWidth = display.widthPixels;
-        int screenHeight = display.heightPixels;
-
-        Integer buttonWidth = screenWidth / mGame.getGridSize();
+        Integer buttonWidth = aspect / mGame.getGridSize();
 
         mGrid.removeAllViews();
 
@@ -209,7 +272,7 @@ public class GamePlayFragment extends Fragment {
                 Integer x = buttonWidth * j;
                 Integer y = buttonWidth * i;
 
-                RelativeLayout.LayoutParams buttonParams = new RelativeLayout.LayoutParams(screenWidth / mGame.getGridSize(), screenWidth / mGame.getGridSize());
+                RelativeLayout.LayoutParams buttonParams = new RelativeLayout.LayoutParams(aspect / mGame.getGridSize(), aspect / mGame.getGridSize());
                 buttonParams.addRule(RelativeLayout.ALIGN_LEFT, 1);
                 buttonParams.addRule(RelativeLayout.ALIGN_TOP, 1);
                 buttonParams.setMargins(x, y, 0, 0);
@@ -234,8 +297,8 @@ public class GamePlayFragment extends Fragment {
                                 final ImageButton correctButton = (ImageButton) mGrid.getChildAt(currentPosition.getCorrectPosition().getPosition());
                                 final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
 
-                                correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
-                                correctButton.setImageBitmap(null);
+                               // correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
+                                correctButton.setImageBitmap(mCorrectTile);
 
                                 new CountDownTimer(1500, 1000) {
                                     public void onTick(long millisUntilFinished) {
@@ -245,7 +308,7 @@ public class GamePlayFragment extends Fragment {
                                         if (correctButton != null && correctPosition != null) {
                                             correctButton.setImageBitmap(correctPosition.getImage().getBitmap());
                                         } else if (correctPosition == null) {
-                                            correctButton.getBackground().setAlpha(256);
+                                            correctButton.setImageBitmap(mEmptyTile);
                                         }
                                     }
                                 }.start();
@@ -359,6 +422,15 @@ public class GamePlayFragment extends Fragment {
 
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.WHITE);
+
+        return addBorderToBitmap(bitmap, BORDER_SIZE);
+    }
+
+    private Bitmap generateCorrectTile(int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.parseColor(CORRECT_COLOR));
 
         return addBorderToBitmap(bitmap, BORDER_SIZE);
     }

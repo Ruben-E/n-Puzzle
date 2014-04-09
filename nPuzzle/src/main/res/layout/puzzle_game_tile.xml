@@ -5,5 +5,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:id="@+id/tile_button" android:layout_gravity="center_horizontal"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         android:padding="0dp"
         android:layout_margin="0dp"/>

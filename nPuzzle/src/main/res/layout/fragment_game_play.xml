@@ -4,10 +4,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
+        android:id="@+id/game_layout"
         android:background="#E2E2E2">
     <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="70dp"
             android:id="@+id/status_bar"
             android:paddingLeft="16dp"
@@ -16,9 +17,8 @@
             android:paddingBottom="8dp">
     </LinearLayout>
     <RelativeLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_below="@+id/status_bar"
+                  android:layout_width="fill_parent"
+                  android:layout_height="fill_parent"
                   android:id="@+id/grid">
     </RelativeLayout>
 </RelativeLayout>
