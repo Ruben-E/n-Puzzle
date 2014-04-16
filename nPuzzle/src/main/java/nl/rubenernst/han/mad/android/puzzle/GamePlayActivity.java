@@ -3,7 +3,9 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
@@ -38,6 +40,10 @@ public class GamePlayActivity extends ActionBarActivity {
             gamePlayFragment.setDifficulty(mDifficulty);
             gamePlayFragment.setPuzzleDrawableId(mPuzzleDrawableId);
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                getActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.container, gamePlayFragment)
@@ -62,6 +68,9 @@ public class GamePlayActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         switch (id) {
+            case android.R.id.home:
+                showQuitDialog();
+                break;
             case R.id.action_change_difficulty:
                 showChangeDifficultyDialog();
                 break;
@@ -75,28 +84,31 @@ public class GamePlayActivity extends ActionBarActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.dialog_stop_game_title)
-                    .setMessage(R.string.dialog_stop_game_message)
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            GamePlayActivity.this.finish();
-                        }
-
-                    })
-                    .setNegativeButton(R.string.no, null)
-                    .show();
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showQuitDialog();
 
             return true;
-        }
-        else {
+        } else {
             return super.onKeyDown(keyCode, event);
         }
 
+    }
+
+    private void showQuitDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_stop_game_title)
+                .setMessage(R.string.dialog_stop_game_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        GamePlayActivity.this.finish();
+                    }
+
+                })
+                .setNegativeButton(R.string.no, null)
+                .show();
     }
 
     private void showRestartDialog() {

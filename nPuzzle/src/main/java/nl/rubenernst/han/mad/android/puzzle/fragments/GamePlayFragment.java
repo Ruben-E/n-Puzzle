@@ -102,7 +102,7 @@ public class GamePlayFragment extends Fragment {
             aspect = screenHeight;
         }
 
-        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getActivity().getApplicationContext().getResources(), mPuzzleDrawableId), aspect, aspect, false);
+        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), aspect, aspect, false);
 
         int pieceHeight = (int) Math.floor(aspect / mGridSize);
         int pieceWidth = (int) Math.floor(aspect / mGridSize);
