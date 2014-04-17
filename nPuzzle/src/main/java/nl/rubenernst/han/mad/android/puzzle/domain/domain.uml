@@ -2,12 +2,69 @@
 <Diagram>
   <ID>JAVA</ID>
   <OriginalElement />
-  <nodes />
+  <nodes>
+    <node x="173.16666666666674" y="101.0">nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition</node>
+    <node x="236.33333333333337" y="536.0">nl.rubenernst.han.mad.android.puzzle.domain.Position.Directions</node>
+    <node x="302.66666666666674" y="11.0">nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition</node>
+    <node x="139.66666666666674" y="0.0">nl.rubenernst.han.mad.android.puzzle.domain.Image</node>
+    <node x="227.33333333333337" y="413.0">nl.rubenernst.han.mad.android.puzzle.domain.Position</node>
+    <node x="0.0" y="224.0">nl.rubenernst.han.mad.android.puzzle.domain.Game</node>
+    <node x="92.16666666666674" y="123.0">nl.rubenernst.han.mad.android.puzzle.domain.Turn</node>
+  </nodes>
   <notes />
-  <edges />
-  <settings layout="Hierarchic Group" zoom="1.0" x="0.0" y="0.0" />
+  <edges>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition" target="nl.rubenernst.han.mad.android.puzzle.domain.Position">
+      <point x="50.66666666666663" y="36.5" />
+      <point x="299.83333333333337" y="204.0" />
+      <point x="320.24333333333334" y="204.0" />
+      <point x="320.24333333333334" y="388.0" />
+      <point x="299.83333333333337" y="388.0" />
+      <point x="0.0" y="-36.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.Position" target="nl.rubenernst.han.mad.android.puzzle.domain.Game">
+      <point x="-48.33333333333334" y="-36.5" />
+      <point x="251.5" y="388.0" />
+      <point x="143.0" y="388.0" />
+      <point x="0.0" y="69.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition" target="nl.rubenernst.han.mad.android.puzzle.domain.Position">
+      <point x="32.25" y="14.5" />
+      <point x="399.41666666666674" y="388.0" />
+      <point x="348.1666666666667" y="388.0" />
+      <point x="48.333333333333314" y="-36.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.Game" target="nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition">
+      <point x="57.20000000000002" y="-69.5" />
+      <point x="200.20000000000002" y="204.0" />
+      <point x="198.50000000000006" y="204.0" />
+      <point x="-50.66666666666666" y="36.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition" target="nl.rubenernst.han.mad.android.puzzle.domain.Image">
+      <point x="-38.0" y="-36.5" />
+      <point x="0.0" y="25.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition" target="nl.rubenernst.han.mad.android.puzzle.domain.CorrectPosition">
+      <point x="38.0" y="-36.5" />
+      <point x="287.16666666666674" y="76.0" />
+      <point x="334.91666666666674" y="76.0" />
+      <point x="-32.25" y="14.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.Position.Directions" target="nl.rubenernst.han.mad.android.puzzle.domain.Position">
+      <point x="0.0" y="-58.5" />
+      <point x="0.0" y="36.5" />
+    </edge>
+    <edge source="nl.rubenernst.han.mad.android.puzzle.domain.Game" target="nl.rubenernst.han.mad.android.puzzle.domain.Turn">
+      <point x="2.8421709430404007E-14" y="-69.5" />
+      <point x="20.333333333333314" y="14.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.7711738484398217" x="216.0" y="326.5" />
   <SelectedNodes />
-  <Categories />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
   <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
 </Diagram>
 
