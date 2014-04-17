@@ -19,6 +19,7 @@ import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
+import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
@@ -128,9 +129,7 @@ public class GamePlayFragment extends Fragment {
     private void onViewCreatedNewGame() {
         updateUI();
 
-        if (mGame.isPlayable()) {
-            startGame();
-        }
+        startGame();
     }
 
     @Override
@@ -178,26 +177,14 @@ public class GamePlayFragment extends Fragment {
             aspect = screenHeight;
         }
 
-        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), aspect, aspect, false);
-
-        int pieceHeight = (int) Math.floor(aspect / mGridSize);
         int pieceWidth = (int) Math.floor(aspect / mGridSize);
 
-        mEmptyTile = generateEmptyTile(pieceWidth, pieceHeight);
-        mCorrectTile = generateCorrectTile(pieceWidth, pieceHeight);
+        mEmptyTile = generateEmptyTile(pieceWidth, pieceWidth);
+        mCorrectTile = generateCorrectTile(pieceWidth, pieceWidth);
 
-        mImageTiles = new ArrayList<Bitmap>();
-
-        for (int i = 0; i < mGridSize; i++) {
-            for (int j = 0; j < mGridSize; j++) {
-                int x = (int) Math.floor(j * pieceWidth);
-                int y = (int) Math.floor(i * pieceHeight);
-
-                Bitmap tile = Bitmap.createBitmap(icon, x, y, pieceWidth, pieceHeight);
-                tile = addBorderToBitmap(tile, BORDER_SIZE);
-                mImageTiles.add(tile);
-            }
-        }
+        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), aspect, aspect, false);
+        ArrayList<Bitmap> bitmaps = BitmapGameHelper.spliceBitmap(icon, mGridSize, pieceWidth);
+        mImageTiles = BitmapGameHelper.addBorderAroundBitmaps(bitmaps, BORDER_SIZE);
     }
 
     private void startGame() {
@@ -435,40 +422,14 @@ public class GamePlayFragment extends Fragment {
         this.mPuzzleDrawableId = puzzleDrawableId;
     }
 
-    private Bitmap addBorderToBitmap(Bitmap bmp, int borderSize, int colorCode) {
-        Canvas canvas = new Canvas(bmp);
-        Paint p = new Paint();
-        p.setStrokeWidth(borderSize);
-        p.setColor(colorCode);
-
-        canvas.drawLine(0, 0, bmp.getWidth(), 0, p);
-        canvas.drawLine(bmp.getWidth() - borderSize, 0, bmp.getWidth() - borderSize, bmp.getHeight(), p);
-        canvas.drawLine(bmp.getWidth(), bmp.getHeight() - borderSize, 0, bmp.getHeight() - borderSize, p);
-        canvas.drawLine(0, bmp.getHeight(), 0, 0, p);
-
-        return bmp;
-    }
-
-    private Bitmap addBorderToBitmap(Bitmap bmp, int borderSize) {
-        return addBorderToBitmap(bmp, borderSize, Color.BLACK);
-    }
-
     private Bitmap generateEmptyTile(int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.WHITE);
-
-        return addBorderToBitmap(bitmap, BORDER_SIZE);
+        Bitmap emptyTile =  BitmapGameHelper.createSolidBitmap(width, height, Color.WHITE);
+        return BitmapGameHelper.addBorderAroundBitmap(emptyTile, BORDER_SIZE);
     }
 
     private Bitmap generateCorrectTile(int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.parseColor(CORRECT_COLOR));
-
-        return addBorderToBitmap(bitmap, BORDER_SIZE);
+        Bitmap correctTile =  BitmapGameHelper.createSolidBitmap(width, height, Color.parseColor(CORRECT_COLOR));
+        return BitmapGameHelper.addBorderAroundBitmap(correctTile, BORDER_SIZE);
     }
 
     private void setStatusBarContent(int layoutId) {
