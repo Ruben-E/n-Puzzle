@@ -20,6 +20,7 @@ import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
+import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
@@ -89,7 +90,13 @@ public class GamePlayFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        SaveGameStateHelper.saveGameState(getActivity().getApplicationContext(), mGame);
 
+        SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+    }
 
     private void splicePuzzle() {
         DisplayMetrics display = this.getResources().getDisplayMetrics();

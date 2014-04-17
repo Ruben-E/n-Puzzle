@@ -10,6 +10,8 @@ final public class Constants {
 
     public static enum GameState {INITIALIZING, PLAYABLE, FINISHED}
 
+    public static final String GAME_STATE_FILE = "game_state";
+
     //private constructor to prevent instantiation/inheritance
     private Constants() {
     }
