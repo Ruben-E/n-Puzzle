@@ -3,10 +3,11 @@ package nl.rubenernst.han.mad.android.puzzle.helpers;
 import android.content.Context;
 import android.util.JsonWriter;
 import android.util.Log;
-import nl.rubenernst.han.mad.android.puzzle.domain.CurrentPosition;
-import nl.rubenernst.han.mad.android.puzzle.domain.Game;
-import nl.rubenernst.han.mad.android.puzzle.domain.Turn;
+import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.util.List;
@@ -15,6 +16,14 @@ import java.util.List;
  * Created by rubenernst on 17-04-14.
  */
 public class SaveGameStateHelper {
+
+    private static final String TAG_GRID_SIZE = "gridSize";
+    private static final String TAG_GAME_STATE = "gameState";
+    private static final String TAG_POSITIONS = "positions";
+    private static final String TAG_TURNS = "turns";
+    private static final String TAG_POSITION = "position";
+    private static final String TAG_CORRECT_POSITION = "correctPosition";
+    private static final String TAG_IMAGE = "image";
 
     public static boolean saveGameState(Context context, Game game) {
         try {
@@ -34,25 +43,40 @@ public class SaveGameStateHelper {
 
     public static Game getSavedGameState(Context context) {
         try {
-            StringBuilder stringBuilder = new StringBuilder();
-            FileInputStream fileInputStream = context.openFileInput(Constants.GAME_STATE_FILE);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream, "UTF-8"));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line).append("\n");
-                }
-                fileInputStream.close();
-            Log.d("GAMESTATEHELPER", stringBuilder.toString());
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper();
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            FileInputStream fileInputStream = context.openFileInput(Constants.GAME_STATE_FILE);
+            String JSON = saveGameStateHelper.getSavedStateJson(fileInputStream);
+
+            if (!JSON.equals("")) {
+                return saveGameStateHelper.parserGameFromJson(JSON);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    public static boolean hasSavedGameState(Context context) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper();
+
+            FileInputStream fileInputStream = context.openFileInput(Constants.GAME_STATE_FILE);
+            String JSON = saveGameStateHelper.getSavedStateJson(fileInputStream);
+
+            if (!JSON.equals("")) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static void removeSavedGameState(Context context) {
+
     }
 
     // Private constructor
@@ -68,13 +92,13 @@ public class SaveGameStateHelper {
 
     private void writeGame(JsonWriter writer, Game game) throws IOException {
         writer.beginObject();
-        writer.name("gridSize").value(game.getGridSize());
-        writer.name("gameState").value(game.getGameState().toString());
+        writer.name(TAG_GRID_SIZE).value(game.getGridSize());
+        writer.name(TAG_GAME_STATE).value(game.getGameState().toString());
 
-        writer.name("positions");
+        writer.name(TAG_POSITIONS);
         writePositions(writer, game.getCurrentPositions());
 
-        writer.name("turns");
+        writer.name(TAG_TURNS);
         writeTurns(writer, game.getTurns());
 
         writer.endObject();
@@ -90,8 +114,8 @@ public class SaveGameStateHelper {
 
     private void writePosition(JsonWriter writer, CurrentPosition position) throws IOException {
         writer.beginObject();
-        writer.name("position").value(position.getPosition());
-        writer.name("correctPosition").value(position.getCorrectPosition().getPosition());
+        writer.name(TAG_POSITION).value(position.getPosition());
+        writer.name(TAG_CORRECT_POSITION).value(position.getCorrectPosition().getPosition());
         writer.endObject();
     }
 
@@ -107,5 +131,76 @@ public class SaveGameStateHelper {
         writer.beginObject();
 
         writer.endObject();
+    }
+
+    private String getSavedStateJson(InputStream inputStream) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line).append("\n");
+        }
+
+        inputStream.close();
+
+        return stringBuilder.toString();
+    }
+
+    private Game parserGameFromJson(String JSON) {
+        try {
+            Game game = new Game();
+            JSONObject jsonObject = new JSONObject(JSON);
+
+            int gridSize = jsonObject.getInt(TAG_GRID_SIZE);
+            String gameState = jsonObject.getString(TAG_GAME_STATE);
+
+            game.setGridSize(gridSize);
+            game.setGameState(Constants.GameState.valueOf(gameState));
+
+            parsePositionsFromJson(jsonObject, game);
+            parseTurnsFromJson(jsonObject, game);
+
+            return game;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private void parseTurnsFromJson(JSONObject jsonObject, Game game) throws JSONException {
+        JSONArray turns = jsonObject.getJSONArray(TAG_TURNS);
+        for (int i = 0; i < turns.length(); i++) {
+            JSONObject turnObject = turns.getJSONObject(i);
+
+            Turn turn = new Turn();
+            game.addTurn(turn);
+        }
+    }
+
+    private void parsePositionsFromJson(JSONObject jsonObject, Game game) throws JSONException {
+        JSONArray positions = jsonObject.getJSONArray(TAG_POSITIONS);
+        for (int i = 0; i < positions.length(); i++) {
+            JSONObject positionObject = positions.getJSONObject(i);
+
+            int positionValue = positionObject.getInt(TAG_POSITION);
+            int correctPositionValue = positionObject.getInt(TAG_CORRECT_POSITION);
+
+            CorrectPosition correctPosition = new CorrectPosition();
+            correctPosition.setGame(game);
+            correctPosition.setPosition(correctPositionValue);
+
+            Image image = new Image();
+
+            CurrentPosition currentPosition = new CurrentPosition();
+            currentPosition.setGame(game);
+            currentPosition.setPosition(positionValue);
+            currentPosition.setCorrectPosition(correctPosition);
+            currentPosition.setImage(image);
+
+            game.addCurrentPosition(currentPosition);
+        }
     }
 }

@@ -2,11 +2,13 @@ package nl.rubenernst.han.mad.android.puzzle;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GameSelectionFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 public class GameSelectionActivity extends ActionBarActivity {
@@ -18,6 +20,10 @@ public class GameSelectionActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_selection);
+
+        if (SaveGameStateHelper.hasSavedGameState(getApplicationContext())) {
+            showNotFinishedGameDialog();
+        }
 
         mGameSelectionFragment = new GameSelectionFragment();
 
@@ -59,6 +65,28 @@ public class GameSelectionActivity extends ActionBarActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Difficulty difficulty = Difficulty.fromString(getResources().obtainTypedArray(R.array.difficulties).getString(which));
                         setDifficulty(difficulty);
+                    }
+                })
+                .show();
+    }
+
+    private void showNotFinishedGameDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Unfinished Game")
+                .setMessage("You have an unfinished game. Do you want to finished it?")
+                .setNegativeButton("No!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                })
+                .setPositiveButton("Yeah!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(GameSelectionActivity.this, GamePlayActivity.class);
+                        intent.putExtra("unfinished_game", true);
+
+                        startActivity(intent);
                     }
                 })
                 .show();

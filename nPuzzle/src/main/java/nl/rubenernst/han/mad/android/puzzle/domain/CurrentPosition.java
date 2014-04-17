@@ -1,5 +1,7 @@
 package nl.rubenernst.han.mad.android.puzzle.domain;
 
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+
 import java.util.List;
 
 /**
@@ -184,6 +186,8 @@ public class CurrentPosition extends Position {
     public void setPosition(Integer position) {
         super.setPosition(position);
 
-        getGame().createTurn();
+        if (getGame().getGameState() == Constants.GameState.PLAYABLE) {
+            getGame().createTurn();
+        }
     }
 }

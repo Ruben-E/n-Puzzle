@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.ImageButton;
@@ -50,6 +49,7 @@ public class GamePlayFragment extends Fragment {
     private CountDownTimer mCountDownTimer;
     private Bitmap mEmptyTile;
     private Bitmap mCorrectTile;
+    private Boolean mUnfinishedGame;
 
     @InjectView(R.id.game_layout)
     RelativeLayout mGameLayout;
@@ -68,9 +68,12 @@ public class GamePlayFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mGridSize = getDifficulty().getGridSize();
 
-        splicePuzzle();
+        if (mUnfinishedGame) {
+            onCreateUnfinishedGame();
+        } else {
+            onCreateNewGame();
+        }
     }
 
     @Override
@@ -96,6 +99,72 @@ public class GamePlayFragment extends Fragment {
         SaveGameStateHelper.saveGameState(getActivity().getApplicationContext(), mGame);
 
         SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_game_play, container, false);
+
+        ButterKnife.inject(this, view);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        if (mUnfinishedGame) {
+            onViewCreatedUnfinishedGame();
+        } else {
+            onViewCreatedNewGame();
+        }
+    }
+
+    private void onViewCreatedUnfinishedGame() {
+        setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
+
+        updateUI();
+    }
+
+    private void onViewCreatedNewGame() {
+        updateUI();
+
+        if (mGame.isPlayable()) {
+            startGame();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mCountDownTimer != null) {
+            mCountDownTimer.cancel();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mCountDownTimer != null && !mGame.isPlayable()) {
+            mCountDownTimer.start();
+        }
+    }
+
+    private void onCreateNewGame() {
+        mGridSize = getDifficulty().getGridSize();
+
+        splicePuzzle();
+        setupGame();
+    }
+
+    private void onCreateUnfinishedGame() {
+        mGame = SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+        mGridSize = mGame.getGridSize();
     }
 
     private void splicePuzzle() {
@@ -129,24 +198,6 @@ public class GamePlayFragment extends Fragment {
                 mImageTiles.add(tile);
             }
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_game_play, container, false);
-
-        ButterKnife.inject(this, view);
-
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        setupGame();
-        updateUI();
-
-        startGame();
     }
 
     private void startGame() {
@@ -187,28 +238,6 @@ public class GamePlayFragment extends Fragment {
         });
 
         gameInitializationTask.execute(mGame);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mCountDownTimer != null) {
-            mCountDownTimer.cancel();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mCountDownTimer != null) {
-            mCountDownTimer.start();
-        }
     }
 
     private int getGridWidth() {
@@ -446,5 +475,9 @@ public class GamePlayFragment extends Fragment {
         View content = mLayoutInflater.inflate(layoutId, null, false);
         mStatusBar.removeAllViews();
         mStatusBar.addView(content);
+    }
+
+    public void setUnfinishedGame(Boolean unfinishedGame) {
+        this.mUnfinishedGame = unfinishedGame;
     }
 }

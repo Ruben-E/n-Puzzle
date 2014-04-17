@@ -16,6 +16,7 @@ import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
  */
 public class GamePlayActivity extends ActionBarActivity {
 
+    private Boolean mUnfinishedGame;
     private Difficulty mDifficulty;
     private Integer mPuzzleId;
     private String mPuzzleImageName;
@@ -30,6 +31,7 @@ public class GamePlayActivity extends ActionBarActivity {
             Class res = R.drawable.class;
 
             Intent intent = getIntent();
+            mUnfinishedGame = intent.getBooleanExtra("unfinished_game", false);
             mDifficulty = (Difficulty) intent.getSerializableExtra("difficulty");
             mPuzzleId = intent.getIntExtra("puzzle", 0);
             mPuzzleImageName = "puzzle_" + (mPuzzleId + 1);
@@ -37,6 +39,7 @@ public class GamePlayActivity extends ActionBarActivity {
             mPuzzleDrawableId = res.getField(mPuzzleImageName).getInt(null);
 
             GamePlayFragment gamePlayFragment = new GamePlayFragment();
+            gamePlayFragment.setUnfinishedGame(mUnfinishedGame);
             gamePlayFragment.setDifficulty(mDifficulty);
             gamePlayFragment.setPuzzleDrawableId(mPuzzleDrawableId);
 
