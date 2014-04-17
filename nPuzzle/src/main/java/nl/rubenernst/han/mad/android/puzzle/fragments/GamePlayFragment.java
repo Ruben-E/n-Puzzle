@@ -167,22 +167,10 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void splicePuzzle() {
-        DisplayMetrics display = this.getResources().getDisplayMetrics();
+        int pieceWidth = getPieceWidth();
+        int orientationWidth = getOrientationWidth();
 
-        int screenWidth = display.widthPixels;
-        int screenHeight = display.heightPixels;
-
-        int aspect = screenWidth;
-        if (screenHeight < screenWidth) {
-            aspect = screenHeight;
-        }
-
-        int pieceWidth = (int) Math.floor(aspect / mGridSize);
-
-        mEmptyTile = generateEmptyTile(pieceWidth, pieceWidth);
-        mCorrectTile = generateCorrectTile(pieceWidth, pieceWidth);
-
-        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), aspect, aspect, false);
+        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), orientationWidth, orientationWidth, false);
         ArrayList<Bitmap> bitmaps = BitmapGameHelper.spliceBitmap(icon, mGridSize, pieceWidth);
         mImageTiles = BitmapGameHelper.addBorderAroundBitmaps(bitmaps, BORDER_SIZE);
     }
@@ -227,6 +215,20 @@ public class GamePlayFragment extends Fragment {
         gameInitializationTask.execute(mGame);
     }
 
+    private int getOrientationWidth() {
+        DisplayMetrics display = this.getResources().getDisplayMetrics();
+
+        int screenWidth = display.widthPixels;
+        int screenHeight = display.heightPixels;
+
+        int aspect = screenWidth;
+        if (screenHeight < screenWidth) {
+            aspect = screenHeight;
+        }
+
+        return aspect;
+    }
+
     private int getGridWidth() {
         DisplayMetrics display = this.getResources().getDisplayMetrics();
 
@@ -241,6 +243,10 @@ public class GamePlayFragment extends Fragment {
         }
 
         return aspect;
+    }
+
+    private int getPieceWidth() {
+        return (int) Math.floor(getOrientationWidth() / mGridSize);
     }
 
     private void updateLayoutPositions() {
@@ -320,8 +326,8 @@ public class GamePlayFragment extends Fragment {
                                 final ImageButton correctButton = (ImageButton) mGrid.getChildAt(currentPosition.getCorrectPosition().getPosition());
                                 final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
 
-                               // correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
-                                correctButton.setImageBitmap(mCorrectTile);
+                                // correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
+                                correctButton.setImageBitmap(getCorrectTile());
 
                                 new CountDownTimer(1500, 1000) {
                                     public void onTick(long millisUntilFinished) {
@@ -331,7 +337,7 @@ public class GamePlayFragment extends Fragment {
                                         if (correctButton != null && correctPosition != null) {
                                             correctButton.setImageBitmap(correctPosition.getImage().getBitmap());
                                         } else if (correctPosition == null) {
-                                            correctButton.setImageBitmap(mEmptyTile);
+                                            correctButton.setImageBitmap(getEmptyTile());
                                         }
                                     }
                                 }.start();
@@ -373,7 +379,7 @@ public class GamePlayFragment extends Fragment {
 
                 } else {
                     //tileButton.getBackground().setAlpha(256);
-                    tileButton.setImageBitmap(mEmptyTile);
+                    tileButton.setImageBitmap(getEmptyTile());
                 }
 
                 mGrid.addView(tileButton);
@@ -423,12 +429,12 @@ public class GamePlayFragment extends Fragment {
     }
 
     private Bitmap generateEmptyTile(int width, int height) {
-        Bitmap emptyTile =  BitmapGameHelper.createSolidBitmap(width, height, Color.WHITE);
+        Bitmap emptyTile = BitmapGameHelper.createSolidBitmap(width, height, Color.WHITE);
         return BitmapGameHelper.addBorderAroundBitmap(emptyTile, BORDER_SIZE);
     }
 
     private Bitmap generateCorrectTile(int width, int height) {
-        Bitmap correctTile =  BitmapGameHelper.createSolidBitmap(width, height, Color.parseColor(CORRECT_COLOR));
+        Bitmap correctTile = BitmapGameHelper.createSolidBitmap(width, height, Color.parseColor(CORRECT_COLOR));
         return BitmapGameHelper.addBorderAroundBitmap(correctTile, BORDER_SIZE);
     }
 
@@ -440,5 +446,25 @@ public class GamePlayFragment extends Fragment {
 
     public void setUnfinishedGame(Boolean unfinishedGame) {
         this.mUnfinishedGame = unfinishedGame;
+    }
+
+    public Bitmap getEmptyTile() {
+        if(mEmptyTile == null) {
+            int pieceWidth = getPieceWidth();
+
+            mEmptyTile = generateEmptyTile(pieceWidth, pieceWidth);
+        }
+
+        return mEmptyTile;
+    }
+
+    public Bitmap getCorrectTile() {
+        if (mCorrectTile == null) {
+            int pieceWidth = getPieceWidth();
+
+            mCorrectTile = generateCorrectTile(pieceWidth, pieceWidth);
+        }
+
+        return mCorrectTile;
     }
 }
