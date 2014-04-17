@@ -1,0 +1,20 @@
+Saved game state:
+
+{
+    gridSize: 3,
+    gameState: PLAYABLE,
+    positions: [
+        {
+            position: 1,
+            correctPosition: 1,
+            image: "x"
+        }
+        ...
+    ],
+    turns: [
+        {
+
+        }
+    ]
+
+}
