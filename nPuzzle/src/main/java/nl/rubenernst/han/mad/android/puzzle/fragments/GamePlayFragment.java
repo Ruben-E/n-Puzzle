@@ -10,10 +10,7 @@ import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.*;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity;
@@ -98,8 +95,6 @@ public class GamePlayFragment extends Fragment {
     public void onPause() {
         super.onPause();
         SaveGameStateHelper.saveGameState(getActivity().getApplicationContext(), mGame);
-
-        SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
     }
 
     @Override
@@ -163,6 +158,12 @@ public class GamePlayFragment extends Fragment {
 
     private void onCreateUnfinishedGame() {
         mGame = SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+
+        if(mGame == null) {
+            Toast.makeText(getActivity().getApplicationContext(), "Could not load the game", Toast.LENGTH_LONG).show();
+            getActivity().finish();
+        }
+
         mGridSize = mGame.getGridSize();
     }
 
@@ -272,6 +273,8 @@ public class GamePlayFragment extends Fragment {
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
 
             statusText.setText("You won!");
+
+            SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
             intent.putExtra("puzzle_drawable_id", mPuzzleDrawableId);

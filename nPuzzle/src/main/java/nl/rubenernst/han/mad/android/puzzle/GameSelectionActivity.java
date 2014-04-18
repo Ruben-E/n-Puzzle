@@ -77,7 +77,7 @@ public class GameSelectionActivity extends ActionBarActivity {
                 .setNegativeButton("No!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
+                        SaveGameStateHelper.removeSavedGameState(getApplicationContext());
                     }
                 })
                 .setPositiveButton("Yeah!", new DialogInterface.OnClickListener() {

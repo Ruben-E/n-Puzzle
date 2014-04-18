@@ -1,6 +1,9 @@
 package nl.rubenernst.han.mad.android.puzzle.helpers;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.JsonWriter;
 import android.util.Log;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
@@ -24,17 +27,18 @@ public class SaveGameStateHelper {
     private static final String TAG_POSITION = "position";
     private static final String TAG_CORRECT_POSITION = "correctPosition";
     private static final String TAG_IMAGE = "image";
+    private static final String TAG_IMAGE_PATH = "imagePath";
+
+    private Context context;
 
     public static boolean saveGameState(Context context, Game game) {
         try {
-            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper();
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
             FileOutputStream fileOutput = context.openFileOutput(Constants.GAME_STATE_FILE, Context.MODE_PRIVATE);
             saveGameStateHelper.writeGameStateJsonStream(fileOutput, game);
-
             return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -43,7 +47,7 @@ public class SaveGameStateHelper {
 
     public static Game getSavedGameState(Context context) {
         try {
-            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper();
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
 
             FileInputStream fileInputStream = context.openFileInput(Constants.GAME_STATE_FILE);
             String JSON = saveGameStateHelper.getSavedStateJson(fileInputStream);
@@ -51,7 +55,7 @@ public class SaveGameStateHelper {
             if (!JSON.equals("")) {
                 return saveGameStateHelper.parserGameFromJson(JSON);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -60,7 +64,7 @@ public class SaveGameStateHelper {
 
     public static boolean hasSavedGameState(Context context) {
         try {
-            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper();
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
 
             FileInputStream fileInputStream = context.openFileInput(Constants.GAME_STATE_FILE);
             String JSON = saveGameStateHelper.getSavedStateJson(fileInputStream);
@@ -68,7 +72,7 @@ public class SaveGameStateHelper {
             if (!JSON.equals("")) {
                 return true;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -76,11 +80,18 @@ public class SaveGameStateHelper {
     }
 
     public static void removeSavedGameState(Context context) {
-
+        try {
+            File directory = context.getFilesDir();
+            File file = new File(directory, Constants.GAME_STATE_FILE);
+            file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Private constructor
-    private SaveGameStateHelper() {
+    private SaveGameStateHelper(Context context) {
+        this.context = context;
     }
 
     private void writeGameStateJsonStream(OutputStream outputStream, Game game) throws IOException {
@@ -113,9 +124,15 @@ public class SaveGameStateHelper {
     }
 
     private void writePosition(JsonWriter writer, CurrentPosition position) throws IOException {
+        int correctPosition = position.getCorrectPosition().getPosition();
+        String imageName = "image-" + correctPosition + ".png";
+        String imagePath = writeImageToDisk(position.getImage().getBitmap(), imageName);
+
         writer.beginObject();
         writer.name(TAG_POSITION).value(position.getPosition());
-        writer.name(TAG_CORRECT_POSITION).value(position.getCorrectPosition().getPosition());
+        writer.name(TAG_CORRECT_POSITION).value(correctPosition);
+        writer.name(TAG_IMAGE).value(imageName);
+        writer.name(TAG_IMAGE_PATH).value(imagePath);
         writer.endObject();
     }
 
@@ -133,6 +150,19 @@ public class SaveGameStateHelper {
         writer.endObject();
     }
 
+    private String writeImageToDisk(Bitmap bitmap, String name) throws IOException {
+        ContextWrapper contextWrapper = new ContextWrapper(context);
+        File directory = contextWrapper.getDir("images", Context.MODE_PRIVATE);
+        File path = new File(directory, name);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(path);
+
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        fileOutputStream.close();
+
+        return directory.getAbsolutePath();
+    }
+
     private String getSavedStateJson(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -148,7 +178,7 @@ public class SaveGameStateHelper {
         return stringBuilder.toString();
     }
 
-    private Game parserGameFromJson(String JSON) {
+    private Game parserGameFromJson(String JSON) throws FileNotFoundException {
         try {
             Game game = new Game();
             JSONObject jsonObject = new JSONObject(JSON);
@@ -160,6 +190,7 @@ public class SaveGameStateHelper {
             game.setGameState(Constants.GameState.valueOf(gameState));
 
             parsePositionsFromJson(jsonObject, game);
+            game.getTurns().clear();
             parseTurnsFromJson(jsonObject, game);
 
             return game;
@@ -180,7 +211,7 @@ public class SaveGameStateHelper {
         }
     }
 
-    private void parsePositionsFromJson(JSONObject jsonObject, Game game) throws JSONException {
+    private void parsePositionsFromJson(JSONObject jsonObject, Game game) throws JSONException, FileNotFoundException {
         JSONArray positions = jsonObject.getJSONArray(TAG_POSITIONS);
         for (int i = 0; i < positions.length(); i++) {
             JSONObject positionObject = positions.getJSONObject(i);
@@ -188,11 +219,15 @@ public class SaveGameStateHelper {
             int positionValue = positionObject.getInt(TAG_POSITION);
             int correctPositionValue = positionObject.getInt(TAG_CORRECT_POSITION);
 
+            String imageName = positionObject.getString(TAG_IMAGE);
+            String imagePath = positionObject.getString(TAG_IMAGE_PATH);
+
             CorrectPosition correctPosition = new CorrectPosition();
             correctPosition.setGame(game);
             correctPosition.setPosition(correctPositionValue);
 
             Image image = new Image();
+            image.setBitmap(parseImageFromDisk(imagePath, imageName));
 
             CurrentPosition currentPosition = new CurrentPosition();
             currentPosition.setGame(game);
@@ -202,5 +237,10 @@ public class SaveGameStateHelper {
 
             game.addCurrentPosition(currentPosition);
         }
+    }
+
+    private Bitmap parseImageFromDisk(String path, String name) throws FileNotFoundException {
+        File file = new File(path, name);
+        return BitmapFactory.decodeStream(new FileInputStream(file));
     }
 }
