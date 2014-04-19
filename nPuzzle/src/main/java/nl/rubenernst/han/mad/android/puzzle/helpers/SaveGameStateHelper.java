@@ -1,11 +1,7 @@
 package nl.rubenernst.han.mad.android.puzzle.helpers;
 
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.JsonWriter;
-import android.util.Log;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import org.json.JSONArray;
@@ -125,8 +121,8 @@ public class SaveGameStateHelper {
 
     private void writePosition(JsonWriter writer, CurrentPosition position) throws IOException {
         int correctPosition = position.getCorrectPosition().getPosition();
-        String imageName = "image-" + correctPosition + ".png";
-        String imagePath = writeImageToDisk(position.getImage().getBitmap(), imageName);
+        String imageName = getImageName(correctPosition);
+        String imagePath = BitmapGameHelper.writeBitmapToPrivateStorage(context, position.getImage().getBitmap(), Constants.IMAGES_FOLDER, imageName);
 
         writer.beginObject();
         writer.name(TAG_POSITION).value(position.getPosition());
@@ -150,18 +146,7 @@ public class SaveGameStateHelper {
         writer.endObject();
     }
 
-    private String writeImageToDisk(Bitmap bitmap, String name) throws IOException {
-        ContextWrapper contextWrapper = new ContextWrapper(context);
-        File directory = contextWrapper.getDir("images", Context.MODE_PRIVATE);
-        File path = new File(directory, name);
 
-        FileOutputStream fileOutputStream = new FileOutputStream(path);
-
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-        fileOutputStream.close();
-
-        return directory.getAbsolutePath();
-    }
 
     private String getSavedStateJson(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
@@ -227,7 +212,7 @@ public class SaveGameStateHelper {
             correctPosition.setPosition(correctPositionValue);
 
             Image image = new Image();
-            image.setBitmap(parseImageFromDisk(imagePath, imageName));
+            image.setBitmap(BitmapGameHelper.parseBitmapFromPrivateStorage(imagePath, imageName));
 
             CurrentPosition currentPosition = new CurrentPosition();
             currentPosition.setGame(game);
@@ -239,8 +224,9 @@ public class SaveGameStateHelper {
         }
     }
 
-    private Bitmap parseImageFromDisk(String path, String name) throws FileNotFoundException {
-        File file = new File(path, name);
-        return BitmapFactory.decodeStream(new FileInputStream(file));
+    private String getImageName(int correctPosition) {
+        return "puzzle-tile-" + correctPosition + ".png";
     }
+
+
 }

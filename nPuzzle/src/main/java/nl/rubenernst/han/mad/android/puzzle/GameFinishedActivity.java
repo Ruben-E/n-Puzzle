@@ -1,18 +1,26 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+
+import java.io.FileNotFoundException;
 
 /**
  * Created by rubenernst on 28-03-14.
  */
 public class GameFinishedActivity extends ActionBarActivity {
+
+    private static final String TAG = "GameFinishedActivity";
 
     @InjectView(R.id.puzzle_image)
     ImageView mPuzzleImage;
@@ -29,8 +37,14 @@ public class GameFinishedActivity extends ActionBarActivity {
 
         Intent intent = getIntent();
 
-        mPuzzleImage.setImageDrawable(getResources().getDrawable(intent.getIntExtra("puzzle_drawable_id", 0)));
         mNumberOfTurnsLabel.setText("Turns: " + intent.getIntExtra("number_of_turns", 0));
+
+        try {
+            Bitmap puzzle = BitmapGameHelper.parseBitmapFromPrivateStorage(Constants.IMAGES_FOLDER, Constants.PUZZLE_IMAGE_NAME);
+            mPuzzleImage.setImageBitmap(puzzle);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Could not read image from internal storage");
+        }
 
     }
 

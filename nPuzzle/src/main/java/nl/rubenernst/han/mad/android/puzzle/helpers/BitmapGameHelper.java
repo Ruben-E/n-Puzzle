@@ -1,10 +1,11 @@
 package nl.rubenernst.han.mad.android.puzzle.helpers;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.graphics.*;
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -64,5 +65,23 @@ public class BitmapGameHelper {
         canvas.drawColor(color);
 
         return bitmap;
+    }
+
+    public static String writeBitmapToPrivateStorage(Context context, Bitmap bitmap, String path, String name) throws IOException {
+        ContextWrapper contextWrapper = new ContextWrapper(context);
+        File directory = contextWrapper.getDir(path, Context.MODE_PRIVATE);
+        File file = new File(directory, name);
+
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+        fileOutputStream.close();
+
+        return directory.getAbsolutePath();
+    }
+
+    public static Bitmap parseBitmapFromPrivateStorage(String path, String name) throws FileNotFoundException {
+        File file = new File(path, name);
+        return BitmapFactory.decodeStream(new FileInputStream(file));
     }
 }

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
@@ -20,9 +21,11 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
+import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 import nl.rubenernst.han.mad.android.puzzle.utils.OnTouchListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +50,7 @@ public class GamePlayFragment extends Fragment {
     private CountDownTimer mCountDownTimer;
     private Bitmap mEmptyTile;
     private Bitmap mCorrectTile;
-    private Boolean mUnfinishedGame;
+    private boolean mUnfinishedGame;
 
     @InjectView(R.id.game_layout)
     RelativeLayout mGameLayout;
@@ -171,9 +174,15 @@ public class GamePlayFragment extends Fragment {
         int pieceWidth = getPieceWidth();
         int orientationWidth = getOrientationWidth();
 
-        Bitmap icon = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), orientationWidth, orientationWidth, false);
-        ArrayList<Bitmap> bitmaps = BitmapGameHelper.spliceBitmap(icon, mGridSize, pieceWidth);
+        Bitmap puzzle = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), orientationWidth, orientationWidth, false);
+        ArrayList<Bitmap> bitmaps = BitmapGameHelper.spliceBitmap(puzzle, mGridSize, pieceWidth);
         mImageTiles = BitmapGameHelper.addBorderAroundBitmaps(bitmaps, BORDER_SIZE);
+
+        try {
+            BitmapGameHelper.writeBitmapToPrivateStorage(getActivity().getApplicationContext(), puzzle, Constants.IMAGES_FOLDER, Constants.PUZZLE_IMAGE_NAME);
+        } catch (IOException e) {
+            Log.e(TAG, "Could not write puzzle bitmap to internal storage");
+        }
     }
 
     private void startGame() {
@@ -274,10 +283,10 @@ public class GamePlayFragment extends Fragment {
 
             statusText.setText("You won!");
 
+            //TODO: Dit werkt nog niet
             SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
-            intent.putExtra("puzzle_drawable_id", mPuzzleDrawableId);
             intent.putExtra("number_of_turns", mGame.getTurns().size());
 
             startActivity(intent);
