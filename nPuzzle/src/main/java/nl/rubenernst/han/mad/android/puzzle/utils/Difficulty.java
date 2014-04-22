@@ -6,7 +6,8 @@ package nl.rubenernst.han.mad.android.puzzle.utils;
 public enum Difficulty {
     HARD(5),
     MEDIUM(4),
-    EASY(3);
+    EASY(3),
+    DUMB(2);
 
     private final int gridSize;
 
