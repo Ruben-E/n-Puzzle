@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle.helpers;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.*;
+import android.util.Log;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 
 import java.io.*;

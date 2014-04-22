@@ -77,9 +77,7 @@ public class SaveGameStateHelper {
 
     public static void removeSavedGameState(Context context) {
         try {
-            File directory = context.getFilesDir();
-            File file = new File(directory, Constants.GAME_STATE_FILE);
-            file.delete();
+            context.deleteFile(Constants.GAME_STATE_FILE);
         } catch (Exception e) {
             e.printStackTrace();
         }

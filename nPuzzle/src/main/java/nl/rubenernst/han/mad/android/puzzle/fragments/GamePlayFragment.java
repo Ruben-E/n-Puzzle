@@ -277,14 +277,13 @@ public class GamePlayFragment extends Fragment {
         updateLayoutPositions();
 
         if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
+            SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
+
             setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
 
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
 
             statusText.setText("You won!");
-
-            //TODO: Dit werkt nog niet
-            SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
             intent.putExtra("number_of_turns", mGame.getTurns().size());
