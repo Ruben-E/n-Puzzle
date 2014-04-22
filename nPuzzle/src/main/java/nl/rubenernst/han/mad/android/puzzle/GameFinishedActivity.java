@@ -1,28 +1,36 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.games.Games;
 import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import com.google.example.games.basegameutils.BaseGameActivity;
 
 import java.io.FileNotFoundException;
 
 /**
  * Created by rubenernst on 28-03-14.
  */
-public class GameFinishedActivity extends ActionBarActivity {
+public class GameFinishedActivity extends BaseGameActivity {
 
     private static final String TAG = "GameFinishedActivity";
+
+    private int mScore;
 
     @InjectView(R.id.puzzle_image)
     ImageView mPuzzleImage;
@@ -38,10 +46,14 @@ public class GameFinishedActivity extends ActionBarActivity {
         ButterKnife.inject(this);
 
         SaveGameStateHelper.removeSavedGameState(getApplicationContext());
+        beginUserInitiatedSignIn();
+
 
         Intent intent = getIntent();
+        mScore = intent.getIntExtra("number_of_turns", 0);
 
-        mNumberOfTurnsLabel.setText("Turns: " + intent.getIntExtra("number_of_turns", 0));
+        mNumberOfTurnsLabel.setText("Turns: " + mScore);
+
 
         try {
             Bitmap puzzle = BitmapGameHelper.parseBitmapFromPrivateStorage(getApplicationContext().getDir(Constants.IMAGES_FOLDER, Context.MODE_PRIVATE).toString(), Constants.PUZZLE_IMAGE_NAME);
@@ -63,5 +75,17 @@ public class GameFinishedActivity extends ActionBarActivity {
             return true;
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public void onSignInFailed() {
+
+    }
+
+    @Override
+    public void onSignInSucceeded() {
+        Games.Leaderboards.submitScore(getApiClient(), "CgkIsru1-aYCEAIQAQ", mScore);
+
+        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), "CgkIsru1-aYCEAIQAQ"), 123);
     }
 }
