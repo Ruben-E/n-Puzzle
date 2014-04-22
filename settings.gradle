@@ -1,1 +1,1 @@
-include ':nPuzzle'
+include ':nPuzzle', ':libraries:BaseGameUtils'
