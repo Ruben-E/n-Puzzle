@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="nl.rubenernst.han.mad.android.puzzle">
+    package="nl.rubenernst.han.mad.android.puzzle" >
 
     <application
-            android:allowBackup="true"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme">
-        <meta-data android:name="com.google.android.gms.version"
-                   android:value="@integer/google_play_services_version"/>
-        <meta-data android:name="com.google.android.gms.games.APP_ID"
-                   android:value="@string/app_id"/>
-        <activity
-                android:name=".GameSelectionActivity"
-                android:label="@string/app_name" android:configChanges="orientation|screenSize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/app_id" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.GameSelectionActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-                android:name=".GamePlayActivity"
-                android:label="@string/app_name"
-                android:configChanges="orientation|screenSize">
+            android:name="nl.rubenernst.han.mad.android.puzzle.GamePlayActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name" >
         </activity>
-
-        <activity android:name=".GameFinishedActivity" android:configChanges="orientation|screenSize"/>
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.MainMenuActivity"
+            android:label="@string/title_activity_main_menu" >
+        </activity>
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
 </manifest>
