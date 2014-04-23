@@ -20,6 +20,7 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import com.google.example.games.basegameutils.BaseGameActivity;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.io.FileNotFoundException;
 
@@ -31,6 +32,7 @@ public class GameFinishedActivity extends BaseGameActivity {
     private static final String TAG = "GameFinishedActivity";
 
     private int mScore;
+    private Difficulty mDifficulty;
 
     @InjectView(R.id.puzzle_image)
     ImageView mPuzzleImage;
@@ -51,6 +53,7 @@ public class GameFinishedActivity extends BaseGameActivity {
 
         Intent intent = getIntent();
         mScore = intent.getIntExtra("number_of_turns", 0);
+        mDifficulty = (Difficulty) intent.getSerializableExtra("difficulty");
 
         mNumberOfTurnsLabel.setText("Turns: " + mScore);
 
@@ -84,8 +87,8 @@ public class GameFinishedActivity extends BaseGameActivity {
 
     @Override
     public void onSignInSucceeded() {
-        Games.Leaderboards.submitScore(getApiClient(), "CgkIsru1-aYCEAIQAQ", mScore);
+        Games.Leaderboards.submitScore(getApiClient(), mDifficulty.getLeaderboardId(), mScore);
 
-        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), "CgkIsru1-aYCEAIQAQ"), 123);
+        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), mDifficulty.getLeaderboardId()), 123);
     }
 }

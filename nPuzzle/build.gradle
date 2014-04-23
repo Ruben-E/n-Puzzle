@@ -40,7 +40,7 @@ android {
             storeFile file("debug.keystore")
         }
 
-        myConfig {
+        signed {
             storeFile file("android-npuzzle.jks")
             storePassword "DHWj7Y4uXbVDDCQ"
             keyAlias "npuzzle"
@@ -49,10 +49,10 @@ android {
     }
 
     buildTypes {
-        foo {
+        debugsigned {
             debuggable true
             jniDebugBuild true
-            signingConfig signingConfigs.myConfig
+            signingConfig signingConfigs.signed
         }
     }
 }

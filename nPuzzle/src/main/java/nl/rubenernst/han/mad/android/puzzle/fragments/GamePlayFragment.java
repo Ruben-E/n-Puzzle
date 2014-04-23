@@ -287,6 +287,7 @@ public class GamePlayFragment extends Fragment {
 
             Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
             intent.putExtra("number_of_turns", mGame.getTurns().size());
+            intent.putExtra("difficulty", getDifficulty());
 
             startActivity(intent);
         } else if (mGame.isPlayable()) {
