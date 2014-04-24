@@ -1,5 +1,6 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -9,15 +10,24 @@ import android.view.View;
 import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.games.Games;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import com.google.example.games.basegameutils.BaseGameActivity;
+
+import java.util.ArrayList;
 
 
-public class MainMenuActivity extends ActionBarActivity implements View.OnClickListener {
+public class MainMenuActivity extends BaseGameActivity implements View.OnClickListener, ResultCallback<TurnBasedMultiplayer.InitiateMatchResult> {
+
+    private static final int RC_SELECT_PLAYERS = 10000;
 
     @InjectView(R.id.singleplayer_button)
     Button singleplayerButton;
 
-    @InjectView(R.id.multiplayer_button)
-    Button multiplayerButton;
+    @InjectView(R.id.multiplayer_new_game_button)
+    Button multiplayerNewGameButton;
 
     @InjectView(R.id.awards_button)
     Button awardsButton;
@@ -33,7 +43,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
         ButterKnife.inject(this);
 
         singleplayerButton.setOnClickListener(this);
-        multiplayerButton.setOnClickListener(this);
+        multiplayerNewGameButton.setOnClickListener(this);
         awardsButton.setOnClickListener(this);
         scoresButton.setOnClickListener(this);
     }
@@ -41,7 +51,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
@@ -61,13 +71,15 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
     @Override
     public void onClick(View view) {
+        Intent intent;
         switch (view.getId()) {
             case R.id.singleplayer_button:
-                Intent intent = new Intent(this, GameSelectionActivity.class);
+                intent = new Intent(this, GameSelectionActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.multiplayer_button:
-
+            case R.id.multiplayer_new_game_button:
+                intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1, false);
+                startActivityForResult(intent, RC_SELECT_PLAYERS);
                 break;
             case R.id.awards_button:
 
@@ -76,5 +88,43 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
                 break;
         }
+    }
+
+    @Override
+    public void onSignInFailed() {
+
+    }
+
+    @Override
+    public void onSignInSucceeded() {
+
+    }
+
+    @Override
+    protected void onActivityResult(int request, int response, Intent data) {
+        super.onActivityResult(request, response, data);
+
+        if (request == RC_SELECT_PLAYERS) {
+            if (response != Activity.RESULT_OK) {
+                // user canceled
+                return;
+            }
+
+            // get the invitee list
+            final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
+
+            TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
+                    .addInvitedPlayers(invitees).build();
+
+            // kick the match off
+            Games.TurnBasedMultiplayer
+                    .createMatch(getApiClient(), tbmc)
+                    .setResultCallback(this);
+        }
+    }
+
+    @Override
+    public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
+        
     }
 }

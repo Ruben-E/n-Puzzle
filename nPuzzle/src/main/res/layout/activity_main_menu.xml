@@ -16,15 +16,15 @@
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Multiplayer"
-            android:id="@+id/multiplayer_button"
+            android:text="Multiplayer (new game)"
+            android:id="@+id/multiplayer_new_game_button"
             android:layout_below="@+id/singleplayer_button" android:layout_centerHorizontal="true"
             />
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Awards"
-            android:id="@+id/awards_button" android:layout_below="@+id/multiplayer_button" android:layout_centerHorizontal="true"/>
+            android:id="@+id/awards_button" android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"/>
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
