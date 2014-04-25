@@ -26,12 +26,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
     private static final String TAG = "Multiplayer";
     private static final int RC_SELECT_PLAYERS = 10000;
 
+    private boolean mIsSignedIn = false;
+    private TurnBasedMatch mMatch;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
 
-        beginUserInitiatedSignIn();
+        if(isSignedIn()) {
+            mIsSignedIn = true;
+        } else {
+            beginUserInitiatedSignIn();
+        }
     }
 
     @Override
@@ -56,11 +63,13 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
 
     @Override
     public void onSignInFailed() {
-
+        mIsSignedIn = false;
     }
 
     @Override
     public void onSignInSucceeded() {
+        mIsSignedIn = true;
+
         Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
             @Override
             public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
@@ -106,22 +115,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
         // Check if the status code is not success;
         Status status = initiateMatchResult.getStatus();
         if (status.getStatusCode() == GamesStatusCodes.STATUS_OK) {
-            TurnBasedMatch match = initiateMatchResult.getMatch();
-            String playerId = Games.Players.getCurrentPlayerId(getApiClient());
-            String myParticipantId = match.getParticipantId(playerId);
-            String participantId = match.getPendingParticipantId();
+            mMatch = initiateMatchResult.getMatch();
 
-            Log.d(TAG, "My player ID: " + playerId);
-            Log.d(TAG, "My participant ID: " + myParticipantId);
-            Log.d(TAG, "Next participant ID: " + participantId);
+            String nextParticipantId = getNextParticipantId();
 
-            if (match.getData() == null) {
+            Log.d(TAG, "Next participant ID: " + nextParticipantId);
+
+            if (mMatch.getData() == null) {
                 //TODO: Init game;
             }
 
             //TODO: Show UI;
 
-            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), match.getMatchId(), new byte[10], "p_2")
+            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), new byte[10], nextParticipantId)
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
@@ -129,6 +135,35 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
                             Log.d(TAG, "Take turn result: " + status.getStatus());
                         }
                     });
+        }
+    }
+
+    public String getNextParticipantId() {
+
+        String myPlayerId = Games.Players.getCurrentPlayerId(getApiClient());
+        String myParticipantId = mMatch.getParticipantId(myPlayerId);
+
+        ArrayList<String> participantIds = mMatch.getParticipantIds();
+
+        int desiredIndex = -1;
+
+        for (int i = 0; i < participantIds.size(); i++) {
+            if (participantIds.get(i).equals(myParticipantId)) {
+                desiredIndex = i + 1;
+            }
+        }
+
+        if (desiredIndex < participantIds.size()) {
+            return participantIds.get(desiredIndex);
+        }
+
+        if (mMatch.getAvailableAutoMatchSlots() <= 0) {
+            // You've run out of automatch slots, so we start over.
+            return participantIds.get(0);
+        } else {
+            // You have not yet fully automatched, so null will find a new
+            // person to play against.
+            return null;
         }
     }
 
