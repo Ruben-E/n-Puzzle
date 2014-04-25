@@ -19,5 +19,6 @@
     <string name="choose_puzzle_label">Puzzle ...</string>
     <string name="title_activity_main_menu">MainMenuActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_multiplayer_game_play">MultiplayerGamePlayActivity</string>
 
 </resources>

@@ -19,9 +19,7 @@ import com.google.example.games.basegameutils.BaseGameActivity;
 import java.util.ArrayList;
 
 
-public class MainMenuActivity extends BaseGameActivity implements View.OnClickListener, ResultCallback<TurnBasedMultiplayer.InitiateMatchResult> {
-
-    private static final int RC_SELECT_PLAYERS = 10000;
+public class MainMenuActivity extends ActionBarActivity implements View.OnClickListener {
 
     @InjectView(R.id.singleplayer_button)
     Button singleplayerButton;
@@ -78,8 +76,8 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
                 startActivity(intent);
                 break;
             case R.id.multiplayer_new_game_button:
-                intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1, false);
-                startActivityForResult(intent, RC_SELECT_PLAYERS);
+                intent = new Intent(this, MultiplayerGamePlayActivity.class);
+                startActivity(intent);
                 break;
             case R.id.awards_button:
 
@@ -88,43 +86,5 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
 
                 break;
         }
-    }
-
-    @Override
-    public void onSignInFailed() {
-
-    }
-
-    @Override
-    public void onSignInSucceeded() {
-
-    }
-
-    @Override
-    protected void onActivityResult(int request, int response, Intent data) {
-        super.onActivityResult(request, response, data);
-
-        if (request == RC_SELECT_PLAYERS) {
-            if (response != Activity.RESULT_OK) {
-                // user canceled
-                return;
-            }
-
-            // get the invitee list
-            final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-
-            TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
-                    .addInvitedPlayers(invitees).build();
-
-            // kick the match off
-            Games.TurnBasedMultiplayer
-                    .createMatch(getApiClient(), tbmc)
-                    .setResultCallback(this);
-        }
-    }
-
-    @Override
-    public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
-        
     }
 }

@@ -36,6 +36,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity"
+            android:label="@string/title_activity_multiplayer_game_play" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
