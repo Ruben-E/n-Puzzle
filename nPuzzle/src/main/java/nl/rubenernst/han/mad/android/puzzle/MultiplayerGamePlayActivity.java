@@ -2,12 +2,13 @@ package nl.rubenernst.han.mad.android.puzzle;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
@@ -17,11 +18,13 @@ import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
 import com.google.example.games.basegameutils.BaseGameActivity;
+import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.util.ArrayList;
 
 
-public class MultiplayerGamePlayActivity extends BaseGameActivity implements ResultCallback<TurnBasedMultiplayer.InitiateMatchResult> {
+public class MultiplayerGamePlayActivity extends BaseGameActivity {
 
     private static final String TAG = "Multiplayer";
     private static final int RC_SELECT_PLAYERS = 10000;
@@ -34,8 +37,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
 
-        if(isSignedIn()) {
-            mIsSignedIn = true;
+        if (isSignedIn()) {
+            selectPlayers();
         } else {
             beginUserInitiatedSignIn();
         }
@@ -70,20 +73,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
     public void onSignInSucceeded() {
         mIsSignedIn = true;
 
-        Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
-            @Override
-            public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
-                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was updated.", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onTurnBasedMatchRemoved(String s) {
-                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was removed.", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1, false);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
+        selectPlayers();
     }
 
     @Override
@@ -100,30 +90,57 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
             final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
             Log.d(TAG, "Invitee id: " + invitees.get(0));
 
-            TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
-                    .addInvitedPlayers(invitees).build();
-
-            // kick the match off
-            Games.TurnBasedMultiplayer
-                    .createMatch(getApiClient(), tbmc)
-                    .setResultCallback(this);
+            initMatch(invitees);
         }
     }
 
-    @Override
-    public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
-        // Check if the status code is not success;
-        Status status = initiateMatchResult.getStatus();
-        if (status.getStatusCode() == GamesStatusCodes.STATUS_OK) {
-            mMatch = initiateMatchResult.getMatch();
+    public void initMatch(ArrayList<String> invitees) {
+        Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
+            @Override
+            public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
+                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was updated.", Toast.LENGTH_LONG).show();
+            }
 
+            @Override
+            public void onTurnBasedMatchRemoved(String s) {
+                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was removed.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        TurnBasedMatchConfig.Builder matchConfigBuilder = TurnBasedMatchConfig.builder();
+        TurnBasedMatchConfig matchConfig = matchConfigBuilder.addInvitedPlayers(invitees).build();
+
+        Games.TurnBasedMultiplayer.createMatch(getApiClient(), matchConfig)
+                .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                    @Override
+                    public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
+                        Status status = initiateMatchResult.getStatus();
+                        if (status.getStatusCode() == GamesStatusCodes.STATUS_OK) {
+                            mMatch = initiateMatchResult.getMatch();
+
+                            launchMatch();
+                        }
+                    }
+                });
+    }
+
+    public void selectPlayers() {
+        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1, false);
+        startActivityForResult(intent, RC_SELECT_PLAYERS);
+    }
+
+    public void launchMatch() {
+        if (mMatch != null) {
             String nextParticipantId = getNextParticipantId();
 
             Log.d(TAG, "Next participant ID: " + nextParticipantId);
+            Log.d(TAG, "Data: " + mMatch.getData());
 
             if (mMatch.getData() == null) {
                 //TODO: Init game;
             }
+
+            showGameUI();
 
             //TODO: Show UI;
 
@@ -135,11 +152,22 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Res
                             Log.d(TAG, "Take turn result: " + status.getStatus());
                         }
                     });
+        } else {
+            throw new IllegalArgumentException();
         }
     }
 
-    public String getNextParticipantId() {
+    public void showGameUI() {
+        GamePlayFragment gamePlayFragment = new GamePlayFragment();
+        gamePlayFragment.setDifficulty(Difficulty.MEDIUM);
+        gamePlayFragment.setPuzzleDrawableId(R.drawable.puzzle_1);
 
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, gamePlayFragment)
+                .commit();
+    }
+
+    public String getNextParticipantId() {
         String myPlayerId = Games.Players.getCurrentPlayerId(getApiClient());
         String myParticipantId = mMatch.getParticipantId(myPlayerId);
 
