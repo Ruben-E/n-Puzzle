@@ -131,9 +131,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity {
 
     public void launchMatch() {
         if (mMatch != null) {
-            String nextParticipantId = getNextParticipantId();
 
-            Log.d(TAG, "Next participant ID: " + nextParticipantId);
             Log.d(TAG, "Data: " + mMatch.getData());
 
             if (mMatch.getData() == null) {
@@ -141,17 +139,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity {
             }
 
             showGameUI();
-
-            //TODO: Show UI;
-
-            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), new byte[10], nextParticipantId)
-                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                        @Override
-                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
-                            Status status = updateMatchResult.getStatus();
-                            Log.d(TAG, "Take turn result: " + status.getStatus());
-                        }
-                    });
         } else {
             throw new IllegalArgumentException();
         }
@@ -165,6 +152,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity {
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.container, gamePlayFragment)
                 .commit();
+
+        String nextParticipantId = getNextParticipantId();
+
+        Log.d(TAG, "Next participant ID: " + nextParticipantId);
+
+        Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), new byte[10], nextParticipantId)
+                .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                    @Override
+                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
+                        Status status = updateMatchResult.getStatus();
+                        Log.d(TAG, "Take turn result: " + status.getStatus());
+                    }
+                });
     }
 
     public String getNextParticipantId() {
