@@ -41,6 +41,34 @@ public class SaveGameStateHelper {
         return false;
     }
 
+    public static String saveGameStateToString(Context context, Game game) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            saveGameStateHelper.writeGameStateJsonStream(output, game);
+            return output.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
+    public static byte[] saveGameStateToByteArray(Context context, Game game) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            saveGameStateHelper.writeGameStateJsonStream(output, game);
+            return output.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static Game getSavedGameState(Context context) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
