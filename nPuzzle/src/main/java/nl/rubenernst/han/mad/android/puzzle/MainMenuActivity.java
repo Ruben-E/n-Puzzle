@@ -76,7 +76,11 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
                 startActivity(intent);
                 break;
             case R.id.multiplayer_new_game_button:
-                intent = new Intent(this, MultiplayerGamePlayActivity.class);
+                intent = new Intent(this, MultiplayerGamePlayPlayerSelectionActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.multiplayer_existing_game_button:
+                intent = new Intent(this, MultiplayerGamePlayInboxActivity.class);
                 startActivity(intent);
                 break;
             case R.id.awards_button:

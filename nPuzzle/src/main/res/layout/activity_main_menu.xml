@@ -20,6 +20,14 @@
             android:id="@+id/multiplayer_new_game_button"
             android:layout_below="@+id/singleplayer_button" android:layout_centerHorizontal="true"
             />
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Multiplayer (existing game)"
+            android:id="@+id/multiplayer_existing_game_button"
+            android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"
+            />
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
