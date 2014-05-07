@@ -8,13 +8,16 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
+import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 /**
  * Created by rubenernst on 14-03-14.
  */
-public class GamePlayActivity extends ActionBarActivity {
+public class GamePlayActivity extends ActionBarActivity implements GamePlayListener {
 
     private Boolean mUnfinishedGame;
     private Difficulty mDifficulty;
@@ -42,6 +45,7 @@ public class GamePlayActivity extends ActionBarActivity {
             gamePlayFragment.setUnfinishedGame(mUnfinishedGame);
             gamePlayFragment.setDifficulty(mDifficulty);
             gamePlayFragment.setPuzzleDrawableId(mPuzzleDrawableId);
+            gamePlayFragment.setGamePlayListener(this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -155,4 +159,48 @@ public class GamePlayActivity extends ActionBarActivity {
                 .commit();
     }
 
+    @Override
+    public void onGameInitialisation() {
+
+    }
+
+    @Override
+    public void onGameInitialised(Game game) {
+
+    }
+
+    @Override
+    public void onGameStarting(Game game) {
+
+    }
+
+    @Override
+    public void onGameStarted(Game game) {
+
+    }
+
+    @Override
+    public void onGameUIUpdating(Game game) {
+
+    }
+
+    @Override
+    public void onGameUIUpdated(Game game) {
+
+    }
+
+    @Override
+    public void onGameFinished(Game game) {
+
+    }
+
+    @Override
+    public void onGamePaused(Game game) {
+        SaveGameStateHelper.saveGameState(getApplicationContext(), game);
+    }
+
+    @Override
+    public void onGameResumed(Game game) {
+
+    }
 }

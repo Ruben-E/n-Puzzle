@@ -19,6 +19,7 @@ import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
@@ -51,6 +52,7 @@ public class GamePlayFragment extends Fragment {
     private Bitmap mEmptyTile;
     private Bitmap mCorrectTile;
     private boolean mUnfinishedGame;
+    private GamePlayListener mGamePlayListener;
 
     @InjectView(R.id.game_layout)
     RelativeLayout mGameLayout;
@@ -67,6 +69,10 @@ public class GamePlayFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameInitialisation();
+        }
 
         mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -97,7 +103,14 @@ public class GamePlayFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        SaveGameStateHelper.saveGameState(getActivity().getApplicationContext(), mGame);
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGamePaused(mGame);
+        }
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameResumed(mGame);
+        }
     }
 
     @Override
@@ -111,6 +124,11 @@ public class GamePlayFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameInitialised(mGame);
+            mGamePlayListener.onGameStarting(mGame);
+        }
+
         if (mUnfinishedGame) {
             onViewCreatedUnfinishedGame();
         } else {
@@ -120,6 +138,10 @@ public class GamePlayFragment extends Fragment {
 
     private void onViewCreatedUnfinishedGame() {
         setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameStarted(mGame);
+        }
 
         updateUI();
     }
@@ -206,6 +228,10 @@ public class GamePlayFragment extends Fragment {
 
                     mGame.startGame();
 
+                    if (mGamePlayListener != null) {
+                        mGamePlayListener.onGameStarted(mGame);
+                    }
+
                     updateUI();
                 }
             }
@@ -277,6 +303,10 @@ public class GamePlayFragment extends Fragment {
         updateLayoutPositions();
 
         if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
+            if (mGamePlayListener != null) {
+                mGamePlayListener.onGameFinished(mGame);
+            }
+
             SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
 
             setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
@@ -293,6 +323,10 @@ public class GamePlayFragment extends Fragment {
         } else if (mGame.isPlayable()) {
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
             statusText.setText("Turns: " + mGame.getTurns().size());
+        }
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameUIUpdating(mGame);
         }
 
         HashMap<Integer, CurrentPosition> currentGrid = mGame.getCurrentGrid();
@@ -397,6 +431,10 @@ public class GamePlayFragment extends Fragment {
                 mGrid.addView(tileButton);
             }
         }
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameUIUpdated(mGame);
+        }
     }
 
     public void setupGame() {
@@ -478,5 +516,9 @@ public class GamePlayFragment extends Fragment {
         }
 
         return mCorrectTile;
+    }
+
+    public void setGamePlayListener(GamePlayListener gamePlayListener) {
+        this.mGamePlayListener = gamePlayListener;
     }
 }

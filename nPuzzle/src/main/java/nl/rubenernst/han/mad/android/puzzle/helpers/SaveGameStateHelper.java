@@ -86,6 +86,20 @@ public class SaveGameStateHelper {
         return null;
     }
 
+    public static Game parserGameFromJson(Context context, String JSON) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            if (!JSON.equals("")) {
+                return saveGameStateHelper.parserGameFromJson(JSON);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static boolean hasSavedGameState(Context context) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
