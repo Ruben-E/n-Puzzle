@@ -28,22 +28,17 @@ import java.util.ArrayList;
 public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener {
 
     private static final String TAG = "Multiplayer";
-    private static final int RC_SELECT_PLAYERS = 10000;
 
-    private TurnBasedMatch mMatch;
-    private Game mOriginalGame;
-    private Game mGame;
+    protected TurnBasedMatch mMatch;
+    protected Game mOriginalGame;
+    protected Game mGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
 
-        if (isSignedIn()) {
-            selectPlayers();
-        } else {
-            beginUserInitiatedSignIn();
-        }
+
     }
 
     @Override
@@ -72,24 +67,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     @Override
     public void onSignInSucceeded() {
-        selectPlayers();
-    }
 
-    @Override
-    protected void onActivityResult(int request, int response, Intent data) {
-        super.onActivityResult(request, response, data);
-
-        if (request == RC_SELECT_PLAYERS) {
-            if (response != Activity.RESULT_OK) {
-                return;
-            }
-
-            // get the invitee list
-            final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-            Log.d(TAG, "Invitee id: " + invitees.get(0));
-
-            initMatch(invitees);
-        }
     }
 
     @Override
@@ -97,41 +75,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         super.onStop();
 
         saveGameState();
-    }
-
-    public void initMatch(ArrayList<String> invitees) {
-        Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
-            @Override
-            public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
-                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was updated.", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onTurnBasedMatchRemoved(String s) {
-                Toast.makeText(MultiplayerGamePlayActivity.this, "A match was removed.", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        TurnBasedMatchConfig.Builder matchConfigBuilder = TurnBasedMatchConfig.builder();
-        TurnBasedMatchConfig matchConfig = matchConfigBuilder.addInvitedPlayers(invitees).build();
-
-        Games.TurnBasedMultiplayer.createMatch(getApiClient(), matchConfig)
-                .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
-                    @Override
-                    public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
-                        Status status = initiateMatchResult.getStatus();
-                        if (status.getStatusCode() == GamesStatusCodes.STATUS_OK) {
-                            mMatch = initiateMatchResult.getMatch();
-
-                            launchMatch();
-                        }
-                    }
-                });
-    }
-
-    public void selectPlayers() {
-        Intent intent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(getApiClient(), 1, 1, false);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
     }
 
     public void launchMatch() {
