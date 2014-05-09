@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
+import android.widget.TextView;
+import butterknife.ButterKnife;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
@@ -191,7 +193,13 @@ public class GamePlayActivity extends ActionBarActivity implements GamePlayListe
 
     @Override
     public void onGameFinished(Game game) {
+        SaveGameStateHelper.removeSavedGameState(getApplicationContext());
 
+        Intent intent = new Intent(this, GameFinishedActivity.class);
+        intent.putExtra("number_of_turns", game.getTurns().size());
+        intent.putExtra("difficulty", Difficulty.fromGridSize(game.getGridSize()));
+
+        startActivity(intent);
     }
 
     @Override

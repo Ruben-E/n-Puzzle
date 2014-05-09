@@ -52,6 +52,7 @@ public class GamePlayFragment extends Fragment {
     private Bitmap mEmptyTile;
     private Bitmap mCorrectTile;
     private boolean mUnfinishedGame;
+    private Game mUnfinishedGame2;
     private GamePlayListener mGamePlayListener;
 
     @InjectView(R.id.game_layout)
@@ -76,7 +77,7 @@ public class GamePlayFragment extends Fragment {
 
         mLayoutInflater = (LayoutInflater) getActivity().getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        if (mUnfinishedGame) {
+        if (mUnfinishedGame2 != null) {
             onCreateUnfinishedGame();
         } else {
             onCreateNewGame();
@@ -129,7 +130,7 @@ public class GamePlayFragment extends Fragment {
             mGamePlayListener.onGameStarting(mGame);
         }
 
-        if (mUnfinishedGame) {
+        if (mUnfinishedGame2 != null) {
             onViewCreatedUnfinishedGame();
         } else {
             onViewCreatedNewGame();
@@ -182,13 +183,14 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void onCreateUnfinishedGame() {
-        mGame = SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+//        mGame = SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+//
+//        if(mGame == null) {
+//            Toast.makeText(getActivity().getApplicationContext(), "Could not load the game", Toast.LENGTH_LONG).show();
+//            getActivity().finish();
+//        }
 
-        if(mGame == null) {
-            Toast.makeText(getActivity().getApplicationContext(), "Could not load the game", Toast.LENGTH_LONG).show();
-            getActivity().finish();
-        }
-
+        mGame = mUnfinishedGame2;
         mGridSize = mGame.getGridSize();
     }
 
@@ -303,23 +305,15 @@ public class GamePlayFragment extends Fragment {
         updateLayoutPositions();
 
         if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
-            if (mGamePlayListener != null) {
-                mGamePlayListener.onGameFinished(mGame);
-            }
-
-            SaveGameStateHelper.removeSavedGameState(getActivity().getApplicationContext());
-
             setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
 
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
 
             statusText.setText("You won!");
 
-            Intent intent = new Intent(getActivity(), GameFinishedActivity.class);
-            intent.putExtra("number_of_turns", mGame.getTurns().size());
-            intent.putExtra("difficulty", getDifficulty());
-
-            startActivity(intent);
+            if (mGamePlayListener != null) {
+                mGamePlayListener.onGameFinished(mGame);
+            }
         } else if (mGame.isPlayable()) {
             TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
             statusText.setText("Turns: " + mGame.getTurns().size());
@@ -496,6 +490,10 @@ public class GamePlayFragment extends Fragment {
 
     public void setUnfinishedGame(Boolean unfinishedGame) {
         this.mUnfinishedGame = unfinishedGame;
+    }
+
+    public void setUnfinishedGame2(Game unfinishedGame) {
+        this.mUnfinishedGame2 = unfinishedGame;
     }
 
     public Bitmap getEmptyTile() {

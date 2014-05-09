@@ -37,8 +37,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity"
+            android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity"
             android:label="@string/title_activity_multiplayer_game_play" >
+        </activity>
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayInboxActivity"
+            android:label="@string/title_activity_multiplayer_game_play" >
+        </activity>
+        <activity
+            android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGameFinished"
+            android:label="@string/title_activity_multiplayer_game_finished" >
         </activity>
     </application>
 

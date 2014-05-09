@@ -29,4 +29,14 @@ public enum Difficulty {
     public static Difficulty fromString(String difficultyString) {
         return Difficulty.valueOf(difficultyString.toUpperCase());
     }
+
+    public static Difficulty fromGridSize(int gridSize) {
+        for(Difficulty difficulty : Difficulty.values()) {
+            if (difficulty.getGridSize() == gridSize) {
+                return difficulty;
+            }
+        }
+
+        return null;
+    }
 }

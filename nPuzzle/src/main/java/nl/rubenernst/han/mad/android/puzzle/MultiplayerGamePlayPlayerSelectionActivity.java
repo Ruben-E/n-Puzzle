@@ -80,6 +80,7 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
                     @Override
                     public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
                         Status status = initiateMatchResult.getStatus();
+                        Log.d(TAG, status.toString());
                         if (status.getStatusCode() == GamesStatusCodes.STATUS_OK) {
                             mMatch = initiateMatchResult.getMatch();
 

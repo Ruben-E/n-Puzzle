@@ -20,5 +20,6 @@
     <string name="title_activity_main_menu">MainMenuActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_multiplayer_game_play">MultiplayerGamePlayActivity</string>
+    <string name="title_activity_multiplayer_game_finished">MultiplayerGameFinished</string>
 
 </resources>

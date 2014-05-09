@@ -27,6 +27,9 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
     @InjectView(R.id.multiplayer_new_game_button)
     Button multiplayerNewGameButton;
 
+    @InjectView(R.id.multiplayer_existing_game_button)
+    Button multiplayerExistingGameButton;
+
     @InjectView(R.id.awards_button)
     Button awardsButton;
 
@@ -42,6 +45,7 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
 
         singleplayerButton.setOnClickListener(this);
         multiplayerNewGameButton.setOnClickListener(this);
+        multiplayerExistingGameButton.setOnClickListener(this);
         awardsButton.setOnClickListener(this);
         scoresButton.setOnClickListener(this);
     }
