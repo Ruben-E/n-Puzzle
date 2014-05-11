@@ -5,11 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.*;
-import android.widget.TextView;
-import butterknife.ButterKnife;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
@@ -204,7 +201,7 @@ public class GamePlayActivity extends ActionBarActivity implements GamePlayListe
 
     @Override
     public void onGamePaused(Game game) {
-        SaveGameStateHelper.saveGameState(getApplicationContext(), game);
+        SaveGameStateHelper.saveGameStateToFile(getApplicationContext(), game);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
@@ -19,24 +21,22 @@ import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener {
 
     private static final String TAG = "Multiplayer";
+    private static final String ORIGINAL_GAME_KEY = "original_game";
 
     protected TurnBasedMatch mMatch;
-    protected Game mOriginalGame;
-    protected Game mCurrentGame;
-    protected Game mSavedGame;
     protected String mCurrentPlayerParticipantId;
+    protected HashMap<String, Game> mGames; // Hashmap with a game for all the players with participant id as key.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
-
-
     }
 
     @Override
@@ -83,13 +83,15 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             if (data != null) {
                 try {
                     String JSON = new String(data, "UTF-16");
-                    Game savedGame = SaveGameStateHelper.parserGameFromJson(getApplicationContext(), JSON);
-                    if (savedGame != null) {
-                        mSavedGame = savedGame;
+                    HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
+                    if (games != null) {
+                        mGames = games;
                     }
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
+            } else {
+                mGames = initialiseGames();
             }
 
             showGameUI();
@@ -103,8 +105,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         gamePlayFragment.setDifficulty(Difficulty.DUMB);
         gamePlayFragment.setPuzzleDrawableId(R.drawable.puzzle_1);
         gamePlayFragment.setGamePlayListener(this);
-        if (mSavedGame != null) {
-            gamePlayFragment.setUnfinishedGame2(mSavedGame);
+        if (getCurrentPlayersGame() != null) {
+            gamePlayFragment.setUnfinishedGame2(getCurrentPlayersGame());
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -150,9 +152,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     private void saveGameState() {
         if (isSignedIn() && mMatch != null) {
-            String gameState = SaveGameStateHelper.saveGameStateToString(getApplicationContext(), mCurrentGame);
-            Log.d(TAG, "Saving game state: " + gameState);
-            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameState.getBytes(Charset.forName("UTF-16")), mCurrentPlayerParticipantId)
+            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), mCurrentPlayerParticipantId)
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
@@ -161,6 +161,31 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                         }
                     });
         }
+    }
+
+    private String getGameStatesAsString() {
+        return SaveGameStateHelper.saveGameStatesToString(getApplicationContext(), mGames);
+    }
+
+    private byte[] getGameStatesAsByteArray() {
+        return getGameStatesAsString().getBytes(Charset.forName("UTF-16"));
+    }
+
+    private HashMap<String, Game> initialiseGames() {
+        HashMap<String, Game> gameStates = new HashMap<String, Game>();
+
+        ArrayList<String> participantIds = mMatch.getParticipantIds();
+        for (String participantId : participantIds) {
+            gameStates.put(participantId, null);
+        }
+
+        gameStates.put(ORIGINAL_GAME_KEY, null);
+
+        return gameStates;
+    }
+
+    private Game getCurrentPlayersGame() {
+        return mGames.get(getCurrentPlayerParticipantId());
     }
 
     @Override
@@ -183,13 +208,14 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         Log.d(TAG, "Started");
 
         String gameState = SaveGameStateHelper.saveGameStateToString(getApplicationContext(), game);
-        mOriginalGame = SaveGameStateHelper.parserGameFromJson(getApplicationContext(), gameState);
+        Game originalGame = SaveGameStateHelper.getSavedGameStateFromJson(getApplicationContext(), gameState);
+
+        mGames.put(ORIGINAL_GAME_KEY, originalGame);
+        mGames.put(getCurrentPlayerParticipantId(), game);
     }
 
     @Override
     public void onGameUIUpdating(Game game) {
-        mCurrentGame = game;
-
         Log.d(TAG, "Updating");
     }
 
@@ -205,9 +231,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         String nextParticipantId = getNextParticipantId();
 
         Log.d(TAG, "Next participant ID: " + nextParticipantId);
-
-        String gameState = SaveGameStateHelper.saveGameStateToString(getApplicationContext(), mOriginalGame);
-        Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameState.getBytes(Charset.forName("UTF-16")), nextParticipantId)
+        Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), nextParticipantId)
                 .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                     @Override
                     public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
@@ -225,5 +249,14 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     @Override
     public void onGameResumed(Game game) {
 
+    }
+
+    public class MultiplayerGameFinishedFragment extends Fragment {
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+
+            mMatch.getData();
+        }
     }
 }

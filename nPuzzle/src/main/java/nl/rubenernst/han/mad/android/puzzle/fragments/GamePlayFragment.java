@@ -183,7 +183,7 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void onCreateUnfinishedGame() {
-//        mGame = SaveGameStateHelper.getSavedGameState(getActivity().getApplicationContext());
+//        mGame = SaveGameStateHelper.getSavedGameStateFromFile(getActivity().getApplicationContext());
 //
 //        if(mGame == null) {
 //            Toast.makeText(getActivity().getApplicationContext(), "Could not load the game", Toast.LENGTH_LONG).show();

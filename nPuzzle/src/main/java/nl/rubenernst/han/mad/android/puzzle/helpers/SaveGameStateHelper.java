@@ -9,7 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by rubenernst on 17-04-14.
@@ -27,12 +30,11 @@ public class SaveGameStateHelper {
 
     private Context context;
 
-    public static boolean saveGameState(Context context, Game game) {
+    public static boolean saveGameStateToOutputStream(Context context, OutputStream outputStream, Game game) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+            saveGameStateHelper.convertGameStateToJson(outputStream, game);
 
-            FileOutputStream fileOutput = context.openFileOutput(Constants.GAME_STATE_FILE, Context.MODE_PRIVATE);
-            saveGameStateHelper.writeGameStateJsonStream(fileOutput, game);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,35 +43,64 @@ public class SaveGameStateHelper {
         return false;
     }
 
-    public static String saveGameStateToString(Context context, Game game) {
+    public static boolean saveGameStatesToOutputStream(Context context, OutputStream outputStream, HashMap<String, Game> games) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+            saveGameStateHelper.convertGameStatesToJson(outputStream, games);
 
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            saveGameStateHelper.writeGameStateJsonStream(output, game);
-            return output.toString();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return "";
+        return false;
     }
 
-    public static byte[] saveGameStateToByteArray(Context context, Game game) {
+    public static boolean saveGameStateToFile(Context context, Game game) {
         try {
-            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
-
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            saveGameStateHelper.writeGameStateJsonStream(output, game);
-            return output.toByteArray();
-        } catch (Exception e) {
+            FileOutputStream outputStream = context.openFileOutput(Constants.GAME_STATE_FILE, Context.MODE_PRIVATE);
+            return SaveGameStateHelper.saveGameStateToOutputStream(context, outputStream, game);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static String saveGameStateToString(Context context, Game game) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = SaveGameStateHelper.saveGameStateToOutputStream(context, outputStream, game);
+
+        if (result) {
+            return outputStream.toString();
         }
 
         return null;
     }
 
-    public static Game getSavedGameState(Context context) {
+    public static byte[] saveGameStateToByteArray(Context context, Game game) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = SaveGameStateHelper.saveGameStateToOutputStream(context, outputStream, game);
+
+        if (result) {
+            return outputStream.toByteArray();
+        }
+
+        return null;
+    }
+
+    public static String saveGameStatesToString(Context context, HashMap<String, Game> games) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        boolean result = SaveGameStateHelper.saveGameStatesToOutputStream(context, outputStream, games);
+
+        if (result) {
+            return outputStream.toString();
+        }
+
+        return null;
+    }
+
+    public static Game getSavedGameStateFromFile(Context context) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
 
@@ -77,7 +108,7 @@ public class SaveGameStateHelper {
             String JSON = saveGameStateHelper.getSavedStateJson(fileInputStream);
 
             if (!JSON.equals("")) {
-                return saveGameStateHelper.parserGameFromJson(JSON);
+                return saveGameStateHelper.getSavedGameStateFromJson(JSON);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,12 +117,12 @@ public class SaveGameStateHelper {
         return null;
     }
 
-    public static Game parserGameFromJson(Context context, String JSON) {
+    public static Game getSavedGameStateFromJson(Context context, String JSON) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
 
             if (!JSON.equals("")) {
-                return saveGameStateHelper.parserGameFromJson(JSON);
+                return saveGameStateHelper.getSavedGameStateFromJson(JSON);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,15 +156,50 @@ public class SaveGameStateHelper {
         }
     }
 
+    public static HashMap<String, Game> getSavedGameStatesFromJson(Context context, String JSON) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            if (!JSON.equals("")) {
+                return saveGameStateHelper.getSavedGameStatesFromJson(JSON);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     // Private constructor
     private SaveGameStateHelper(Context context) {
         this.context = context;
     }
 
-    private void writeGameStateJsonStream(OutputStream outputStream, Game game) throws IOException {
+    private void convertGameStateToJson(OutputStream outputStream, Game game) throws IOException {
         JsonWriter writer = new JsonWriter(new OutputStreamWriter(outputStream, "UTF-8"));
         writer.setIndent(" ");
         writeGame(writer, game);
+        writer.close();
+    }
+
+    private void convertGameStatesToJson(OutputStream outputStream, HashMap<String, Game> games) throws IOException {
+        JsonWriter writer = new JsonWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+        writer.setIndent(" ");
+
+        writer.beginObject();
+        for (Map.Entry<String, Game> entry : games.entrySet()) {
+            String key = entry.getKey();
+            Game game = entry.getValue();
+
+            writer.name(key);
+            if (game != null) {
+                writeGame(writer, game);
+            } else {
+                writer.nullValue();
+            }
+        }
+        writer.endObject();
+
         writer.close();
     }
 
@@ -203,7 +269,7 @@ public class SaveGameStateHelper {
         return stringBuilder.toString();
     }
 
-    private Game parserGameFromJson(String JSON) throws FileNotFoundException {
+    private Game getSavedGameStateFromJson(String JSON) throws FileNotFoundException {
         try {
             Game game = new Game();
             JSONObject jsonObject = new JSONObject(JSON);
@@ -214,9 +280,9 @@ public class SaveGameStateHelper {
             game.setGridSize(gridSize);
             game.setGameState(Constants.GameState.valueOf(gameState));
 
-            parsePositionsFromJson(jsonObject, game);
+            getPositionsFromJson(jsonObject, game);
             game.getTurns().clear();
-            parseTurnsFromJson(jsonObject, game);
+            getTurnsFromJson(jsonObject, game);
 
             return game;
         } catch (JSONException e) {
@@ -226,7 +292,33 @@ public class SaveGameStateHelper {
         return null;
     }
 
-    private void parseTurnsFromJson(JSONObject jsonObject, Game game) throws JSONException {
+    private HashMap<String, Game> getSavedGameStatesFromJson(String JSON) {
+        HashMap<String, Game> games = new HashMap<String, Game>();
+
+        try {
+            JSONObject jsonObject = new JSONObject(JSON);
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                try {
+                    JSONObject value = jsonObject.getJSONObject(key);
+                    Game game = getSavedGameStateFromJson(value.toString());
+
+                    if (game != null) {
+                        games.put(key, game);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return games;
+    }
+
+    private void getTurnsFromJson(JSONObject jsonObject, Game game) throws JSONException {
         JSONArray turns = jsonObject.getJSONArray(TAG_TURNS);
         for (int i = 0; i < turns.length(); i++) {
             JSONObject turnObject = turns.getJSONObject(i);
@@ -236,7 +328,7 @@ public class SaveGameStateHelper {
         }
     }
 
-    private void parsePositionsFromJson(JSONObject jsonObject, Game game) throws JSONException, FileNotFoundException {
+    private void getPositionsFromJson(JSONObject jsonObject, Game game) throws JSONException, FileNotFoundException {
         JSONArray positions = jsonObject.getJSONArray(TAG_POSITIONS);
         for (int i = 0; i < positions.length(); i++) {
             JSONObject positionObject = positions.getJSONObject(i);
