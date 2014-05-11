@@ -107,6 +107,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         gamePlayFragment.setGamePlayListener(this);
         if (getCurrentPlayersGame() != null) {
             gamePlayFragment.setUnfinishedGame2(getCurrentPlayersGame());
+        } else if (getOriginalGame() != null) {
+            gamePlayFragment.setUnfinishedGame2(getOriginalGame());
         }
 
         getSupportFragmentManager().beginTransaction()
@@ -186,6 +188,10 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     private Game getCurrentPlayersGame() {
         return mGames.get(getCurrentPlayerParticipantId());
+    }
+
+    private Game getOriginalGame() {
+        return mGames.get(ORIGINAL_GAME_KEY);
     }
 
     @Override
