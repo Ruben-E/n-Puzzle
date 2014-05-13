@@ -1,14 +1,23 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesStatusCodes;
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
 import com.google.example.games.basegameutils.BaseGameActivity;
@@ -16,6 +25,8 @@ import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
+import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.io.UnsupportedEncodingException;
@@ -77,24 +88,27 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     public void launchMatch() {
         if (mMatch != null) {
-            mCurrentPlayerParticipantId = getCurrentPlayerParticipantId();
+            boolean playable = currentMatchIsPlayable();
+            if (playable) {
+                mCurrentPlayerParticipantId = getCurrentPlayerParticipantId();
 
-            byte[] data = mMatch.getData();
-            if (data != null) {
-                try {
-                    String JSON = new String(data, "UTF-16");
-                    HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
-                    if (games != null) {
-                        mGames = games;
+                byte[] data = mMatch.getData();
+                if (data != null) {
+                    try {
+                        String JSON = new String(data, "UTF-16");
+                        HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
+                        if (games != null) {
+                            mGames = games;
+                        }
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                } else {
+                    mGames = initialiseGames();
                 }
-            } else {
-                mGames = initialiseGames();
-            }
 
-            showGameUI();
+                showGameUI();
+            }
         } else {
             throw new IllegalArgumentException();
         }
@@ -153,7 +167,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     private void saveGameState() {
-        if (isSignedIn() && mMatch != null) {
+        if (isSignedIn() && mMatch != null && currentMatchIsPlayable()) {
             Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), mCurrentPlayerParticipantId)
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
@@ -186,12 +200,200 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         return gameStates;
     }
 
+    private boolean allPlayersPlayed() {
+        for (Participant participant : mMatch.getParticipants()) {
+            String participantId = participant.getParticipantId();
+
+            if (mGames.get(participantId) == null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void takeNextTurn() {
+        if (allPlayersPlayed()) {
+            Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId())
+                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                        @Override
+                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                            processUpdateResult(result);
+                        }
+                    });
+        } else {
+            String nextParticipantId = getNextParticipantId();
+
+            Log.d(TAG, "Next participant ID: " + nextParticipantId);
+            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), nextParticipantId)
+                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                        @Override
+                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                            processUpdateResult(result);
+                        }
+                    });
+        }
+    }
+
     private Game getCurrentPlayersGame() {
         return mGames.get(getCurrentPlayerParticipantId());
     }
 
     private Game getOriginalGame() {
         return mGames.get(ORIGINAL_GAME_KEY);
+    }
+
+    public void processCancelResult(TurnBasedMultiplayer.CancelMatchResult result) {
+        checkAndHandleStatusCode(null, result);
+
+        showError("Match",
+                "This match is canceled.  All other players will have their game ended.");
+    }
+
+    public void processInitiateResult(TurnBasedMultiplayer.InitiateMatchResult result) {
+        TurnBasedMatch match = result.getMatch();
+        boolean processed = checkAndHandleStatusCode(match, result);
+
+        if (processed) {
+            mMatch = result.getMatch();
+            launchMatch();
+        }
+    }
+
+
+    public void processLeaveResult(TurnBasedMultiplayer.LeaveMatchResult result) {
+        TurnBasedMatch match = result.getMatch();
+        checkAndHandleStatusCode(match, result);
+
+        showError("Left", "You've left this match.");
+    }
+
+
+    public void processUpdateResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+        TurnBasedMatch match = result.getMatch();
+        checkAndHandleStatusCode(match, result);
+    }
+
+    public void showError(String title, String message) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        finish();
+                    }
+                }
+        );
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+
+    public void showErrorMessage(TurnBasedMatch match, int statusCode,
+                                 int stringId) {
+
+        showError("Error!", getResources().getString(stringId));
+    }
+
+    private boolean currentMatchIsPlayable() {
+        int matchStatus = mMatch.getStatus();
+        int turnStatus = mMatch.getTurnStatus();
+
+        switch (matchStatus) {
+            case TurnBasedMatch.MATCH_STATUS_CANCELED:
+                showError("Canceled!", "This game was canceled!");
+                break;
+            case TurnBasedMatch.MATCH_STATUS_EXPIRED:
+                showError("Expired!", "This game is expired.  So sad!");
+                break;
+            case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
+                showError("Waiting for auto-match...",
+                        "We're still waiting for an automatch partner.");
+                break;
+            case TurnBasedMatch.MATCH_STATUS_COMPLETE:
+                if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
+                    showError(
+                            "Complete!",
+                            "This game is over; someone finished it, and so did you!  There is nothing to be done.");
+                    break;
+                }
+
+                // Note that in this state, you must still call "Finish" yourself,
+                // so we allow this to continue.
+                showError("Complete!",
+                        "This game is over; someone finished it!  You can only finish it now.");
+        }
+
+        switch (turnStatus) {
+            case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
+                return true;
+            case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
+                // Should return results.
+                showError("Alas...", "It's not your turn.");
+                break;
+            case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
+                showError("Good inititative!",
+                        "Still waiting for invitations.\n\nBe patient!");
+        }
+
+        return false;
+    }
+
+    private boolean checkAndHandleStatusCode(TurnBasedMatch match, Result result) {
+        int resultStatusCode = result.getStatus().getStatusCode();
+
+        switch (resultStatusCode) {
+            case GamesStatusCodes.STATUS_OK:
+                return true;
+            case GamesStatusCodes.STATUS_NETWORK_ERROR_OPERATION_DEFERRED:
+                // This is OK; the action is stored by Google Play Services and will
+                // be dealt with later.
+
+                // NOTE: This toast is for informative reasons only; please remove
+                // it from your final application.
+                return true;
+            case GamesStatusCodes.STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.status_multiplayer_error_not_trusted_tester);
+                break;
+            case GamesStatusCodes.STATUS_MATCH_ERROR_ALREADY_REMATCHED:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.match_error_already_rematched);
+                break;
+            case GamesStatusCodes.STATUS_NETWORK_ERROR_OPERATION_FAILED:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.network_error_operation_failed);
+                break;
+            case GamesStatusCodes.STATUS_CLIENT_RECONNECT_REQUIRED:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.client_reconnect_required);
+                break;
+            case GamesStatusCodes.STATUS_INTERNAL_ERROR:
+                showErrorMessage(match, resultStatusCode, R.string.internal_error);
+                break;
+            case GamesStatusCodes.STATUS_MATCH_ERROR_INACTIVE_MATCH:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.match_error_inactive_match);
+                break;
+            case GamesStatusCodes.STATUS_MATCH_ERROR_LOCALLY_MODIFIED:
+                showErrorMessage(match, resultStatusCode,
+                        R.string.match_error_locally_modified);
+                break;
+            default:
+                showErrorMessage(match, resultStatusCode, R.string.unexpected_status);
+                Log.d(TAG, "Did not have warning or string to deal with: "
+                        + resultStatusCode);
+        }
+
+        return false;
     }
 
     @Override
@@ -234,17 +436,11 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameFinished(Game game) {
         Log.d(TAG, "Finished");
 
-        String nextParticipantId = getNextParticipantId();
+        takeNextTurn();
 
-        Log.d(TAG, "Next participant ID: " + nextParticipantId);
-        Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), nextParticipantId)
-                .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                    @Override
-                    public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
-                        Status status = updateMatchResult.getStatus();
-                        Log.d(TAG, "Take turn result: " + status.getStatus());
-                    }
-                });
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, new MultiplayerGameFinishedFragment())
+                .commit();
     }
 
     @Override
@@ -258,11 +454,62 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     public class MultiplayerGameFinishedFragment extends Fragment {
+
+        private LayoutInflater layoutInflater;
+
+        @InjectView(R.id.players)
+        LinearLayout players;
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_multiplayer_game_finished, container, false);
+
+            ButterKnife.inject(this, view);
+
+            this.layoutInflater = inflater;
+
+            return view;
+        }
+
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
 
-            mMatch.getData();
+            ArrayList<Participant> participants = mMatch.getParticipants();
+            for (Participant participant : participants) {
+                LinearLayout playerLayout = (LinearLayout) layoutInflater.inflate(R.layout.fragment_multiplayer_game_finished_player_result, null, false);
+                if (playerLayout != null) {
+                    final ImageView avatar = ButterKnife.findById(playerLayout, R.id.avatar);
+                    TextView playerName = ButterKnife.findById(playerLayout, R.id.playerName);
+                    TextView score = ButterKnife.findById(playerLayout, R.id.score);
+
+                    String imageUrl = participant.getIconImageUrl();
+                    if (imageUrl != null) {
+                        ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
+                        imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+                            @Override
+                            public void onTaskFinished(Object result, String message) {
+                                if (result != null) {
+                                    Bitmap bitmap = (Bitmap) result;
+                                    avatar.setImageBitmap(bitmap);
+                                }
+                            }
+                        });
+                        imageDownloaderTask.execute(imageUrl);
+                    }
+
+                    playerName.setText(participant.getDisplayName());
+
+                    Game game = mGames.get(participant.getParticipantId());
+                    if (game != null) {
+                        score.setText(game.getTurns().size() + "");
+                    } else {
+                        score.setText("-");
+                    }
+
+                    players.addView(playerLayout);
+                }
+            }
         }
     }
 }
