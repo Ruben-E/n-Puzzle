@@ -38,11 +38,13 @@
         </activity>
         <activity
             android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity"
-            android:label="@string/title_activity_multiplayer_game_play" >
+            android:label="@string/title_activity_multiplayer_game_play"
+            android:configChanges="orientation|screenSize">
         </activity>
         <activity
             android:name="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayInboxActivity"
-            android:label="@string/title_activity_multiplayer_game_play" >
+            android:label="@string/title_activity_multiplayer_game_play"
+            android:configChanges="orientation|screenSize">
         </activity>
     </application>
 

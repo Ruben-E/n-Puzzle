@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -89,24 +90,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void launchMatch() {
         if (mMatch != null) {
             boolean playable = currentMatchIsPlayable();
-            if (playable) {
-                mCurrentPlayerParticipantId = getCurrentPlayerParticipantId();
 
-                byte[] data = mMatch.getData();
-                if (data != null) {
-                    try {
-                        String JSON = new String(data, "UTF-16");
-                        HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
-                        if (games != null) {
-                            mGames = games;
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    mGames = initialiseGames();
-                }
+            mCurrentPlayerParticipantId = getCurrentPlayerParticipantId();
 
+            byte[] data = mMatch.getData();
+            if (data != null) {
+                mGames = getGamesFromMatchData();
+            } else {
+                mGames = initialiseGames();
+            }
+
+            if (allPlayersPlayed()) {
+                showScoresScreen();
+            } else if (playable) {
                 showGameUI();
             }
         } else {
@@ -126,7 +122,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         }
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, gamePlayFragment)
+                .replace(R.id.container, gamePlayFragment)
                 .commit();
     }
 
@@ -200,6 +196,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         return gameStates;
     }
 
+    private HashMap<String, Game> getGamesFromMatchData() {
+        try {
+            String JSON = new String(mMatch.getData(), "UTF-16");
+            HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
+
+            return games;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     private boolean allPlayersPlayed() {
         for (Participant participant : mMatch.getParticipants()) {
             String participantId = participant.getParticipantId();
@@ -214,7 +223,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     private void takeNextTurn() {
         if (allPlayersPlayed()) {
-            Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId())
+            Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray())
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
@@ -310,26 +319,30 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         switch (matchStatus) {
             case TurnBasedMatch.MATCH_STATUS_CANCELED:
                 showError("Canceled!", "This game was canceled!");
-                break;
+                return false;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
                 showError("Expired!", "This game is expired.  So sad!");
-                break;
+                return false;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 showError("Waiting for auto-match...",
                         "We're still waiting for an automatch partner.");
-                break;
+                return false;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                    showError(
-                            "Complete!",
-                            "This game is over; someone finished it, and so did you!  There is nothing to be done.");
-                    break;
+                    showScoresScreen();
+                    return false;
                 }
 
-                // Note that in this state, you must still call "Finish" yourself,
-                // so we allow this to continue.
-                showError("Complete!",
-                        "This game is over; someone finished it!  You can only finish it now.");
+                Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId())
+                        .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                            @Override
+                            public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                                processUpdateResult(result);
+                            }
+                        });
+
+                showScoresScreen();
+                return false;
         }
 
         switch (turnStatus) {
@@ -396,6 +409,16 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         return false;
     }
 
+    public void rematch() {
+        Games.TurnBasedMultiplayer.rematch(getApiClient(), mMatch.getMatchId()).setResultCallback(
+                new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                    @Override
+                    public void onResult(TurnBasedMultiplayer.InitiateMatchResult result) {
+                        processInitiateResult(result);
+                    }
+                });
+    }
+
     @Override
     public void onGameInitialisation() {
         Log.d(TAG, "Initialisation");
@@ -438,6 +461,10 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
         takeNextTurn();
 
+        showScoresScreen();
+    }
+
+    public void showScoresScreen() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, new MultiplayerGameFinishedFragment())
                 .commit();
@@ -460,6 +487,9 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         @InjectView(R.id.players)
         LinearLayout players;
 
+        @InjectView(R.id.rematch_button)
+        Button rematchButton;
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_multiplayer_game_finished, container, false);
@@ -474,6 +504,17 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+
+            if (mMatch.canRematch()) {
+                rematchButton.setVisibility(View.VISIBLE);
+
+                rematchButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        rematch();
+                    }
+                });
+            }
 
             ArrayList<Participant> participants = mMatch.getParticipants();
             for (Participant participant : participants) {
