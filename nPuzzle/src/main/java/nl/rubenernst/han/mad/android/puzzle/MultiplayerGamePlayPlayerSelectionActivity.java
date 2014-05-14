@@ -31,6 +31,8 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
         if (isSignedIn()) {
             selectPlayers();
         } else {
+            showLoadingIndicator("Signing in...");
+
             beginUserInitiatedSignIn();
         }
     }
@@ -40,6 +42,8 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
         super.onActivityResult(request, response, data);
 
         if (request == RC_SELECT_PLAYERS) {
+            showLoadingIndicator("Creating match...");
+
             if (response != Activity.RESULT_OK) {
                 return;
             }
@@ -55,6 +59,8 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
     @Override
     public void onSignInSucceeded() {
         super.onSignInSucceeded();
+
+        hideLoadingIndicator();
 
         selectPlayers();
     }

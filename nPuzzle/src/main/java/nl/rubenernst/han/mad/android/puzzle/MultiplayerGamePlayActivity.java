@@ -7,10 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.google.android.gms.common.api.Result;
@@ -27,6 +24,7 @@ import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
+import nl.rubenernst.han.mad.android.puzzle.tasks.GameCloneTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
@@ -37,6 +35,15 @@ import java.util.HashMap;
 
 
 public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener {
+
+    @InjectView(R.id.loading_container)
+    RelativeLayout loadingContainer;
+
+    @InjectView(R.id.progressBar)
+    ProgressBar progressBar;
+
+    @InjectView(R.id.loadingText)
+    TextView loadingText;
 
     private static final String TAG = "Multiplayer";
     private static final String ORIGINAL_GAME_KEY = "original_game";
@@ -49,6 +56,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
+
+        ButterKnife.inject(this);
     }
 
     @Override
@@ -253,6 +262,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     public void processCancelResult(TurnBasedMultiplayer.CancelMatchResult result) {
+        hideLoadingIndicator();
+
         checkAndHandleStatusCode(null, result);
 
         showError("Match",
@@ -260,6 +271,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     public void processInitiateResult(TurnBasedMultiplayer.InitiateMatchResult result) {
+        hideLoadingIndicator();
+
         TurnBasedMatch match = result.getMatch();
         boolean processed = checkAndHandleStatusCode(match, result);
 
@@ -271,6 +284,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
 
     public void processLeaveResult(TurnBasedMultiplayer.LeaveMatchResult result) {
+        hideLoadingIndicator();
+
         TurnBasedMatch match = result.getMatch();
         checkAndHandleStatusCode(match, result);
 
@@ -279,8 +294,20 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
 
     public void processUpdateResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+        hideLoadingIndicator();
+
         TurnBasedMatch match = result.getMatch();
         checkAndHandleStatusCode(match, result);
+    }
+
+    public void showLoadingIndicator(String text) {
+        loadingText.setText(text);
+        loadingContainer.setVisibility(View.VISIBLE);
+    }
+
+    public void hideLoadingIndicator() {
+        loadingText.setText("");
+        loadingContainer.setVisibility(View.INVISIBLE);
     }
 
     public void showError(String title, String message) {
@@ -438,10 +465,19 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameStarted(Game game) {
         Log.d(TAG, "Started");
 
-        String gameState = SaveGameStateHelper.saveGameStateToString(getApplicationContext(), game);
-        Game originalGame = SaveGameStateHelper.getSavedGameStateFromJson(getApplicationContext(), gameState);
+        GameCloneTask gameCloneTask = new GameCloneTask();
+        gameCloneTask.setContext(getApplicationContext());
+        gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(Object result, String message) {
+                if (result != null) {
+                    Game originalGame = (Game) result;
+                    mGames.put(ORIGINAL_GAME_KEY, originalGame);
+                }
+            }
+        });
+        gameCloneTask.execute(game);
 
-        mGames.put(ORIGINAL_GAME_KEY, originalGame);
         mGames.put(getCurrentPlayerParticipantId(), game);
     }
 
