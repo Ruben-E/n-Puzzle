@@ -25,6 +25,7 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameCloneTask;
+import nl.rubenernst.han.mad.android.puzzle.tasks.GameStatesAsStringTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
@@ -173,19 +174,22 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     private void saveGameState() {
         if (isSignedIn() && mMatch != null && currentMatchIsPlayable()) {
-            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), mCurrentPlayerParticipantId)
-                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                        @Override
-                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
-                            Status status = updateMatchResult.getStatus();
-                            Log.d(TAG, "Take turn result: " + status.getStatus());
-                        }
-                    });
+            takeTurnWithNextParticipant(mCurrentPlayerParticipantId, new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                @Override
+                public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
+                    Status status = updateMatchResult.getStatus();
+                    Log.d(TAG, "Take turn result: " + status.getStatus());
+                }
+            });
         }
     }
 
     private String getGameStatesAsString() {
         return SaveGameStateHelper.saveGameStatesToString(getApplicationContext(), mGames);
+    }
+
+    private byte[] getGameStatesAsByteArray(String gameStatesString) {
+        return gameStatesString.getBytes(Charset.forName("UTF-16"));
     }
 
     private byte[] getGameStatesAsByteArray() {
@@ -230,26 +234,54 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         return true;
     }
 
+    public void takeTurnWithNextParticipant(final String participantId, final ResultCallback<TurnBasedMultiplayer.UpdateMatchResult> resultCallback) {
+        GameStatesAsStringTask gameStatesAsStringTask = new GameStatesAsStringTask();
+        gameStatesAsStringTask.setContext(getApplicationContext());
+        gameStatesAsStringTask.setTaskFinishedListener(new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(Object result, String message) {
+                if (result != null) {
+                    String gameState = (String) result;
+                    byte[] gameStateByteArray = getGameStatesAsByteArray(gameState);
+
+                    Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameStateByteArray, participantId)
+                            .setResultCallback(resultCallback);
+                }
+            }
+        });
+        gameStatesAsStringTask.execute(mGames);
+
+    }
+
     private void takeNextTurn() {
+        showLoadingIndicator("Saving the score...");
+
         if (allPlayersPlayed()) {
             Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray())
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
                         public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
                             processUpdateResult(result);
+
+                            hideLoadingIndicator();
+
+                            showScoresScreen();
                         }
                     });
         } else {
             String nextParticipantId = getNextParticipantId();
-
             Log.d(TAG, "Next participant ID: " + nextParticipantId);
-            Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray(), nextParticipantId)
-                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                        @Override
-                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                            processUpdateResult(result);
-                        }
-                    });
+
+            takeTurnWithNextParticipant(nextParticipantId, new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                @Override
+                public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                    processUpdateResult(result);
+
+                    hideLoadingIndicator();
+
+                    showScoresScreen();
+                }
+            });
         }
     }
 
@@ -443,7 +475,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                     public void onResult(TurnBasedMultiplayer.InitiateMatchResult result) {
                         processInitiateResult(result);
                     }
-                });
+                }
+        );
     }
 
     @Override
@@ -496,8 +529,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         Log.d(TAG, "Finished");
 
         takeNextTurn();
-
-        showScoresScreen();
     }
 
     public void showScoresScreen() {
