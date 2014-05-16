@@ -519,10 +519,12 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                         List<Address> addresses = (List<Address>) result;
                         if (addresses.size() == 1) {
                             Address address = addresses.get(0);
-                            if (address != null) {
+                            if (address != null && MultiplayerGamePlayActivity.this.getApiClient().isConnected()) {
                                 nl.rubenernst.han.mad.android.puzzle.domain.Location location = new nl.rubenernst.han.mad.android.puzzle.domain.Location();
                                 location.setCounty(address.getCountryName());
 
+
+                                //TODO: Soms lijkt het alsof de locatie voor ieder spel opgeslagen wordt. Dit bleek uit het feit dat de emulator geen locatie heeft maar toch in de scorelijst The Netherlands te zien was.
                                 if (getCurrentPlayersGame() != null) {
                                     getCurrentPlayersGame().setLocation(location);
                                 }
