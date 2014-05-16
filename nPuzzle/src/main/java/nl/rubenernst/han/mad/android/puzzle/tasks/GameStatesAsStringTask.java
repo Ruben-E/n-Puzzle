@@ -20,12 +20,18 @@ public class GameStatesAsStringTask extends AsyncTask<HashMap<String, Game>, Voi
 
     @Override
     protected String doInBackground(HashMap<String, Game>... games) {
-        return SaveGameStateHelper.saveGameStatesToString(context, games[0]);
+        if (context != null) {
+            return SaveGameStateHelper.saveGameStatesToString(context, games[0]);
+        }
+
+        return null;
     }
 
     @Override
     protected void onPostExecute(String gameString) {
-        taskFinishedListener.onTaskFinished(gameString, null);
+        if (taskFinishedListener != null) {
+            taskFinishedListener.onTaskFinished(gameString, null);
+        }
     }
 
     public void setTaskFinishedListener(TaskFinishedListener taskFinishedListener) {

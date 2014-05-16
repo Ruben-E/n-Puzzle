@@ -18,13 +18,19 @@ public class GameCloneTask extends AsyncTask<Game, Void, Game> {
 
     @Override
     protected Game doInBackground(Game... games) {
-        String gameState = SaveGameStateHelper.saveGameStateToString(context, games[0]);
-        return SaveGameStateHelper.getSavedGameStateFromJson(context, gameState);
+        if (context != null) {
+            String gameState = SaveGameStateHelper.saveGameStateToString(context, games[0]);
+            return SaveGameStateHelper.getSavedGameStateFromJson(context, gameState);
+        }
+
+        return null;
     }
 
     @Override
     protected void onPostExecute(Game game) {
-        taskFinishedListener.onTaskFinished(game, null);
+        if (taskFinishedListener != null) {
+            taskFinishedListener.onTaskFinished(game, null);
+        }
     }
 
     public void setTaskFinishedListener(TaskFinishedListener taskFinishedListener) {
