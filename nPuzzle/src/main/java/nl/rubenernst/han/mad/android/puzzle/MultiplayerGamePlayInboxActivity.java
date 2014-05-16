@@ -42,6 +42,7 @@ public class MultiplayerGamePlayInboxActivity extends MultiplayerGamePlayActivit
 
         if (request == RC_LOOK_AT_MATCHES) {
             if (response != Activity.RESULT_OK) {
+                finish();
                 return;
             }
 

@@ -4,8 +4,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        android:id="@+id/game_layout"
-        android:background="#E2E2E2">
+        android:id="@+id/game_layout">
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"

@@ -244,8 +244,10 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                     String gameState = (String) result;
                     byte[] gameStateByteArray = getGameStatesAsByteArray(gameState);
 
-                    Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameStateByteArray, participantId)
-                            .setResultCallback(resultCallback);
+                    if (getApiClient().isConnected()) {
+                        Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameStateByteArray, participantId)
+                                .setResultCallback(resultCallback);
+                    }
                 }
             }
         });
@@ -254,6 +256,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     private void takeNextTurn() {
+        //TODO: The original game could be null, because this is running in a background thread.
+
         showLoadingIndicator("Saving the score...");
 
         if (allPlayersPlayed()) {
@@ -469,6 +473,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     public void rematch() {
+        showLoadingIndicator("Loading rematch...");
+
         Games.TurnBasedMultiplayer.rematch(getApiClient(), mMatch.getMatchId()).setResultCallback(
                 new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
                     @Override
@@ -505,7 +511,9 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             public void onTaskFinished(Object result, String message) {
                 if (result != null) {
                     Game originalGame = (Game) result;
-                    mGames.put(ORIGINAL_GAME_KEY, originalGame);
+                    if (mGames != null) {
+                        mGames.put(ORIGINAL_GAME_KEY, originalGame);
+                    }
                 }
             }
         });
@@ -572,15 +580,17 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
 
+            rematchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    rematch();
+                }
+            });
+
             if (mMatch.canRematch()) {
                 rematchButton.setVisibility(View.VISIBLE);
-
-                rematchButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        rematch();
-                    }
-                });
+            } else {
+                rematchButton.setVisibility(View.INVISIBLE);
             }
 
             ArrayList<Participant> participants = mMatch.getParticipants();
@@ -599,7 +609,9 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                             public void onTaskFinished(Object result, String message) {
                                 if (result != null) {
                                     Bitmap bitmap = (Bitmap) result;
-                                    avatar.setImageBitmap(bitmap);
+                                    if (avatar != null) {
+                                        avatar.setImageBitmap(bitmap);
+                                    }
                                 }
                             }
                         });

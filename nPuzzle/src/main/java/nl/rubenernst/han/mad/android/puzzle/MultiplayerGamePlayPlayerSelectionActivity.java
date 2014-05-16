@@ -45,12 +45,12 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
             showLoadingIndicator("Creating match...");
 
             if (response != Activity.RESULT_OK) {
+                finish();
                 return;
             }
 
             // get the invitee list
             final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-            Log.d(TAG, "Invitee id: " + invitees.get(0));
 
             initMatch(invitees);
         }
