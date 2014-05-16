@@ -59,14 +59,15 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected TurnBasedMatch mMatch;
     protected String mCurrentPlayerParticipantId;
     protected HashMap<String, Game> mGames; // Hashmap with a game for all the players with participant id as key.
-    protected LocationHelper locationHelper;
+    protected LocationHelper mLocationHelper;
+    protected LocationClient mLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
 
-        locationHelper = new LocationHelper(this, this);
+        mLocationHelper = new LocationHelper(this, this);
 
         ButterKnife.inject(this);
     }
@@ -75,7 +76,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected void onStart() {
         super.onStart();
 
-        locationHelper.connect();
+        mLocationHelper.connect();
     }
 
     @Override
@@ -111,7 +112,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected void onStop() {
         saveGameState();
 
-        locationHelper.disconnect();
+        mLocationHelper.disconnect();
 
         super.onStop();
     }
@@ -504,6 +505,37 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         );
     }
 
+    public void setLocationToGame() {
+        Location lastLocation = mLocationClient.getLastLocation();
+
+        if (lastLocation != null) {
+            Log.d(TAG, "Location: " + lastLocation.toString());
+
+            GeocoderTask geocoderTask = new GeocoderTask();
+            geocoderTask.setTaskFinishedListener(new TaskFinishedListener() {
+                @Override
+                public void onTaskFinished(Object result, String message) {
+                    if (result != null) {
+                        List<Address> addresses = (List<Address>) result;
+                        if (addresses.size() == 1) {
+                            Address address = addresses.get(0);
+                            if (address != null) {
+                                nl.rubenernst.han.mad.android.puzzle.domain.Location location = new nl.rubenernst.han.mad.android.puzzle.domain.Location();
+                                location.setCounty(address.getCountryName());
+
+                                if (getCurrentPlayersGame() != null) {
+                                    getCurrentPlayersGame().setLocation(location);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            geocoderTask.setContext(getApplicationContext());
+            geocoderTask.execute(lastLocation);
+        }
+    }
+
     @Override
     public void onGameInitialisation() {
         Log.d(TAG, "Initialisation");
@@ -539,6 +571,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         gameCloneTask.execute(game);
 
         mGames.put(getCurrentPlayerParticipantId(), game);
+
+        setLocationToGame();
     }
 
     @Override
@@ -577,22 +611,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     @Override
     public void onLocationClientConnected(Bundle bundle, LocationClient locationClient) {
         Log.d(TAG, "Locationhelper connected");
-        Location location = locationClient.getLastLocation();
-        Log.d(TAG, "Location: " + location.toString());
-
-        GeocoderTask geocoderTask = new GeocoderTask();
-        geocoderTask.setTaskFinishedListener(new TaskFinishedListener() {
-            @Override
-            public void onTaskFinished(Object result, String message) {
-                if (result != null) {
-                    List<Address> addresses = (List<Address>) result;
-                    Address address = addresses.get(0);
-                    Log.d(TAG, "Country: " + address.getCountryName());
-                }
-            }
-        });
-        geocoderTask.setContext(getApplicationContext());
-        geocoderTask.execute(location);
+        mLocationClient = locationClient;
     }
 
     @Override
@@ -668,13 +687,17 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                         imageDownloaderTask.execute(imageUrl);
                     }
 
-                    playerName.setText(participant.getDisplayName());
-
                     Game game = mGames.get(participant.getParticipantId());
                     if (game != null) {
                         score.setText(game.getTurns().size() + "");
+                        if (game.getLocation() != null) {
+                            playerName.setText(participant.getDisplayName() + " (" + game.getLocation().getCounty() + ")");
+                        } else {
+                            playerName.setText(participant.getDisplayName() + " (n/a)");
+                        }
                     } else {
                         score.setText("-");
+                        playerName.setText(participant.getDisplayName() + " (n/a)");
                     }
 
                     players.addView(playerLayout);

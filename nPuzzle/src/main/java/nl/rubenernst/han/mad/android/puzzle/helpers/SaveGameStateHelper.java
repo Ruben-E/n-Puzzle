@@ -27,6 +27,8 @@ public class SaveGameStateHelper {
     private static final String TAG_CORRECT_POSITION = "correctPosition";
     private static final String TAG_IMAGE = "image";
     private static final String TAG_IMAGE_PATH = "imagePath";
+    private static final String TAG_LOCATION = "location";
+    private static final String TAG_LOCATION_COUNTRY = "country";
 
     private Context context;
 
@@ -214,6 +216,9 @@ public class SaveGameStateHelper {
         writer.name(TAG_TURNS);
         writeTurns(writer, game.getTurns());
 
+        writer.name(TAG_LOCATION);
+        writeLocation(writer, game.getLocation());
+
         writer.endObject();
     }
 
@@ -252,7 +257,16 @@ public class SaveGameStateHelper {
         writer.endObject();
     }
 
+    private void writeLocation(JsonWriter writer, Location location) throws IOException {
+        if (location != null) {
+            writer.beginObject();
+            writer.name(TAG_LOCATION_COUNTRY).value(location.getCounty());
 
+            writer.endObject();
+        } else {
+            writer.nullValue();
+        }
+    }
 
     private String getSavedStateJson(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
@@ -283,6 +297,8 @@ public class SaveGameStateHelper {
             getPositionsFromJson(jsonObject, game);
             game.getTurns().clear();
             getTurnsFromJson(jsonObject, game);
+
+            getLocationFromJson(jsonObject, game);
 
             return game;
         } catch (JSONException e) {
@@ -353,6 +369,18 @@ public class SaveGameStateHelper {
             currentPosition.setImage(image);
 
             game.addCurrentPosition(currentPosition);
+        }
+    }
+
+    private void getLocationFromJson(JSONObject jsonObject, Game game) throws JSONException {
+        JSONObject locationObject = jsonObject.getJSONObject(TAG_LOCATION);
+        if (locationObject != null) {
+            String country = locationObject.getString(TAG_LOCATION_COUNTRY);
+
+            Location location = new Location();
+            location.setCounty(country);
+
+            game.setLocation(location);
         }
     }
 

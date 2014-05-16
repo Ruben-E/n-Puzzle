@@ -4,7 +4,11 @@
     <!--<color name="main_color">#FFFFFF</color>-->
     <!--<color name="main_color_text">#000000</color>-->
 
-    <color name="background">#404040</color>
+    <!--<color name="background">#404040</color>-->
+    <!--<color name="main_color">#649700</color>-->
+    <!--<color name="main_color_text">#FFFFFF</color>-->
+
+    <color name="background">#E2E2E2</color>
     <color name="main_color">#649700</color>
     <color name="main_color_text">#FFFFFF</color>
 </resources>

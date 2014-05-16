@@ -10,6 +10,7 @@ import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskProgressListener;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by rubenernst on 16-05-14.
@@ -25,7 +26,7 @@ public class GeocoderTask extends AsyncTask<Location, Void, List<Address>> {
         List<Address> addresses = null;
 
         if (context != null) {
-            Geocoder geocoder = new Geocoder(context);
+            Geocoder geocoder = new Geocoder(context, Locale.ENGLISH);
             Location location = locations[0];
 
             try {

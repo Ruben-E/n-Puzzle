@@ -11,6 +11,7 @@
             android:layout_height="48dp"
             android:id="@+id/avatar" android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"/>
+
     <TextView
             android:layout_width="0dp"
             android:layout_weight=".50"

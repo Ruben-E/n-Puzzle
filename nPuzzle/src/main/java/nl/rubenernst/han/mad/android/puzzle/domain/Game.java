@@ -13,6 +13,8 @@ public class Game {
     private List<CurrentPosition> currentPositions = new ArrayList<CurrentPosition>();
     private List<Turn> turns = new ArrayList<Turn>();
 
+    private Location location;
+
     private Integer gridSize;
 
     private Constants.GameState gameState;
@@ -141,5 +143,13 @@ public class Game {
     public void startGame() {
         setGameState(Constants.GameState.PLAYABLE);
         getTurns().clear();
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }
