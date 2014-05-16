@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,11 +19,14 @@ import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import com.google.android.gms.location.LocationClient;
 import com.google.example.games.basegameutils.BaseGameActivity;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.LocationHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.LocationHelperListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameCloneTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameStatesAsStringTask;
@@ -35,7 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 
-public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener {
+public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener, LocationHelperListener {
 
     @InjectView(R.id.loading_container)
     RelativeLayout loadingContainer;
@@ -52,13 +56,23 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected TurnBasedMatch mMatch;
     protected String mCurrentPlayerParticipantId;
     protected HashMap<String, Game> mGames; // Hashmap with a game for all the players with participant id as key.
+    protected LocationHelper locationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_multiplayer_game_play);
 
+        locationHelper = new LocationHelper(this, this);
+
         ButterKnife.inject(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        locationHelper.connect();
     }
 
     @Override
@@ -93,6 +107,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     @Override
     protected void onStop() {
         saveGameState();
+
+        locationHelper.disconnect();
 
         super.onStop();
     }
@@ -552,6 +568,23 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     @Override
     public void onGameResumed(Game game) {
+
+    }
+
+    @Override
+    public void onLocationClientConnected(Bundle bundle, LocationClient locationClient) {
+        Log.d(TAG, "Locationhelper connected");
+        Location location = locationClient.getLastLocation();
+        Log.d(TAG, "Location: " + location.toString());
+    }
+
+    @Override
+    public void onLocationClientDisconnected() {
+
+    }
+
+    @Override
+    public void onLocationClientConnectionFailed() {
 
     }
 
