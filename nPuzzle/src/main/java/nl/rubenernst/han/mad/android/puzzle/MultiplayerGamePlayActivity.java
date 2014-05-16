@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,6 +31,7 @@ import nl.rubenernst.han.mad.android.puzzle.interfaces.LocationHelperListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameCloneTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameStatesAsStringTask;
+import nl.rubenernst.han.mad.android.puzzle.tasks.GeocoderTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
@@ -37,6 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener, LocationHelperListener {
@@ -576,6 +579,20 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         Log.d(TAG, "Locationhelper connected");
         Location location = locationClient.getLastLocation();
         Log.d(TAG, "Location: " + location.toString());
+
+        GeocoderTask geocoderTask = new GeocoderTask();
+        geocoderTask.setTaskFinishedListener(new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(Object result, String message) {
+                if (result != null) {
+                    List<Address> addresses = (List<Address>) result;
+                    Address address = addresses.get(0);
+                    Log.d(TAG, "Country: " + address.getCountryName());
+                }
+            }
+        });
+        geocoderTask.setContext(getApplicationContext());
+        geocoderTask.execute(location);
     }
 
     @Override
