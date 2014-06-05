@@ -6,7 +6,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:background="@drawable/background"
     tools:context="nl.rubenernst.han.mad.android.puzzle.MainMenuActivity">
 
     <Button
@@ -18,7 +17,6 @@
             android:layout_alignEnd="@+id/multiplayer_existing_game_button"
             android:layout_alignLeft="@+id/multiplayer_existing_game_button"
             android:layout_alignStart="@+id/multiplayer_existing_game_button"
-            android:textColor="@android:color/white"
             />
     <Button
             android:layout_width="wrap_content"
@@ -28,7 +26,7 @@
             android:layout_below="@+id/singleplayer_button"
             android:layout_alignLeft="@+id/singleplayer_button" android:layout_alignStart="@+id/singleplayer_button"
             android:layout_alignRight="@+id/singleplayer_button" android:layout_alignEnd="@+id/singleplayer_button"
-            android:textColor="@android:color/white"/>
+            />
 
     <Button
             android:layout_width="wrap_content"
@@ -36,7 +34,6 @@
             android:text="Multiplayer (existing game)"
             android:id="@+id/multiplayer_existing_game_button"
             android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"
-            android:textColor="@android:color/white"
             />
     <Button
             android:layout_width="wrap_content"
@@ -47,7 +44,7 @@
             android:layout_alignStart="@+id/multiplayer_existing_game_button"
             android:layout_alignRight="@+id/multiplayer_existing_game_button"
             android:layout_alignEnd="@+id/multiplayer_existing_game_button"
-            android:textColor="@android:color/white"/>
+            />
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -55,5 +52,5 @@
             android:id="@+id/scores_button" android:layout_below="@+id/awards_button"
             android:layout_alignLeft="@+id/awards_button" android:layout_alignStart="@+id/awards_button"
             android:layout_alignRight="@+id/awards_button" android:layout_alignEnd="@+id/awards_button"
-            android:textColor="@android:color/white"/>
+            />
 </RelativeLayout>

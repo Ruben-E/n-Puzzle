@@ -20,7 +20,7 @@ import com.google.example.games.basegameutils.BaseGameActivity;
 import java.util.ArrayList;
 
 
-public class MainMenuActivity extends ActionBarActivity implements View.OnClickListener {
+public class MainMenuActivity extends BaseGameActivity implements View.OnClickListener {
 
     @InjectView(R.id.singleplayer_button)
     Button singleplayerButton;
@@ -89,11 +89,29 @@ public class MainMenuActivity extends ActionBarActivity implements View.OnClickL
                 startActivity(intent);
                 break;
             case R.id.awards_button:
-
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Achievements.getAchievementsIntent(getApiClient()), 0);
+                } else {
+                    showAlert("Achievements not available");
+                }
                 break;
             case R.id.scores_button:
-
+                if (isSignedIn()) {
+                    startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(getApiClient()), 0);
+                } else {
+                    showAlert("Leaderboards not available");
+                }
                 break;
         }
+    }
+
+    @Override
+    public void onSignInFailed() {
+
+    }
+
+    @Override
+    public void onSignInSucceeded() {
+
     }
 }
