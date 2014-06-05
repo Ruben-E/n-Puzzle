@@ -275,25 +275,43 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     }
 
+    public void finishGame(final ResultCallback<TurnBasedMultiplayer.UpdateMatchResult> resultCallback) {
+        GameStatesAsStringTask gameStatesAsStringTask = new GameStatesAsStringTask();
+        gameStatesAsStringTask.setContext(getApplicationContext());
+        gameStatesAsStringTask.setTaskFinishedListener(new TaskFinishedListener() {
+            @Override
+            public void onTaskFinished(Object result, String message) {
+                if (result != null) {
+                    String gameState = (String) result;
+                    byte[] gameStateByteArray = getGameStatesAsByteArray(gameState);
+
+                    if (getApiClient().isConnected()) {
+                        Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId(), gameStateByteArray)
+                                .setResultCallback(resultCallback);
+                    }
+                }
+            }
+        });
+        gameStatesAsStringTask.execute(mGames);
+
+    }
+
     private void takeNextTurn() {
         //TODO: The original game could be null, because this is running in a background thread.
 
         showLoadingIndicator("Saving the score...");
 
         if (allPlayersPlayed()) {
-            //TODO: Maybe this should be in the background.
+            finishGame(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+                @Override
+                public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
+                    processUpdateResult(result);
 
-            Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray())
-                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
-                        @Override
-                        public void onResult(TurnBasedMultiplayer.UpdateMatchResult result) {
-                            processUpdateResult(result);
+                    hideLoadingIndicator();
 
-                            hideLoadingIndicator();
-
-                            showScoresScreen();
-                        }
-                    });
+                    showScoresScreen();
+                }
+            });
         } else {
             String nextParticipantId = getNextParticipantId();
             Log.d(TAG, "Next participant ID: " + nextParticipantId);
