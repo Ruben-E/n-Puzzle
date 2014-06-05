@@ -66,17 +66,17 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
     }
 
     public void initMatch(ArrayList<String> invitees) {
-        Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
-            @Override
-            public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
-                Toast.makeText(MultiplayerGamePlayPlayerSelectionActivity.this, "A match was updated.", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onTurnBasedMatchRemoved(String s) {
-                Toast.makeText(MultiplayerGamePlayPlayerSelectionActivity.this, "A match was removed.", Toast.LENGTH_LONG).show();
-            }
-        });
+//        Games.TurnBasedMultiplayer.registerMatchUpdateListener(getApiClient(), new OnTurnBasedMatchUpdateReceivedListener() {
+//            @Override
+//            public void onTurnBasedMatchReceived(TurnBasedMatch turnBasedMatch) {
+//                Toast.makeText(MultiplayerGamePlayPlayerSelectionActivity.this, "A match was updated.", Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onTurnBasedMatchRemoved(String s) {
+//                Toast.makeText(MultiplayerGamePlayPlayerSelectionActivity.this, "A match was removed.", Toast.LENGTH_LONG).show();
+//            }
+//        });
 
         TurnBasedMatchConfig.Builder matchConfigBuilder = TurnBasedMatchConfig.builder();
         TurnBasedMatchConfig matchConfig = matchConfigBuilder.addInvitedPlayers(invitees).build();

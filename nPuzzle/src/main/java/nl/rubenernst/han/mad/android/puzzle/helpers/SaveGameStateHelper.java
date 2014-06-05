@@ -284,8 +284,9 @@ public class SaveGameStateHelper {
     }
 
     private Game getSavedGameStateFromJson(String JSON) throws FileNotFoundException {
+        Game game = null;
         try {
-            Game game = new Game();
+            game = new Game();
             JSONObject jsonObject = new JSONObject(JSON);
 
             int gridSize = jsonObject.getInt(TAG_GRID_SIZE);
@@ -298,14 +299,14 @@ public class SaveGameStateHelper {
             game.getTurns().clear();
             getTurnsFromJson(jsonObject, game);
 
-            getLocationFromJson(jsonObject, game);
-
-            return game;
-        } catch (JSONException e) {
+            if (!jsonObject.isNull(TAG_LOCATION)) {
+                getLocationFromJson(jsonObject, game);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return null;
+        return game;
     }
 
     private HashMap<String, Game> getSavedGameStatesFromJson(String JSON) {

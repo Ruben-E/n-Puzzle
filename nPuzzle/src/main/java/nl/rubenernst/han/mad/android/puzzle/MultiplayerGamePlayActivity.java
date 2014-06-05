@@ -281,6 +281,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         showLoadingIndicator("Saving the score...");
 
         if (allPlayersPlayed()) {
+            //TODO: Maybe this should be in the background.
+
             Games.TurnBasedMultiplayer.finishMatch(getApiClient(), mMatch.getMatchId(), getGameStatesAsByteArray())
                     .setResultCallback(new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
                         @Override
