@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,10 +20,10 @@ import butterknife.InjectView;
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.BaseGameActivity;
 import nl.rubenernst.han.mad.android.puzzle.fragments.MainMenuFragment;
+import nl.rubenernst.han.mad.android.puzzle.fragments.MatchesFragment;
 
 import java.util.ArrayList;
 
@@ -48,6 +49,8 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
     private ViewPager pager;
     private MainMenuPagerAdapter adapter;
 
+    private MatchesFragment matchesFragment;
+
     public MainMenuActivity() {
     }
 
@@ -69,6 +72,12 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
         pager.setPageMargin(pageMargin);
 
         tabs.setViewPager(pager);
+
+        if (isSignedIn()) {
+            getMatchesFragment().onSignInSucceeded();
+        } else {
+            beginUserInitiatedSignIn();
+        }
 
 //        singleplayerButton.setOnClickListener(this);
 //        multiplayerNewGameButton.setOnClickListener(this);
@@ -138,12 +147,12 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
 
     @Override
     public void onSignInSucceeded() {
-
+        getMatchesFragment().onSignInSucceeded();
     }
 
     public class MainMenuPagerAdapter extends FragmentPagerAdapter {
 
-        private final String[] TITLES = { "Home", "Your matches", "High Scores", "Achievements" };
+        private final String[] TITLES = {"Home", "Your matches", "High Scores", "Achievements"};
 
         public MainMenuPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -161,8 +170,25 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
 
         @Override
         public Fragment getItem(int position) {
-            return MainMenuFragment.newInstance();
+            switch (position) {
+                case 1: {
+                    return getMatchesFragment();
+                }
+
+                default: {
+                    return MainMenuFragment.newInstance();
+                }
+            }
         }
 
+    }
+
+    public MatchesFragment getMatchesFragment() {
+        if (matchesFragment == null) {
+            matchesFragment = MatchesFragment.newInstance(this);
+            matchesFragment.setApiClient(getApiClient());
+        }
+
+        return matchesFragment;
     }
 }

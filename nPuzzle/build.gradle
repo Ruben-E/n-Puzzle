@@ -14,10 +14,10 @@ repositories {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19"
+    buildToolsVersion '19'
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 14
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -63,10 +63,11 @@ dependencies {
     compile 'com.jakewharton:butterknife:4.0.1'
     compile 'com.google.android.gms:play-services:4.3.23'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    compile 'com.github.gabrielemariotti.cards:library:1.6.0'
     compile project(':libraries:BaseGameUtils')
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     // The Support Repository (separate from the corresponding library) can be found in the Extras category.
-    // 
+    //
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     // The Support Repository (separate from the corresponding library) can be found in the Extras category.
     //
