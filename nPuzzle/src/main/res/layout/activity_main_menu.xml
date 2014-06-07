@@ -2,55 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="nl.rubenernst.han.mad.android.puzzle.MainMenuActivity">
 
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Singleplayer"
-            android:id="@+id/singleplayer_button" android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/multiplayer_existing_game_button"
-            android:layout_alignEnd="@+id/multiplayer_existing_game_button"
-            android:layout_alignLeft="@+id/multiplayer_existing_game_button"
-            android:layout_alignStart="@+id/multiplayer_existing_game_button"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Multiplayer (new game)"
-            android:id="@+id/multiplayer_new_game_button"
-            android:layout_below="@+id/singleplayer_button"
-            android:layout_alignLeft="@+id/singleplayer_button" android:layout_alignStart="@+id/singleplayer_button"
-            android:layout_alignRight="@+id/singleplayer_button" android:layout_alignEnd="@+id/singleplayer_button"
-            />
+    <com.astuetz.PagerSlidingTabStrip
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="48dip" />
 
-    <Button
-            android:layout_width="wrap_content"
+    <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Multiplayer (existing game)"
-            android:id="@+id/multiplayer_existing_game_button"
-            android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Awards"
-            android:id="@+id/awards_button" android:layout_below="@+id/multiplayer_existing_game_button"
-            android:layout_alignLeft="@+id/multiplayer_existing_game_button"
-            android:layout_alignStart="@+id/multiplayer_existing_game_button"
-            android:layout_alignRight="@+id/multiplayer_existing_game_button"
-            android:layout_alignEnd="@+id/multiplayer_existing_game_button"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scores"
-            android:id="@+id/scores_button" android:layout_below="@+id/awards_button"
-            android:layout_alignLeft="@+id/awards_button" android:layout_alignStart="@+id/awards_button"
-            android:layout_alignRight="@+id/awards_button" android:layout_alignEnd="@+id/awards_button"
-            />
+            android:layout_below="@+id/tabs"
+            tools:context=".MainActivity" />
 </RelativeLayout>
