@@ -1,7 +1,6 @@
 package nl.rubenernst.han.mad.android.puzzle.fragments;
 
 
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +16,7 @@ import butterknife.InjectView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.InvitationBuffer;
 import com.google.android.gms.games.multiplayer.Participant;
@@ -34,11 +34,11 @@ import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
- *
  */
 public class MatchesFragment extends Fragment implements GameHelper.GameHelperListener {
 
@@ -60,6 +60,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     public static MatchesFragment newInstance() {
         return new MatchesFragment();
     }
+
     public static MatchesFragment newInstance(Activity activity) {
         return new MatchesFragment(activity);
     }
@@ -76,7 +77,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(R.layout.fragment_matches, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_matches, container, false);
 
         ButterKnife.inject(this, rootView);
 
@@ -102,66 +103,20 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                 TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN,
                 TurnBasedMatch.MATCH_TURN_STATUS_INVITED};
 
-        final ArrayList<Card> inviteCards = new ArrayList<Card>();
-        final CardArrayAdapter invitedCardsAdapter = new CardArrayAdapter(activity, inviteCards);
-
-        final ArrayList<Card> myTurnCards = new ArrayList<Card>();
-        final CardArrayAdapter myTurnCardsAdapter = new CardArrayAdapter(activity, myTurnCards);
-
-        final ArrayList<Card> theirTurnCards = new ArrayList<Card>();
-        final CardArrayAdapter theirTurnCardsAdapter = new CardArrayAdapter(activity, theirTurnCards);
-
-        final ArrayList<Card> endedCards = new ArrayList<Card>();
-        final CardArrayAdapter endedCardsAdapter = new CardArrayAdapter(activity, endedCards);
-
-
         Games.TurnBasedMultiplayer.loadMatchesByStatus(apiClient, games)
                 .setResultCallback(new ResultCallback<TurnBasedMultiplayer.LoadMatchesResult>() {
                     public void onResult(TurnBasedMultiplayer.LoadMatchesResult r) {
-
-
                         LoadMatchesResponse matches = r.getMatches();
-                        InvitationBuffer invitedMatches =  matches.getInvitations();
-                        TurnBasedMatchBuffer myTurnMatches =  matches.getMyTurnMatches();
-                        TurnBasedMatchBuffer theirTurnMatches =  matches.getTheirTurnMatches();
-                        TurnBasedMatchBuffer endedMatches =  matches.getCompletedMatches();
 
-//                        for (int i = 0; i < invitedMatches.getCount(); i++) {
-//                            Invitation invitation = invitedMatches.get(i);
-//                            Log.d("MainMenu", match.getMatchId());
-//
-//                            invitation.
-//                        }
+                        ArrayList<Card> inviteCards = getCardsForInvitations(matches.getInvitations());
+                        ArrayList<Card> myTurnCards = getCardsForMatches(matches.getMyTurnMatches());
+                        ArrayList<Card> theirTurnCards = getCardsForMatches(matches.getTheirTurnMatches());
+                        ArrayList<Card> endedCards = getCardsForMatches(matches.getCompletedMatches());
 
-                        for (int i = 0; i < myTurnMatches.getCount(); i++) {
-                            TurnBasedMatch match = myTurnMatches.get(i);
-                            Log.d("MainMenu", match.getMatchId());
-
-                            Card card = getCardForMatch(match);
-                            if (card != null) {
-                                myTurnCards.add(card);
-                            }
-                        }
-
-                        for (int i = 0; i < theirTurnMatches.getCount(); i++) {
-                            TurnBasedMatch match = theirTurnMatches.get(i);
-                            Log.d("MainMenu", match.getMatchId());
-
-                            Card card = getCardForMatch(match);
-                            if (card != null) {
-                                theirTurnCards.add(card);
-                            }
-                        }
-
-                        for (int i = 0; i < endedMatches.getCount(); i++) {
-                            TurnBasedMatch match = endedMatches.get(i);
-                            Log.d("MainMenu", match.getMatchId());
-
-                            Card card = getCardForMatch(match);
-                            if (card != null) {
-                                endedCards.add(card);
-                            }
-                        }
+                        CardArrayAdapter invitedCardsAdapter = new CardArrayAdapter(activity, inviteCards);
+                        CardArrayAdapter myTurnCardsAdapter = new CardArrayAdapter(activity, myTurnCards);
+                        CardArrayAdapter theirTurnCardsAdapter = new CardArrayAdapter(activity, theirTurnCards);
+                        CardArrayAdapter endedCardsAdapter = new CardArrayAdapter(activity, endedCards);
 
                         invitedMatchesList.setAdapter(invitedCardsAdapter);
                         myTurnMatchesList.setAdapter(myTurnCardsAdapter);
@@ -171,8 +126,38 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                 });
     }
 
+    public ArrayList<Card> getCardsForInvitations(InvitationBuffer invitations) {
+        ArrayList<Card> cards = new ArrayList<Card>();
+        for (int i = 0; i < invitations.getCount(); i++) {
+            Invitation invitation = invitations.get(i);
+            Log.d("MainMenu", invitation.getInvitationId());
+
+            Card card = getCardForInvitation(invitation);
+            if (card != null) {
+                cards.add(card);
+            }
+        }
+
+        return cards;
+    }
+
+    public ArrayList<Card> getCardsForMatches(TurnBasedMatchBuffer matches) {
+        ArrayList<Card> cards = new ArrayList<Card>();
+        for (int i = 0; i < matches.getCount(); i++) {
+            TurnBasedMatch match = matches.get(i);
+            Log.d("MainMenu", match.getMatchId());
+
+            Card card = getCardForMatch(match);
+            if (card != null) {
+                cards.add(card);
+            }
+        }
+
+        return cards;
+    }
+
     public Card getCardForMatch(final TurnBasedMatch match) {
-        Participant opponent = getOpponent(match);
+        Participant opponent = getOpponent(match.getParticipants());
         Card card = null;
 
         if (opponent != null) {
@@ -204,12 +189,53 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         return card;
     }
 
-    public Participant getOpponent(TurnBasedMatch match) {
-        ArrayList<String> participantIds = match.getParticipantIds();
+    public Card getCardForInvitation(final Invitation invitation) {
+        Participant opponent = getOpponent(invitation.getParticipants());
+        Card card = null;
 
-        for (String participantId : participantIds) {
-            if (!participantId.equals(getParticipantIdForPlayerId(match, getCurrentPlayerId()))) {
-                return  match.getParticipant(participantId);
+        if (opponent != null) {
+            card = new Card(activity);
+            card.setType(2);
+
+            card.setTitle(getDateTime(invitation.getCreationTimestamp()));
+
+            CardHeader header = new CardHeader(activity);
+            header.setTitle(opponent.getDisplayName());
+
+            CardThumbnail thumbnail = new CardThumbnail(getActivity());
+            thumbnail.setUrlResource(opponent.getIconImageUrl());
+
+            card.addCardThumbnail(thumbnail);
+            card.addCardHeader(header);
+
+            card.setOnClickListener(new Card.OnCardClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Games.TurnBasedMultiplayer.acceptInvitation(apiClient, invitation.getInvitationId())
+                            .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                                @Override
+                                public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
+                                    if(initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
+                                        TurnBasedMatch match = initiateMatchResult.getMatch();
+
+                                        Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
+                                        intent.putExtra("matchId", match.getMatchId());
+
+                                        startActivity(intent);
+                                    }
+                                }
+                            });
+                }
+            });
+        }
+
+        return card;
+    }
+
+    public Participant getOpponent(ArrayList<Participant> participants) {
+        for (Participant participant : participants) {
+            if (!participant.getPlayer().getPlayerId().equals(getCurrentPlayerId())) {
+                return participant;
             }
         }
 
@@ -236,9 +262,5 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     private String getCurrentPlayerId() {
         return Games.Players.getCurrentPlayerId(apiClient);
-    }
-
-    private String getParticipantIdForPlayerId(TurnBasedMatch match, String playerId) {
-        return match.getParticipantId(playerId);
     }
 }

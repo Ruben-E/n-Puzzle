@@ -2,6 +2,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesStatusCodes;
@@ -28,9 +29,13 @@ public class MultiplayerGamePlayIntentActivity extends MultiplayerGamePlayActivi
                             if (loadMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
                                 mMatch = loadMatchResult.getMatch();
                                 launchMatch();
+                            } else {
+                                showError("Oops!", "Could not load the game.");
                             }
                         }
                     });
+        } else {
+            showError("Oops!", "Could not load the game.");
         }
     }
 }
