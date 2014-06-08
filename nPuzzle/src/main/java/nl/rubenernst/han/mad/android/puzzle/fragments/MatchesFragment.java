@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle.fragments;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
@@ -29,6 +30,8 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.view.CardListView;
+import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
+import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 
 import java.util.*;
@@ -168,7 +171,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                 });
     }
 
-    public Card getCardForMatch(TurnBasedMatch match) {
+    public Card getCardForMatch(final TurnBasedMatch match) {
         Participant opponent = getOpponent(match);
         Card card = null;
 
@@ -186,6 +189,16 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
             card.addCardThumbnail(thumbnail);
             card.addCardHeader(header);
+
+            card.setOnClickListener(new Card.OnCardClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
+                    intent.putExtra("matchId", match.getMatchId());
+
+                    startActivity(intent);
+                }
+            });
         }
 
         return card;
