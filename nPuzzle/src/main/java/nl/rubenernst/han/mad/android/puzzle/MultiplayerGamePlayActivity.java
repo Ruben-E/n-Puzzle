@@ -297,8 +297,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     private void takeNextTurn() {
-        //TODO: The original game could be null, because this is running in a background thread.
-
         showLoadingIndicator("Saving the score...");
 
         if (allPlayersPlayed()) {
@@ -577,6 +575,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameStarted(Game game) {
         Log.d(TAG, "Started");
 
+        showLoadingIndicator("Loading...");
+
         GameCloneTask gameCloneTask = new GameCloneTask();
         gameCloneTask.setContext(getApplicationContext());
         gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
@@ -586,6 +586,10 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                     Game originalGame = (Game) result;
                     if (mGames != null) {
                         mGames.put(ORIGINAL_GAME_KEY, originalGame);
+
+                        hideLoadingIndicator();
+
+                        setLocationToGame();
                     }
                 }
             }
@@ -593,8 +597,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         gameCloneTask.execute(game);
 
         mGames.put(getCurrentPlayerParticipantId(), game);
-
-        setLocationToGame();
     }
 
     @Override

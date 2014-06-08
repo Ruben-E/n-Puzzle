@@ -29,7 +29,8 @@
             android:configChanges="orientation|screenSize" />
         <activity
             android:name="nl.rubenernst.han.mad.android.puzzle.MainMenuActivity"
-            android:label="@string/title_activity_main_menu" >
+            android:label="@string/title_activity_main_menu"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
