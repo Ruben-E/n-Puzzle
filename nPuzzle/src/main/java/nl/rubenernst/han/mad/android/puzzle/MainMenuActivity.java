@@ -24,6 +24,7 @@ public class MainMenuActivity extends BaseGameActivity {
     private MainMenuPagerAdapter adapter;
 
     private MatchesFragment matchesFragment;
+    private MainMenuFragment mainMenuFragment;
 
     public MainMenuActivity() {
     }
@@ -53,6 +54,7 @@ public class MainMenuActivity extends BaseGameActivity {
         tabs.setIndicatorColor(getResources().getColor(R.color.main_color));
 
         if (isSignedIn()) {
+            getMainMenuFragment().onSignInSucceeded();
             getMatchesFragment().onSignInSucceeded();
         } else {
             beginUserInitiatedSignIn();
@@ -79,17 +81,19 @@ public class MainMenuActivity extends BaseGameActivity {
 
     @Override
     public void onSignInFailed() {
-
+        getMatchesFragment().onSignInFailed();
+        getMainMenuFragment().onSignInFailed();
     }
 
     @Override
     public void onSignInSucceeded() {
         getMatchesFragment().onSignInSucceeded();
+        getMainMenuFragment().onSignInSucceeded();
     }
 
     public class MainMenuPagerAdapter extends FragmentPagerAdapter {
 
-        private final String[] TITLES = {"Home", "Your matches", "High Scores", "Achievements"};
+        private final String[] TITLES = {"Home", "Your matches"/*, "High Scores", "Achievements"*/};
 
         public MainMenuPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -108,12 +112,16 @@ public class MainMenuActivity extends BaseGameActivity {
         @Override
         public Fragment getItem(int position) {
             switch (position) {
+                case 0: {
+                    return getMainMenuFragment();
+                }
+
                 case 1: {
                     return getMatchesFragment();
                 }
 
                 default: {
-                    return MainMenuFragment.newInstance();
+                    return null;
                 }
             }
         }
@@ -127,5 +135,14 @@ public class MainMenuActivity extends BaseGameActivity {
         }
 
         return matchesFragment;
+    }
+
+    public MainMenuFragment getMainMenuFragment() {
+        if (mainMenuFragment == null) {
+            mainMenuFragment = MainMenuFragment.newInstance(this);
+            mainMenuFragment.setApiClient(getApiClient());
+        }
+
+        return mainMenuFragment;
     }
 }
