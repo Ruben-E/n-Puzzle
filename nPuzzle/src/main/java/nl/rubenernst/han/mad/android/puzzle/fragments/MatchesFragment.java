@@ -226,6 +226,10 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         if (opponent != null) {
             card = new Card("Playing with " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
             card.setTag(match);
+
+            if (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN) {
+                card.setClickable(false);
+            }
         }
 
         return card;
