@@ -20,7 +20,7 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 public class MainMenuActivity extends BaseGameActivity {
 
     private PagerSlidingTabStrip tabs;
-    private ViewPager pager;
+    public ViewPager pager;
     private MainMenuPagerAdapter adapter;
 
     private MatchesFragment matchesFragment;

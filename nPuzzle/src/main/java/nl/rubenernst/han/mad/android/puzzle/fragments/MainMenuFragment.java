@@ -16,9 +16,7 @@ import com.afollestad.cardsui.*;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.GameHelper;
-import nl.rubenernst.han.mad.android.puzzle.GameSelectionActivity;
-import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayInboxActivity;
-import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity;
+import nl.rubenernst.han.mad.android.puzzle.*;
 import nl.rubenernst.han.mad.android.puzzle.R;
 
 public class MainMenuFragment extends Fragment implements GameHelper.GameHelperListener {
@@ -28,21 +26,21 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
     private static final int ACHIEVEMENTS_TAG = 3;
     private static final int HIGHSCORES_TAG = 4;
 
-    private Activity activity;
+    private MainMenuActivity activity;
     private GoogleApiClient apiClient;
     private CardAdapter adapter;
 
     @InjectView(R.id.menu)
     CardListView menuList;
 
-    public static MainMenuFragment newInstance(Activity activity) {
+    public static MainMenuFragment newInstance(MainMenuActivity activity) {
         return new MainMenuFragment(activity);
     }
 
     public MainMenuFragment() {
     }
 
-    public MainMenuFragment(Activity activity) {
+    public MainMenuFragment(MainMenuActivity activity) {
         this.activity = activity;
         this.adapter = new CardAdapter(activity, R.color.main_color);
     }
@@ -105,8 +103,7 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
                             }
 
                             case MULTIPLAYER_TAG: {
-                                Intent intent = new Intent(getActivity(), MultiplayerGamePlayPlayerSelectionActivity.class);
-                                startActivity(intent);
+                                activity.pager.setCurrentItem(1, true);
                                 break;
                             }
 
