@@ -21,18 +21,6 @@ public class MainMenuFragment extends Fragment {
     @InjectView(R.id.menu)
     CardListView menuList;
 
-//    @InjectView(R.id.multiplayer_new_game_button)
-//    Button multiplayerNewGameButton;
-//
-//    @InjectView(R.id.multiplayer_existing_game_button)
-//    Button multiplayerExistingGameButton;
-//
-//    @InjectView(R.id.awards_button)
-//    Button awardsButton;
-//
-//    @InjectView(R.id.scores_button)
-//    Button scoresButton;
-
     public static MainMenuFragment newInstance() {
         return new MainMenuFragment();
     }
@@ -91,12 +79,6 @@ public class MainMenuFragment extends Fragment {
             }
         });
 
-//        singleplayerButton.setOnClickListener(this);
-//        multiplayerNewGameButton.setOnClickListener(this);
-//        multiplayerExistingGameButton.setOnClickListener(this);
-//        awardsButton.setOnClickListener(this);
-//        scoresButton.setOnClickListener(this);
-
         return rootView;
     }
 
@@ -106,37 +88,4 @@ public class MainMenuFragment extends Fragment {
 
         ButterKnife.reset(this);
     }
-
-//    @Override
-//    public void onClick(View view) {
-//        Intent intent;
-//        switch (view.getId()) {
-//            case R.id.singleplayer_button:
-//                intent = new Intent(getActivity(), GameSelectionActivity.class);
-//                startActivity(intent);
-//                break;
-//            case R.id.multiplayer_new_game_button:
-//                intent = new Intent(getActivity(), MultiplayerGamePlayPlayerSelectionActivity.class);
-//                startActivity(intent);
-//                break;
-//            case R.id.multiplayer_existing_game_button:
-//                intent = new Intent(getActivity(), MultiplayerGamePlayInboxActivity.class);
-//                startActivity(intent);
-//                break;
-//            case R.id.awards_button:
-////                if (isSignedIn()) {
-////                    startActivityForResult(Games.Achievements.getAchievementsIntent(getApiClient()), 0);
-////                } else {
-////                    showAlert("Achievements not available");
-////                }
-//                break;
-//            case R.id.scores_button:
-////                if (isSignedIn()) {
-////                    startActivityForResult(Games.Leaderboards.getAllLeaderboardsIntent(getApiClient()), 0);
-////                } else {
-////                    showAlert("Leaderboards not available");
-////                }
-//                break;
-//        }
-//    }
 }
