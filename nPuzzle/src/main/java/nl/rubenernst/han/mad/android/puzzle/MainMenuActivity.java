@@ -70,6 +70,7 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
         final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
                 .getDisplayMetrics());
         pager.setPageMargin(pageMargin);
+        pager.setOffscreenPageLimit(10);
 
         tabs.setViewPager(pager);
 

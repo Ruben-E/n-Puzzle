@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,10 +23,7 @@ import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.InvitationBuffer;
 import com.google.android.gms.games.multiplayer.Participant;
-import com.google.android.gms.games.multiplayer.turnbased.LoadMatchesResponse;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchBuffer;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
@@ -38,18 +36,6 @@ import java.util.*;
  * A simple {@link android.support.v4.app.Fragment} subclass.
  */
 public class MatchesFragment extends Fragment implements GameHelper.GameHelperListener {
-
-//    @InjectView(R.id.invited_matches)
-//    CardListView invitedMatchesList;
-
-//    @InjectView(R.id.my_turn_matches)
-//    CardListView myTurnMatchesList;
-//
-//    @InjectView(R.id.their_turn_matches)
-//    CardListView theirTurnMatchesList;
-//
-//    @InjectView(R.id.ended_matches)
-//    CardListView endedMatchesList;
 
     @InjectView(R.id.matches)
     CardListView matchesList;
@@ -98,6 +84,25 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     @Override
     public void onSignInSucceeded() {
+        setListeners();
+        refreshGames();
+    }
+
+    public void setListeners() {
+        Games.TurnBasedMultiplayer.registerMatchUpdateListener(apiClient, new OnTurnBasedMatchUpdateReceivedListener() {
+            @Override
+            public void onTurnBasedMatchReceived(TurnBasedMatch match) {
+                refreshGames();
+            }
+
+            @Override
+            public void onTurnBasedMatchRemoved(String s) {
+                refreshGames();
+            }
+        });
+    }
+
+    public void refreshGames() {
         int[] games = {TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE,
                 TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN,
                 TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN,
@@ -218,7 +223,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Card card = null;
 
         if (opponent != null) {
-            card = new Card("Playing with " + opponent.getDisplayName(), getDateTime(match.getLastUpdatedTimestamp()));
+            card = new Card("Playing with " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
             card.setTag(match);
         }
 
