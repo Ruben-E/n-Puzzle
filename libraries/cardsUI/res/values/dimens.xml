@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="card_thumbnail">56dp</dimen>
+    <dimen name="card_thumbnail_margin">5dp</dimen>
+    <dimen name="card_thumbnail_margin_top">3dp</dimen>
+    <dimen name="card_title_margin_sides">5dp</dimen>
+    <dimen name="card_content_margin_top">3dp</dimen>
+    <dimen name="card_title">18sp</dimen>
+    <dimen name="card_content">16sp</dimen>
+
+    <dimen name="card_margin_horizontal">6dp</dimen>
+    <dimen name="card_margin_vertical">2dp</dimen>
+    <dimen name="card_padding_vertical">10dp</dimen>
+    <dimen name="card_padding_vertical_taller">7dp</dimen>
+
+    <dimen name="card_header">21sp</dimen>
+    <dimen name="card_subheader">15sp</dimen>
+    <dimen name="card_header_padding_top">30dp</dimen>
+    <dimen name="card_header_padding_horizontal">20dp</dimen>
+    <dimen name="card_header_button_text">13sp</dimen>
+    <dimen name="card_header_button_padding_side">8dp</dimen>
+    <dimen name="card_header_button_padding_top">5dp</dimen>
+    <dimen name="card_header_button_margin_left">10dp</dimen>
+
+    <dimen name="card_action_touchdelegate">25dp</dimen>
+
+</resources>

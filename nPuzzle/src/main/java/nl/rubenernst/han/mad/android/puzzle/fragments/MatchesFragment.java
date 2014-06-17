@@ -11,8 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.LinearLayout;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.afollestad.cardsui.*;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
@@ -25,11 +27,6 @@ import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchBuffer;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
 import com.google.example.games.basegameutils.GameHelper;
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.internal.CardThumbnail;
-import it.gmariotti.cardslib.library.view.CardListView;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
@@ -42,17 +39,20 @@ import java.util.*;
  */
 public class MatchesFragment extends Fragment implements GameHelper.GameHelperListener {
 
-    @InjectView(R.id.invited_matches)
-    CardListView invitedMatchesList;
+//    @InjectView(R.id.invited_matches)
+//    CardListView invitedMatchesList;
 
-    @InjectView(R.id.my_turn_matches)
-    CardListView myTurnMatchesList;
+//    @InjectView(R.id.my_turn_matches)
+//    CardListView myTurnMatchesList;
+//
+//    @InjectView(R.id.their_turn_matches)
+//    CardListView theirTurnMatchesList;
+//
+//    @InjectView(R.id.ended_matches)
+//    CardListView endedMatchesList;
 
-    @InjectView(R.id.their_turn_matches)
-    CardListView theirTurnMatchesList;
-
-    @InjectView(R.id.ended_matches)
-    CardListView endedMatchesList;
+    @InjectView(R.id.matches)
+    CardListView matchesList;
 
     private GoogleApiClient apiClient;
     private Activity activity;
@@ -113,15 +113,72 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                         ArrayList<Card> theirTurnCards = getCardsForMatches(matches.getTheirTurnMatches());
                         ArrayList<Card> endedCards = getCardsForMatches(matches.getCompletedMatches());
 
-                        CardArrayAdapter invitedCardsAdapter = new CardArrayAdapter(activity, inviteCards);
-                        CardArrayAdapter myTurnCardsAdapter = new CardArrayAdapter(activity, myTurnCards);
-                        CardArrayAdapter theirTurnCardsAdapter = new CardArrayAdapter(activity, theirTurnCards);
-                        CardArrayAdapter endedCardsAdapter = new CardArrayAdapter(activity, endedCards);
+                        CardHeader endedHeader = new CardHeader("Ended matches");
+                        CardHeader invitationsHeader = new CardHeader("Invitations");
+                        CardHeader theirTurnHeader = new CardHeader("Their turn");
+                        CardHeader myTurnHeader = new CardHeader("My turn");
 
-                        invitedMatchesList.setAdapter(invitedCardsAdapter);
-                        myTurnMatchesList.setAdapter(myTurnCardsAdapter);
-                        theirTurnMatchesList.setAdapter(theirTurnCardsAdapter);
-                        endedMatchesList.setAdapter(endedCardsAdapter);
+                        final CardAdapter adapter = new CardAdapter(activity, android.R.color.holo_blue_dark);
+                        adapter.add(myTurnHeader);
+                        if (myTurnCards.size() > 0) {
+                            adapter.add(myTurnCards);
+                        } else {
+                            adapter.add(new CardCenteredHeader("No games"));
+                        }
+
+                        adapter.add(invitationsHeader);
+                        if (inviteCards.size() > 0) {
+                            adapter.add(inviteCards);
+                        } else {
+                            adapter.add(new CardCenteredHeader("No games"));
+                        }
+
+                        adapter.add(theirTurnHeader);
+                        if (theirTurnCards.size() > 0) {
+                            adapter.add(theirTurnCards);
+                        } else {
+                            adapter.add(new CardCenteredHeader("No games"));
+                        }
+
+                        adapter.add(endedHeader);
+                        if (endedCards.size() > 0) {
+                            adapter.add(endedCards);
+                        } else {
+                            adapter.add(new CardCenteredHeader("No games"));
+                        }
+
+                        matchesList.setOnCardClickListener(new CardListView.CardClickListener() {
+                            @Override
+                            public void onCardClick(int index, CardBase card, View view) {
+                                Object tag = card.getTag();
+                                if (tag instanceof TurnBasedMatch) {
+                                    TurnBasedMatch match = (TurnBasedMatch) tag;
+                                    Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
+                                    intent.putExtra("matchId", match.getMatchId());
+
+                                    startActivity(intent);
+                                } else if (tag instanceof Invitation) {
+                                    Invitation invitation = (Invitation) tag;
+
+                                    Games.TurnBasedMultiplayer.acceptInvitation(apiClient, invitation.getInvitationId())
+                                            .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                                                @Override
+                                                public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
+                                                    if(initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
+                                                        TurnBasedMatch match = initiateMatchResult.getMatch();
+
+                                                        Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
+                                                        intent.putExtra("matchId", match.getMatchId());
+
+                                                        startActivity(intent);
+                                                    }
+                                                }
+                                            });
+                                }
+                            }
+                        });
+
+                        matchesList.setAdapter(adapter);
                     }
                 });
     }
@@ -161,29 +218,8 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Card card = null;
 
         if (opponent != null) {
-            card = new Card(activity);
-            card.setType(2);
-
-            card.setTitle(getDateTime(match.getLastUpdatedTimestamp()));
-
-            CardHeader header = new CardHeader(activity);
-            header.setTitle(opponent.getDisplayName());
-
-            CardThumbnail thumbnail = new CardThumbnail(getActivity());
-            thumbnail.setUrlResource(opponent.getIconImageUrl());
-
-            card.addCardThumbnail(thumbnail);
-            card.addCardHeader(header);
-
-            card.setOnClickListener(new Card.OnCardClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
-                    intent.putExtra("matchId", match.getMatchId());
-
-                    startActivity(intent);
-                }
-            });
+            card = new Card("Playing with " + opponent.getDisplayName(), getDateTime(match.getLastUpdatedTimestamp()));
+            card.setTag(match);
         }
 
         return card;
@@ -194,39 +230,8 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Card card = null;
 
         if (opponent != null) {
-            card = new Card(activity);
-            card.setType(2);
-
-            card.setTitle(getDateTime(invitation.getCreationTimestamp()));
-
-            CardHeader header = new CardHeader(activity);
-            header.setTitle(opponent.getDisplayName());
-
-            CardThumbnail thumbnail = new CardThumbnail(getActivity());
-            thumbnail.setUrlResource(opponent.getIconImageUrl());
-
-            card.addCardThumbnail(thumbnail);
-            card.addCardHeader(header);
-
-            card.setOnClickListener(new Card.OnCardClickListener() {
-                @Override
-                public void onClick(Card card, View view) {
-                    Games.TurnBasedMultiplayer.acceptInvitation(apiClient, invitation.getInvitationId())
-                            .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
-                                @Override
-                                public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
-                                    if(initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
-                                        TurnBasedMatch match = initiateMatchResult.getMatch();
-
-                                        Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
-                                        intent.putExtra("matchId", match.getMatchId());
-
-                                        startActivity(intent);
-                                    }
-                                }
-                            });
-                }
-            });
+            card = new Card("Invitation from " + opponent.getDisplayName(), getDateTime(invitation.getCreationTimestamp()));
+            card.setTag(invitation);
         }
 
         return card;

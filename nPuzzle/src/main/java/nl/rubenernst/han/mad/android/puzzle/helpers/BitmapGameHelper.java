@@ -69,16 +69,20 @@ public class BitmapGameHelper {
     }
 
     public static String writeBitmapToPrivateStorage(Context context, Bitmap bitmap, String path, String name) throws IOException {
-        ContextWrapper contextWrapper = new ContextWrapper(context);
-        File directory = contextWrapper.getDir(path, Context.MODE_PRIVATE);
-        File file = new File(directory, name);
+        if (bitmap != null) {
+            ContextWrapper contextWrapper = new ContextWrapper(context);
+            File directory = contextWrapper.getDir(path, Context.MODE_PRIVATE);
+            File file = new File(directory, name);
 
-        FileOutputStream fileOutputStream = new FileOutputStream(file);
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
 
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-        fileOutputStream.close();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+            fileOutputStream.close();
 
-        return directory.getAbsolutePath();
+            return directory.getAbsolutePath();
+        }
+
+        return "";
     }
 
     public static Bitmap parseBitmapFromPrivateStorage(String path, String name) throws FileNotFoundException {

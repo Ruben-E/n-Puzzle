@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              style="@style/card_outer_frame">
+
+    <RelativeLayout android:id="@android:id/widget_frame"
+                    style="@style/card_inner_frame">
+
+        <TextView android:id="@android:id/title"
+                  style="@style/card_title_compressed"
+                  android:textSize="@dimen/card_content"
+                  android:layout_centerVertical="true"/>
+
+        <com.afollestad.silk.views.text.SilkTextView android:id="@android:id/content"
+                                                     style="@style/card_content"
+                                                     android:layout_alignParentRight="true"
+                                                     android:maxLines="1"
+                                                     android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
+</LinearLayout>
