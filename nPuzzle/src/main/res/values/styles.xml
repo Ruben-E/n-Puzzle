@@ -3,6 +3,7 @@
     <style name="TranslucentTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:actionBarStyle">@style/TranslucentTheme.ActionBar</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
     <style name="TranslucentTheme.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">

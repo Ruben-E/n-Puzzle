@@ -6,6 +6,7 @@
         <item name="android:windowTranslucentNavigation">@bool/transparent_nav</item>
         <item name="android:actionBarStyle">@style/TranslucentTheme.ActionBar</item>
         <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowBackground">@color/background</item>
     </style>
 
 </resources>
