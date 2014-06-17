@@ -3,6 +3,7 @@ package nl.rubenernst.han.mad.android.puzzle.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
@@ -22,8 +23,11 @@ import com.google.android.gms.games.multiplayer.InvitationBuffer;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
+import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
+import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 
 import java.util.*;
 
@@ -37,6 +41,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     private GoogleApiClient apiClient;
     private Activity activity;
+    private CardAdapter adapter = null;
 
     public static MatchesFragment newInstance() {
         return new MatchesFragment();
@@ -52,6 +57,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     public MatchesFragment(Activity activity) {
         this.activity = activity;
+        this.adapter = new CardAdapter(activity, R.color.main_color);
     }
 
 
@@ -117,8 +123,6 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                         CardHeader invitationsHeader = new CardHeader("Invitations");
                         CardHeader theirTurnHeader = new CardHeader("Their turn");
                         CardHeader myTurnHeader = new CardHeader("My turn");
-
-                        final CardAdapter adapter = new CardAdapter(activity, R.color.main_color);
 
                         addCardsToAdapter(adapter, invitationsHeader, inviteCards);
                         addCardsToAdapter(adapter, myTurnHeader, myTurnCards);
@@ -191,9 +195,24 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
             TurnBasedMatch match = matches.get(i);
             Log.d("MainMenu", match.getMatchId());
 
-            Card card = getCardForMatch(match);
+            final Card card = getCardForMatch(match);
             if (card != null) {
                 cards.add(card);
+                Participant opponent = getOpponent(match.getParticipants());
+
+                ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
+                    imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+                        @Override
+                        public void onTaskFinished(Object result, String message) {
+                            if (result != null) {
+                                Bitmap bitmap = (Bitmap) result;
+
+                                card.setThumbnail(activity, bitmap);
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
+                    imageDownloaderTask.execute(opponent.getIconImageUrl());
             }
         }
 
