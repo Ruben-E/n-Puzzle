@@ -690,30 +690,30 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
             ArrayList<Participant> participants = mMatch.getParticipants();
             for (Participant participant : participants) {
-                CardCompressed card = new CardCompressed(participant.getDisplayName(), "");
+                final Card card = new Card(participant.getDisplayName(), "");
+
                 String scoreText = "Did not play yet";
                 Game game = mGames.get(participant.getParticipantId());
                 if (game != null) {
                     scoreText = "Score: " + game.getTurns().size();
                 }
 
-//                String imageUrl = participant.getIconImageUrl();
-//                if (imageUrl != null) {
-//                    ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
-//                    imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
-//                        @Override
-//                        public void onTaskFinished(Object result, String message) {
-//                            if (result != null) {
-//                                Bitmap bitmap = (Bitmap) result;
-//
-//
-//
-//                                card.setThumbnail(MultiplayerGamePlayActivity.this, bitmap);
-//                            }
-//                        }
-//                    });
-//                    imageDownloaderTask.execute(imageUrl);
-//                }
+                String imageUrl = participant.getIconImageUrl();
+                if (imageUrl != null) {
+                    ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
+                    imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+                        @Override
+                        public void onTaskFinished(Object result, String message) {
+                            if (result != null) {
+                                Bitmap bitmap = (Bitmap) result;
+
+                                card.setThumbnail(MultiplayerGamePlayActivity.this, bitmap);
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
+                    imageDownloaderTask.execute(imageUrl);
+                }
 
                 card.setClickable(false);
                 card.setContent(scoreText);
