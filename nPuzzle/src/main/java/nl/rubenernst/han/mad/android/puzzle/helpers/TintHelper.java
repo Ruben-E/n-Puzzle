@@ -14,7 +14,7 @@ public class TintHelper {
             SystemBarTintManager tintManager;
             tintManager = new SystemBarTintManager(context);
             tintManager.setStatusBarTintEnabled(true);
-            tintManager.setTintResource(R.color.holo_blue_dark);
+            tintManager.setTintResource(R.color.main_color);
         }
 
         return null;

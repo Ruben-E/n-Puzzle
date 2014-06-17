@@ -5,14 +5,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.widget.LinearLayout;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.afollestad.cardsui.*;
@@ -25,11 +22,9 @@ import com.google.android.gms.games.multiplayer.InvitationBuffer;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
-import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -123,34 +118,12 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                         CardHeader theirTurnHeader = new CardHeader("Their turn");
                         CardHeader myTurnHeader = new CardHeader("My turn");
 
-                        final CardAdapter adapter = new CardAdapter(activity, android.R.color.holo_blue_dark);
-                        adapter.add(myTurnHeader);
-                        if (myTurnCards.size() > 0) {
-                            adapter.add(myTurnCards);
-                        } else {
-                            adapter.add(new CardCenteredHeader("No games"));
-                        }
+                        final CardAdapter adapter = new CardAdapter(activity, R.color.main_color);
 
-                        adapter.add(invitationsHeader);
-                        if (inviteCards.size() > 0) {
-                            adapter.add(inviteCards);
-                        } else {
-                            adapter.add(new CardCenteredHeader("No games"));
-                        }
-
-                        adapter.add(theirTurnHeader);
-                        if (theirTurnCards.size() > 0) {
-                            adapter.add(theirTurnCards);
-                        } else {
-                            adapter.add(new CardCenteredHeader("No games"));
-                        }
-
-                        adapter.add(endedHeader);
-                        if (endedCards.size() > 0) {
-                            adapter.add(endedCards);
-                        } else {
-                            adapter.add(new CardCenteredHeader("No games"));
-                        }
+                        addCardsToAdapter(adapter, invitationsHeader, inviteCards);
+                        addCardsToAdapter(adapter, myTurnHeader, myTurnCards);
+                        addCardsToAdapter(adapter, theirTurnHeader, theirTurnCards);
+                        addCardsToAdapter(adapter, endedHeader, endedCards);
 
                         matchesList.setOnCardClickListener(new CardListView.CardClickListener() {
                             @Override
@@ -186,6 +159,15 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                         matchesList.setAdapter(adapter);
                     }
                 });
+    }
+
+    public void addCardsToAdapter(CardAdapter adapter, CardHeader header, List<Card> cards) {
+        adapter.add(header);
+        if (cards.size() > 0) {
+            adapter.add(cards);
+        } else {
+            adapter.add(new CardCenteredHeader("No games"));
+        }
     }
 
     public ArrayList<Card> getCardsForInvitations(InvitationBuffer invitations) {

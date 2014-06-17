@@ -671,7 +671,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
 
-            final CardAdapter adapter = new CardAdapter(MultiplayerGamePlayActivity.this, android.R.color.holo_blue_dark);
+            final CardAdapter adapter = new CardAdapter(MultiplayerGamePlayActivity.this, R.color.main_color);
 
             CardHeader header = new CardHeader("Results");
 

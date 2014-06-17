@@ -54,7 +54,7 @@ public class MainMenuFragment extends Fragment {
 
         ButterKnife.inject(this, rootView);
 
-        final CardAdapter adapter = new CardAdapter(getActivity(), android.R.color.holo_blue_dark);
+        final CardAdapter adapter = new CardAdapter(getActivity(), R.color.main_color);
 
         adapter.add(new CardHeader("What do you want to play?"));
         adapter.add(new CardCompressed("Singleplayer", ""));
