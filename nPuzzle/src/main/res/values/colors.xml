@@ -9,6 +9,7 @@
     <!--<color name="main_color_text">#FFFFFF</color>-->
 
     <color name="background">#E2E2E2</color>
+    <color name="holo_blue_dark">@android:color/holo_blue_dark</color>
     <color name="main_color">#649700</color>
     <color name="main_color_text">#FFFFFF</color>
 </resources>

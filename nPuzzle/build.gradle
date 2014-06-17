@@ -63,7 +63,7 @@ dependencies {
     compile 'com.jakewharton:butterknife:4.0.1'
     compile 'com.google.android.gms:play-services:4.3.23'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
-    compile 'com.github.gabrielemariotti.cards:library:1.6.0'
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     compile project(':libraries:BaseGameUtils')
     compile project(':libraries:cardsUI')
     // You must install or update the Support Repository through the SDK manager to use this dependency.

@@ -1,53 +1,54 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.afollestad.cardsui.CardListView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/menu"
     tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.MainMenuFragment">
 
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Singleplayer"
-            android:id="@+id/singleplayer_button" android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/multiplayer_existing_game_button"
-            android:layout_alignEnd="@+id/multiplayer_existing_game_button"
-            android:layout_alignLeft="@+id/multiplayer_existing_game_button"
-            android:layout_alignStart="@+id/multiplayer_existing_game_button"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Multiplayer (new game)"
-            android:id="@+id/multiplayer_new_game_button"
-            android:layout_below="@+id/singleplayer_button"
-            android:layout_alignLeft="@+id/singleplayer_button" android:layout_alignStart="@+id/singleplayer_button"
-            android:layout_alignRight="@+id/singleplayer_button" android:layout_alignEnd="@+id/singleplayer_button"
-            />
+    <!--<com.af-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Singleplayer"-->
+            <!--android:id="@+id/singleplayer_button" android:layout_alignParentTop="true"-->
+            <!--android:layout_alignRight="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignEnd="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignLeft="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignStart="@+id/multiplayer_existing_game_button"-->
+            <!--/>-->
+    <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Multiplayer (new game)"-->
+            <!--android:id="@+id/multiplayer_new_game_button"-->
+            <!--android:layout_below="@+id/singleplayer_button"-->
+            <!--android:layout_alignLeft="@+id/singleplayer_button" android:layout_alignStart="@+id/singleplayer_button"-->
+            <!--android:layout_alignRight="@+id/singleplayer_button" android:layout_alignEnd="@+id/singleplayer_button"-->
+            <!--/>-->
 
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Multiplayer (existing game)"
-            android:id="@+id/multiplayer_existing_game_button"
-            android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Awards"
-            android:id="@+id/awards_button" android:layout_below="@+id/multiplayer_existing_game_button"
-            android:layout_alignLeft="@+id/multiplayer_existing_game_button"
-            android:layout_alignStart="@+id/multiplayer_existing_game_button"
-            android:layout_alignRight="@+id/multiplayer_existing_game_button"
-            android:layout_alignEnd="@+id/multiplayer_existing_game_button"
-            />
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scores"
-            android:id="@+id/scores_button" android:layout_below="@+id/awards_button"
-            android:layout_alignLeft="@+id/awards_button" android:layout_alignStart="@+id/awards_button"
-            android:layout_alignRight="@+id/awards_button" android:layout_alignEnd="@+id/awards_button"
-            />
+    <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Multiplayer (existing game)"-->
+            <!--android:id="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_below="@+id/multiplayer_new_game_button" android:layout_centerHorizontal="true"-->
+            <!--/>-->
+    <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Awards"-->
+            <!--android:id="@+id/awards_button" android:layout_below="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignLeft="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignStart="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignRight="@+id/multiplayer_existing_game_button"-->
+            <!--android:layout_alignEnd="@+id/multiplayer_existing_game_button"-->
+            <!--/>-->
+    <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Scores"-->
+            <!--android:id="@+id/scores_button" android:layout_below="@+id/awards_button"-->
+            <!--android:layout_alignLeft="@+id/awards_button" android:layout_alignStart="@+id/awards_button"-->
+            <!--android:layout_alignRight="@+id/awards_button" android:layout_alignEnd="@+id/awards_button"-->
+            <!--/>-->
 
-</RelativeLayout>
+</com.afollestad.cardsui.CardListView>

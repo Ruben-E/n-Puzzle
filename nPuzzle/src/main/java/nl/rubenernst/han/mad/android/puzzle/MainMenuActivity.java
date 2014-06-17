@@ -2,6 +2,7 @@ package nl.rubenernst.han.mad.android.puzzle;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,13 +18,17 @@ import android.view.Window;
 import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.afollestad.silk.fragments.list.SilkListFragment;
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.BaseGameActivity;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 import nl.rubenernst.han.mad.android.puzzle.fragments.MainMenuFragment;
 import nl.rubenernst.han.mad.android.puzzle.fragments.MatchesFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 
 import java.util.ArrayList;
 
@@ -60,6 +65,9 @@ public class MainMenuActivity extends BaseGameActivity implements View.OnClickLi
         setContentView(R.layout.activity_main_menu);
 
         ButterKnife.inject(this);
+
+        TintHelper.setupTransparentTints(this);
+        InsetsHelper.setInsets(this, findViewById(R.id.content_frame), true, true);
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         pager = (ViewPager) findViewById(R.id.pager);

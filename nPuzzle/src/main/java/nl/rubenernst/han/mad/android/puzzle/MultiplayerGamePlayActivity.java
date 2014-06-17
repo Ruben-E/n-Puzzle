@@ -743,61 +743,6 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             }
 
             resultList.setAdapter(adapter);
-//
-//            rematchButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    rematch();
-//                }
-//            });
-//
-//            if (mMatch.canRematch()) {
-//                rematchButton.setVisibility(View.VISIBLE);
-//            } else {
-//                rematchButton.setVisibility(View.INVISIBLE);
-//            }
-//
-//            ArrayList<Participant> participants = mMatch.getParticipants();
-//            for (Participant participant : participants) {
-//                LinearLayout playerLayout = (LinearLayout) layoutInflater.inflate(R.layout.fragment_multiplayer_game_finished_player_result, null, false);
-//                if (playerLayout != null) {
-//                    final ImageView avatar = ButterKnife.findById(playerLayout, R.id.avatar);
-//                    TextView playerName = ButterKnife.findById(playerLayout, R.id.playerName);
-//                    TextView score = ButterKnife.findById(playerLayout, R.id.score);
-//
-//                    String imageUrl = participant.getIconImageUrl();
-//                    if (imageUrl != null) {
-//                        ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
-//                        imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
-//                            @Override
-//                            public void onTaskFinished(Object result, String message) {
-//                                if (result != null) {
-//                                    Bitmap bitmap = (Bitmap) result;
-//                                    if (avatar != null) {
-//                                        avatar.setImageBitmap(bitmap);
-//                                    }
-//                                }
-//                            }
-//                        });
-//                        imageDownloaderTask.execute(imageUrl);
-//                    }
-//
-//                    Game game = mGames.get(participant.getParticipantId());
-//                    if (game != null) {
-//                        score.setText(game.getTurns().size() + "");
-//                        if (game.getLocation() != null) {
-//                            playerName.setText(participant.getDisplayName() + " (" + game.getLocation().getCounty() + ")");
-//                        } else {
-//                            playerName.setText(participant.getDisplayName() + " (n/a)");
-//                        }
-//                    } else {
-//                        score.setText("-");
-//                        playerName.setText(participant.getDisplayName() + " (n/a)");
-//                    }
-//
-//                    players.addView(playerLayout);
-//                }
-//            }
         }
     }
 }

@@ -235,7 +235,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Card card = null;
 
         if (opponent != null) {
-            card = new Card("Invitation from " + opponent.getDisplayName(), getDateTime(invitation.getCreationTimestamp()));
+            card = new Card("Invitation from " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, invitation.getCreationTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
             card.setTag(invitation);
         }
 
@@ -250,20 +250,6 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         }
 
         return null;
-    }
-
-    private String getDate(long time) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(time);
-        String date = DateFormat.format("dd-MM-yyyy", cal).toString();
-        return date;
-    }
-
-    private String getDateTime(long time) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(time);
-        String date = DateFormat.format("dd-MM-yyyy hh:mm", cal).toString();
-        return date;
     }
 
     public void setApiClient(GoogleApiClient apiClient) {
