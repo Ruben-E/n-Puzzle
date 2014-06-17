@@ -12,6 +12,7 @@ import android.view.*;
 import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import com.afollestad.cardsui.*;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -652,11 +653,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
         private LayoutInflater layoutInflater;
 
-        @InjectView(R.id.players)
-        LinearLayout players;
-
-        @InjectView(R.id.rematch_button)
-        Button rematchButton;
+        @InjectView(R.id.multiplayer_results)
+        CardListView resultList;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -673,60 +671,133 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
 
-            rematchButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    rematch();
-                }
-            });
+            final CardAdapter adapter = new CardAdapter(MultiplayerGamePlayActivity.this, android.R.color.holo_blue_dark);
+
+            CardHeader header = new CardHeader("Results");
 
             if (mMatch.canRematch()) {
-                rematchButton.setVisibility(View.VISIBLE);
+                header.setAction("Rematch", new CardHeader.ActionListener() {
+                    @Override
+                    public void onHeaderActionClick(CardHeader header) {
+                        rematch();
+                    }
+                });
             } else {
-                rematchButton.setVisibility(View.INVISIBLE);
+                header.setAction(null);
             }
+
+            adapter.add(header);
 
             ArrayList<Participant> participants = mMatch.getParticipants();
             for (Participant participant : participants) {
-                LinearLayout playerLayout = (LinearLayout) layoutInflater.inflate(R.layout.fragment_multiplayer_game_finished_player_result, null, false);
-                if (playerLayout != null) {
-                    final ImageView avatar = ButterKnife.findById(playerLayout, R.id.avatar);
-                    TextView playerName = ButterKnife.findById(playerLayout, R.id.playerName);
-                    TextView score = ButterKnife.findById(playerLayout, R.id.score);
-
-                    String imageUrl = participant.getIconImageUrl();
-                    if (imageUrl != null) {
-                        ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
-                        imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
-                            @Override
-                            public void onTaskFinished(Object result, String message) {
-                                if (result != null) {
-                                    Bitmap bitmap = (Bitmap) result;
-                                    if (avatar != null) {
-                                        avatar.setImageBitmap(bitmap);
-                                    }
-                                }
-                            }
-                        });
-                        imageDownloaderTask.execute(imageUrl);
-                    }
-
-                    Game game = mGames.get(participant.getParticipantId());
-                    if (game != null) {
-                        score.setText(game.getTurns().size() + "");
-                        if (game.getLocation() != null) {
-                            playerName.setText(participant.getDisplayName() + " (" + game.getLocation().getCounty() + ")");
-                        } else {
-                            playerName.setText(participant.getDisplayName() + " (n/a)");
-                        }
-                    } else {
-                        score.setText("-");
-                        playerName.setText(participant.getDisplayName() + " (n/a)");
-                    }
-
-                    players.addView(playerLayout);
+                CardCompressed card = new CardCompressed(participant.getDisplayName(), "");
+                String scoreText = "Did not play yet";
+                Game game = mGames.get(participant.getParticipantId());
+                if (game != null) {
+                    scoreText = "Score: " + game.getTurns().size();
                 }
+
+//                String imageUrl = participant.getIconImageUrl();
+//                if (imageUrl != null) {
+//                    ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
+//                    imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+//                        @Override
+//                        public void onTaskFinished(Object result, String message) {
+//                            if (result != null) {
+//                                Bitmap bitmap = (Bitmap) result;
+//
+//
+//
+//                                card.setThumbnail(MultiplayerGamePlayActivity.this, bitmap);
+//                            }
+//                        }
+//                    });
+//                    imageDownloaderTask.execute(imageUrl);
+//                }
+
+                card.setClickable(false);
+                card.setContent(scoreText);
+
+                adapter.add(card);
             }
+
+            CardHeader locationsHeader = new CardHeader("Locations");
+            adapter.add(locationsHeader);
+
+            for (Participant participant : participants) {
+                CardCompressed card = new CardCompressed(participant.getDisplayName(), "");
+
+                String locationText = "N/A";
+
+                Game game = mGames.get(participant.getParticipantId());
+                if (game != null) {
+                    if (game.getLocation() != null) {
+                        locationText = game.getLocation().getCounty();
+                    }
+                }
+
+                card.setClickable(false);
+                card.setContent(locationText);
+
+                adapter.add(card);
+            }
+
+            resultList.setAdapter(adapter);
+//
+//            rematchButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    rematch();
+//                }
+//            });
+//
+//            if (mMatch.canRematch()) {
+//                rematchButton.setVisibility(View.VISIBLE);
+//            } else {
+//                rematchButton.setVisibility(View.INVISIBLE);
+//            }
+//
+//            ArrayList<Participant> participants = mMatch.getParticipants();
+//            for (Participant participant : participants) {
+//                LinearLayout playerLayout = (LinearLayout) layoutInflater.inflate(R.layout.fragment_multiplayer_game_finished_player_result, null, false);
+//                if (playerLayout != null) {
+//                    final ImageView avatar = ButterKnife.findById(playerLayout, R.id.avatar);
+//                    TextView playerName = ButterKnife.findById(playerLayout, R.id.playerName);
+//                    TextView score = ButterKnife.findById(playerLayout, R.id.score);
+//
+//                    String imageUrl = participant.getIconImageUrl();
+//                    if (imageUrl != null) {
+//                        ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
+//                        imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+//                            @Override
+//                            public void onTaskFinished(Object result, String message) {
+//                                if (result != null) {
+//                                    Bitmap bitmap = (Bitmap) result;
+//                                    if (avatar != null) {
+//                                        avatar.setImageBitmap(bitmap);
+//                                    }
+//                                }
+//                            }
+//                        });
+//                        imageDownloaderTask.execute(imageUrl);
+//                    }
+//
+//                    Game game = mGames.get(participant.getParticipantId());
+//                    if (game != null) {
+//                        score.setText(game.getTurns().size() + "");
+//                        if (game.getLocation() != null) {
+//                            playerName.setText(participant.getDisplayName() + " (" + game.getLocation().getCounty() + ")");
+//                        } else {
+//                            playerName.setText(participant.getDisplayName() + " (n/a)");
+//                        }
+//                    } else {
+//                        score.setText("-");
+//                        playerName.setText(participant.getDisplayName() + " (n/a)");
+//                    }
+//
+//                    players.addView(playerLayout);
+//                }
+//            }
         }
     }
 }

@@ -1,27 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity.MultiplayerGameFinishedFragment"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:background="@android:color/white">
+<com.afollestad.cardsui.CardListView xmlns:android="http://schemas.android.com/apk/res/android"
+                                     xmlns:tools="http://schemas.android.com/tools"
+                                     android:layout_width="fill_parent"
+                                     android:layout_height="wrap_content"
+                                     android:id="@+id/multiplayer_results"
+        >
 
-
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
-            android:layout_above="@+id/rematch_button"
-            android:id="@+id/players">
-    </LinearLayout>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rematch"
-            android:id="@+id/rematch_button" android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"/>
-</RelativeLayout>
+</com.afollestad.cardsui.CardListView>
