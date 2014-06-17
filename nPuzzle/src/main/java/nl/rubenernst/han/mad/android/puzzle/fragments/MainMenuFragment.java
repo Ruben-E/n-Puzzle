@@ -10,10 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import com.afollestad.cardsui.CardAdapter;
-import com.afollestad.cardsui.CardCompressed;
-import com.afollestad.cardsui.CardHeader;
-import com.afollestad.cardsui.CardListView;
+import com.afollestad.cardsui.*;
 import nl.rubenernst.han.mad.android.puzzle.GameSelectionActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayInboxActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity;
@@ -56,11 +53,43 @@ public class MainMenuFragment extends Fragment {
 
         final CardAdapter adapter = new CardAdapter(getActivity(), R.color.main_color);
 
+        CardCompressed singleplayerCard = new CardCompressed("Singleplayer", "");
+        singleplayerCard.setTag(1);
+
+        CardCompressed multiplayerCard = new CardCompressed("Multiplayer", "");
+        multiplayerCard.setTag(2);
+
         adapter.add(new CardHeader("What do you want to play?"));
-        adapter.add(new CardCompressed("Singleplayer", ""));
-        adapter.add(new CardCompressed("Multiplayer", ""));
+        adapter.add(singleplayerCard);
+        adapter.add(multiplayerCard);
 
         menuList.setAdapter(adapter);
+
+        menuList.setOnCardClickListener(new CardListView.CardClickListener() {
+            @Override
+            public void onCardClick(int index, CardBase card, View view) {
+                Object tag = card.getTag();
+                if (tag != null) {
+                    if (tag instanceof Integer) {
+                        Integer type = (Integer)tag;
+
+                        switch (type) {
+                            case 1: {
+                                Intent intent = new Intent(getActivity(), GameSelectionActivity.class);
+                                startActivity(intent);
+                                break;
+                            }
+
+                            case 2: {
+                                Intent intent = new Intent(getActivity(), MultiplayerGamePlayPlayerSelectionActivity.class);
+                                startActivity(intent);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
 //        singleplayerButton.setOnClickListener(this);
 //        multiplayerNewGameButton.setOnClickListener(this);
