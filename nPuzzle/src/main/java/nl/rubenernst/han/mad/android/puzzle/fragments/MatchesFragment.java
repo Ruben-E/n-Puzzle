@@ -104,6 +104,9 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public void refreshGames() {
+        adapter.clear();
+        adapter.notifyDataSetChanged();
+
         int[] games = {TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE,
                 TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN,
                 TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN,
