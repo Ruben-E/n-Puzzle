@@ -8,6 +8,8 @@ import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 
 import java.io.Serializable;
 
@@ -18,6 +20,9 @@ public class MultiplayerGamePlayIntentActivity extends MultiplayerGamePlayActivi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TintHelper.setupTransparentTints(this);
+        InsetsHelper.setInsets(this, findViewById(R.id.content_frame), true, false);
 
         Intent intent = getIntent();
         String matchId = intent.getStringExtra("matchId");

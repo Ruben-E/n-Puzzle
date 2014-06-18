@@ -14,6 +14,8 @@ import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdate
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 
 import java.util.ArrayList;
 
@@ -28,6 +30,9 @@ public class MultiplayerGamePlayInboxActivity extends MultiplayerGamePlayActivit
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TintHelper.setupTransparentTints(this);
+        InsetsHelper.setInsets(this, findViewById(R.id.content_frame), true, false);
 
         if (isSignedIn()) {
             SelectInbox();

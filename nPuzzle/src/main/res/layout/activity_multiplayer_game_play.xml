@@ -3,6 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 tools:context="nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity"
+                android:id="@+id/content_frame"
                 tools:ignore="MergeRootFrame">
     <RelativeLayout android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
