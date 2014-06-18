@@ -13,6 +13,7 @@ import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdate
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.util.ArrayList;
 
@@ -27,6 +28,13 @@ public class MultiplayerGamePlayPlayerSelectionActivity extends MultiplayerGameP
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        puzzleId = intent.getIntExtra("puzzleId", 0);
+        String difficultyString = intent.getStringExtra("difficulty");
+        if (difficultyString != null && !difficultyString.equals("")) {
+            difficulty = Difficulty.fromString(difficultyString);
+        }
 
         if (isSignedIn()) {
             selectPlayers();

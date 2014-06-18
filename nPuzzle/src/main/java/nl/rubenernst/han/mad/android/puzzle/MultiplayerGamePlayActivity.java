@@ -62,6 +62,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     protected HashMap<String, Game> mGames; // Hashmap with a game for all the players with participant id as key.
     protected LocationHelper mLocationHelper;
     protected LocationClient mLocationClient;
+    protected int puzzleId;
+    protected Difficulty difficulty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +145,17 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     public void showGameUI() {
         GamePlayFragment gamePlayFragment = new GamePlayFragment();
-        gamePlayFragment.setDifficulty(Difficulty.DUMB);
-        gamePlayFragment.setPuzzleDrawableId(R.drawable.puzzle_1);
+        if (difficulty != null) {
+            gamePlayFragment.setDifficulty(difficulty);
+        } else {
+            gamePlayFragment.setDifficulty(Difficulty.DUMB);
+        }
+
+        if (puzzleId != 0) {
+            gamePlayFragment.setPuzzleDrawableId(puzzleId);
+        } else {
+            gamePlayFragment.setPuzzleDrawableId(R.drawable.puzzle_1);
+        }
         gamePlayFragment.setGamePlayListener(this);
         if (getCurrentPlayersGame() != null) {
             gamePlayFragment.setUnfinishedGame2(getCurrentPlayersGame());

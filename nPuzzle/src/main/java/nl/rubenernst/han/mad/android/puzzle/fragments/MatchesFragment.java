@@ -24,10 +24,9 @@ import com.google.android.gms.games.multiplayer.InvitationBuffer;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
-import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
-import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
+import nl.rubenernst.han.mad.android.puzzle.helpers.MultiplayerHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 
@@ -76,8 +75,10 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         newGameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(activity, MultiplayerGamePlayPlayerSelectionActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(activity, MultiplayerGamePlayPlayerSelectionActivity.class);
+//                startActivity(intent);
+
+                MultiplayerHelper.startMultiplayer(activity);
             }
         });
 
@@ -274,6 +275,8 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
         return null;
     }
+
+
 
     public void setApiClient(GoogleApiClient apiClient) {
         this.apiClient = apiClient;
