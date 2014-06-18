@@ -605,26 +605,28 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameStarted(Game game) {
         Log.d(TAG, "Started");
 
-        showLoadingIndicator("Loading...");
+        if (mGames != null && mGames.get(ORIGINAL_GAME_KEY) == null) {
+            showLoadingIndicator("Loading...");
 
-        GameCloneTask gameCloneTask = new GameCloneTask();
-        gameCloneTask.setContext(getApplicationContext());
-        gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
-            @Override
-            public void onTaskFinished(Object result, String message) {
-                if (result != null) {
-                    Game originalGame = (Game) result;
-                    if (mGames != null) {
-                        mGames.put(ORIGINAL_GAME_KEY, originalGame);
+            GameCloneTask gameCloneTask = new GameCloneTask();
+            gameCloneTask.setContext(getApplicationContext());
+            gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
+                @Override
+                public void onTaskFinished(Object result, String message) {
+                    if (result != null) {
+                        Game originalGame = (Game) result;
+                        if (mGames != null) {
+                            mGames.put(ORIGINAL_GAME_KEY, originalGame);
 
-                        hideLoadingIndicator();
+                            hideLoadingIndicator();
 
-                        setLocationToGame();
+                            setLocationToGame();
+                        }
                     }
                 }
-            }
-        });
-        gameCloneTask.execute(game);
+            });
+            gameCloneTask.execute(game);
+        }
 
         mGames.put(getCurrentPlayerParticipantId(), game);
     }
