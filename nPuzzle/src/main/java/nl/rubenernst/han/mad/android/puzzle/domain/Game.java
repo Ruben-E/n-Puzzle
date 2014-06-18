@@ -19,6 +19,8 @@ public class Game {
 
     private Constants.GameState gameState;
 
+    private int puzzleId;
+
     public Game() {
         setGameState(Constants.GameState.INITIALIZING);
     }
@@ -151,5 +153,13 @@ public class Game {
 
     public Location getLocation() {
         return location;
+    }
+
+    public int getPuzzleId() {
+        return puzzleId;
+    }
+
+    public void setPuzzleId(int puzzleId) {
+        this.puzzleId = puzzleId;
     }
 }

@@ -6,4 +6,11 @@
         <item>Medium</item>
         <item>Hard</item>
     </array>
+
+    <array name="puzzles">
+        <item>@drawable/puzzle_1</item>
+        <item>@drawable/puzzle_2</item>
+        <item>@drawable/puzzle_3</item>
+        <item>@drawable/puzzle_4</item>
+    </array>
 </resources>

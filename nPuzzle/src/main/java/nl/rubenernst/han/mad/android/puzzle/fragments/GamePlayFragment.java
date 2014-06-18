@@ -178,8 +178,8 @@ public class GamePlayFragment extends Fragment {
     private void onCreateNewGame() {
         mGridSize = getDifficulty().getGridSize();
 
-        splicePuzzle();
         setupGame();
+        splicePuzzle();
     }
 
     private void onCreateUnfinishedGame() {
@@ -192,20 +192,28 @@ public class GamePlayFragment extends Fragment {
 
         mGame = mUnfinishedGame2;
         mGridSize = mGame.getGridSize();
+
+        splicePuzzle();
     }
 
     private void splicePuzzle() {
         int pieceWidth = getPieceWidth();
         int orientationWidth = getOrientationWidth();
 
-        Bitmap puzzle = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mPuzzleDrawableId), orientationWidth, orientationWidth, false);
+        Bitmap puzzle = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), mGame.getPuzzleId()), orientationWidth, orientationWidth, false);
         ArrayList<Bitmap> bitmaps = BitmapGameHelper.spliceBitmap(puzzle, mGridSize, pieceWidth);
         mImageTiles = BitmapGameHelper.addBorderAroundBitmaps(bitmaps, BORDER_SIZE);
 
-        try {
-            BitmapGameHelper.writeBitmapToPrivateStorage(getActivity().getApplicationContext(), puzzle, Constants.IMAGES_FOLDER, Constants.PUZZLE_IMAGE_NAME);
-        } catch (IOException e) {
-            Log.e(TAG, "Could not write puzzle bitmap to internal storage");
+//        try {
+//            BitmapGameHelper.writeBitmapToPrivateStorage(getActivity().getApplicationContext(), puzzle, Constants.IMAGES_FOLDER, Constants.PUZZLE_IMAGE_NAME);
+//        } catch (IOException e) {
+//            Log.e(TAG, "Could not write puzzle bitmap to internal storage");
+//        }
+
+        for (CurrentPosition currentPosition : mGame.getCurrentPositions()) {
+            CorrectPosition correctPosition = currentPosition.getCorrectPosition();
+
+            currentPosition.getImage().setBitmap(mImageTiles.get(correctPosition.getPosition()));
         }
     }
 
@@ -433,6 +441,7 @@ public class GamePlayFragment extends Fragment {
 
     public void setupGame() {
         mGame = new Game();
+        mGame.setPuzzleId(mPuzzleDrawableId);
         mGame.setGridSize(mGridSize);
 
         Integer tiles = (int) Math.pow(mGridSize, 2);
@@ -443,7 +452,6 @@ public class GamePlayFragment extends Fragment {
             currentPosition.setPosition(i);
 
             Image image = new Image();
-            image.setBitmap(mImageTiles.get(i));
 
             currentPosition.setImage(image);
 

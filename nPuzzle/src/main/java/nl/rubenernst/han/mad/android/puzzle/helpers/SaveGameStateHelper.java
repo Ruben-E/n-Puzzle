@@ -1,7 +1,13 @@
 package nl.rubenernst.han.mad.android.puzzle.helpers;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.util.Base64;
 import android.util.JsonWriter;
+import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import org.json.JSONArray;
@@ -9,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -209,6 +216,7 @@ public class SaveGameStateHelper {
         writer.beginObject();
         writer.name(TAG_GRID_SIZE).value(game.getGridSize());
         writer.name(TAG_GAME_STATE).value(game.getGameState().toString());
+        writer.name(TAG_IMAGE).value(ResourcesHelper.findIdForResourceByIdInArray(context, R.array.puzzles, game.getPuzzleId()));
 
         writer.name(TAG_POSITIONS);
         writePositions(writer, game.getCurrentPositions());
@@ -232,8 +240,11 @@ public class SaveGameStateHelper {
 
     private void writePosition(JsonWriter writer, CurrentPosition position) throws IOException {
         int correctPosition = position.getCorrectPosition().getPosition();
-        String imageName = getImageName(correctPosition);
-        String imagePath = BitmapGameHelper.writeBitmapToPrivateStorage(context, position.getImage().getBitmap(), Constants.IMAGES_FOLDER, imageName);
+//        String imageName = getImageName(correctPosition);
+//        String imagePath = BitmapGameHelper.writeBitmapToPrivateStorage(context, position.getImage().getBitmap(), Constants.IMAGES_FOLDER, imageName);
+
+        String imageName = "";
+        String imagePath = "";
 
         writer.beginObject();
         writer.name(TAG_POSITION).value(position.getPosition());
@@ -290,8 +301,18 @@ public class SaveGameStateHelper {
             JSONObject jsonObject = new JSONObject(JSON);
 
             int gridSize = jsonObject.getInt(TAG_GRID_SIZE);
+            int puzzleId = jsonObject.getInt(TAG_IMAGE);
+            int resourceId = -1;
             String gameState = jsonObject.getString(TAG_GAME_STATE);
 
+            if (puzzleId > 0) {
+                TypedArray puzzles = context.getResources().obtainTypedArray(R.array.puzzles);
+                if (puzzles != null) {
+                    resourceId = puzzles.getResourceId(puzzleId, -1);
+                }
+            }
+
+            game.setPuzzleId(resourceId);
             game.setGridSize(gridSize);
             game.setGameState(Constants.GameState.valueOf(gameState));
 
@@ -353,15 +374,29 @@ public class SaveGameStateHelper {
             int positionValue = positionObject.getInt(TAG_POSITION);
             int correctPositionValue = positionObject.getInt(TAG_CORRECT_POSITION);
 
-            String imageName = positionObject.getString(TAG_IMAGE);
-            String imagePath = positionObject.getString(TAG_IMAGE_PATH);
+//            String imageName = positionObject.getString(TAG_IMAGE);
+//            String imagePath = positionObject.getString(TAG_IMAGE_PATH);
+//
+//
+//
+//            String imageData = positionObject.getString("imageData");
+//            if (imageData != null && !imageData.equals("")) {
+//                byte[] imageDataBytes = imageData.getBytes(Charset.forName("UTF-16"));
+//
+//                Bitmap bmp;
+//                BitmapFactory.Options options = new BitmapFactory.Options();
+//                options.inMutable = true;
+//                bmp = BitmapFactory.decodeByteArray(imageDataBytes, 0, imageDataBytes.length, options);
+//
+//                //image.setBitmap(BitmapGameHelper.parseBitmapFromPrivateStorage(imagePath, imageName));
+//                image.setBitmap(bmp);
+//            }
 
             CorrectPosition correctPosition = new CorrectPosition();
             correctPosition.setGame(game);
             correctPosition.setPosition(correctPositionValue);
 
             Image image = new Image();
-            image.setBitmap(BitmapGameHelper.parseBitmapFromPrivateStorage(imagePath, imageName));
 
             CurrentPosition currentPosition = new CurrentPosition();
             currentPosition.setGame(game);
