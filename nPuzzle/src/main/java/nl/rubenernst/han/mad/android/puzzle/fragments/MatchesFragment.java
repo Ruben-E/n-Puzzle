@@ -21,6 +21,7 @@ import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.InvitationBuffer;
+import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
@@ -35,7 +36,7 @@ import java.util.*;
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
  */
-public class MatchesFragment extends Fragment implements GameHelper.GameHelperListener {
+public class MatchesFragment extends Fragment implements GameHelper.GameHelperListener, OnTurnBasedMatchUpdateReceivedListener, OnInvitationReceivedListener {
 
     @InjectView(R.id.matches)
     CardListView matchesList;
@@ -106,17 +107,8 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public void setListeners() {
-        Games.TurnBasedMultiplayer.registerMatchUpdateListener(apiClient, new OnTurnBasedMatchUpdateReceivedListener() {
-            @Override
-            public void onTurnBasedMatchReceived(TurnBasedMatch match) {
-                refreshGames();
-            }
-
-            @Override
-            public void onTurnBasedMatchRemoved(String s) {
-                refreshGames();
-            }
-        });
+        Games.Invitations.registerInvitationListener(apiClient, this);
+        Games.TurnBasedMultiplayer.registerMatchUpdateListener(apiClient, this);
     }
 
     public void refreshGames() {
@@ -286,5 +278,25 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     private String getCurrentPlayerId() {
         return Games.Players.getCurrentPlayerId(apiClient);
+    }
+
+    @Override
+    public void onTurnBasedMatchReceived(TurnBasedMatch match) {
+        refreshGames();
+    }
+
+    @Override
+    public void onTurnBasedMatchRemoved(String s) {
+        refreshGames();
+    }
+
+    @Override
+    public void onInvitationReceived(Invitation invitation) {
+        refreshGames();
+    }
+
+    @Override
+    public void onInvitationRemoved(String s) {
+        refreshGames();
     }
 }
