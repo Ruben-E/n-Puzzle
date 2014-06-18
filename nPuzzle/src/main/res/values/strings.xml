@@ -34,5 +34,6 @@
     <string name='match_error_locally_modified'>This match has locally-modified data. This operation cannot be performed
         until the match is sent to the server.
     </string>
+    <string name="new_game_button">New game</string>
 
 </resources>

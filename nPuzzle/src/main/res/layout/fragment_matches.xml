@@ -1,17 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.MatchesFragment"
-              android:orientation="vertical">
-    <Button android:layout_width="fill_parent" android:layout_height="wrap_content"
-            android:text="New game"/>
-    <com.afollestad.cardsui.CardListView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/matches"
-            >
-    </com.afollestad.cardsui.CardListView>
-</LinearLayout>
+<com.afollestad.cardsui.CardListView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.MatchesFragment"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/matches"
+        >
+</com.afollestad.cardsui.CardListView>
 
 

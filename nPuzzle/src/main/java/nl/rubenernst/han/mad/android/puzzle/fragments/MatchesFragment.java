@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.afollestad.cardsui.*;
@@ -25,6 +26,7 @@ import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayActivity;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
+import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayPlayerSelectionActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
@@ -67,6 +69,19 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         View rootView = inflater.inflate(R.layout.fragment_matches, container, false);
 
         ButterKnife.inject(this, rootView);
+
+        View headerView = inflater.inflate(R.layout.fragment_matches_listview_header, matchesList, false);
+        Button newGameButton = ButterKnife.findById(headerView, R.id.new_game);
+
+        newGameButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity, MultiplayerGamePlayPlayerSelectionActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        matchesList.addHeaderView(headerView);
 
         return rootView;
     }
