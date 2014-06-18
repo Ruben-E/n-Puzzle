@@ -165,7 +165,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                                             .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
                                                 @Override
                                                 public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
-                                                    if(initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
+                                                    if (initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
                                                         TurnBasedMatch match = initiateMatchResult.getMatch();
 
                                                         Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
@@ -220,18 +220,21 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                 Participant opponent = getOpponent(match.getParticipants());
 
                 ImageDownloaderTask imageDownloaderTask = new ImageDownloaderTask();
-                    imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
-                        @Override
-                        public void onTaskFinished(Object result, String message) {
-                            if (result != null) {
-                                Bitmap bitmap = (Bitmap) result;
+                imageDownloaderTask.setTaskFinishedListener(new TaskFinishedListener() {
+                    @Override
+                    public void onTaskFinished(Object result, String message) {
+                        if (result != null) {
+                            Bitmap bitmap = (Bitmap) result;
 
-                                card.setThumbnail(activity, bitmap);
-                                adapter.notifyDataSetChanged();
-                            }
+                            card.setThumbnail(activity, bitmap);
+                            adapter.notifyDataSetChanged();
                         }
-                    });
+                    }
+                });
+
+                if (opponent.getIconImageUrl() != null && !opponent.getIconImageUrl().equals("")) {
                     imageDownloaderTask.execute(opponent.getIconImageUrl());
+                }
             }
         }
 
@@ -275,7 +278,6 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
         return null;
     }
-
 
 
     public void setApiClient(GoogleApiClient apiClient) {
