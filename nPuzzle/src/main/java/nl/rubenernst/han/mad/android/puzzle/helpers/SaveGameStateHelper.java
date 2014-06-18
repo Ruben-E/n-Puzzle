@@ -305,7 +305,7 @@ public class SaveGameStateHelper {
             int resourceId = -1;
             String gameState = jsonObject.getString(TAG_GAME_STATE);
 
-            if (puzzleId > 0) {
+            if (puzzleId > -1) {
                 TypedArray puzzles = context.getResources().obtainTypedArray(R.array.puzzles);
                 if (puzzles != null) {
                     resourceId = puzzles.getResourceId(puzzleId, -1);

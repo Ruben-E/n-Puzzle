@@ -242,16 +242,16 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     }
 
     private HashMap<String, Game> getGamesFromMatchData() {
+        HashMap<String, Game> games = null;
+
         try {
             String JSON = new String(mMatch.getData(), "UTF-16");
-            HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
-
-            return games;
+            games = SaveGameStateHelper.getSavedGameStatesFromJson(getApplicationContext(), JSON);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return games;
     }
 
     private boolean allPlayersPlayed() {

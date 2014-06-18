@@ -9,20 +9,22 @@ import nl.rubenernst.han.mad.android.puzzle.R;
  */
 public class ResourcesHelper {
     public static int findIdForResourceByIdInArray(Context context, int arrayId, int value) {
-        TypedArray colors = context.getResources().obtainTypedArray(arrayId);
-        if (colors != null) {
-            for (int i = 0; i < colors.length(); i++) {
-                int resourceId = colors.getResourceId(i, -1);
+        TypedArray array = context.getResources().obtainTypedArray(arrayId);
+        int returnResourceId = -1;
+        if (array != null) {
+            for (int i = 0; i < array.length(); i++) {
+                int resourceId = array.getResourceId(i, -1);
                 if (resourceId > -1) {
                     if (resourceId == value) {
-                        return i;
+                        returnResourceId = i;
+                        break;
                     }
                 }
             }
 
-            colors.recycle();
+            array.recycle();
         }
 
-        return -1;
+        return returnResourceId;
     }
 }
