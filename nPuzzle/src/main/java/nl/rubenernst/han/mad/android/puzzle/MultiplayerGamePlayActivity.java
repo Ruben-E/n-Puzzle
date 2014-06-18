@@ -30,10 +30,7 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.LocationHelperListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
-import nl.rubenernst.han.mad.android.puzzle.tasks.GameCloneTask;
-import nl.rubenernst.han.mad.android.puzzle.tasks.GameStatesAsStringTask;
-import nl.rubenernst.han.mad.android.puzzle.tasks.GeocoderTask;
-import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
+import nl.rubenernst.han.mad.android.puzzle.tasks.*;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.io.UnsupportedEncodingException;
@@ -41,6 +38,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener, LocationHelperListener {
@@ -206,13 +204,27 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     private void saveGameState() {
         if (isSignedIn() && mMatch != null && currentMatchIsPlayable()) {
-            takeTurnWithNextParticipant(mCurrentPlayerParticipantId, new ResultCallback<TurnBasedMultiplayer.UpdateMatchResult>() {
+            GameStatesAsStringTask gameStatesAsStringTask = new GameStatesAsStringTask();
+            gameStatesAsStringTask.setContext(getApplicationContext());
+            gameStatesAsStringTask.setTaskFinishedListener(new TaskFinishedListener() {
                 @Override
-                public void onResult(TurnBasedMultiplayer.UpdateMatchResult updateMatchResult) {
-                    Status status = updateMatchResult.getStatus();
-                    Log.d(TAG, "Take turn result: " + status.getStatus());
+                public void onTaskFinished(Object result, String message) {
+                    if (result != null) {
+                        String gameState = (String) result;
+                        byte[] gameStateByteArray = getGameStatesAsByteArray(gameState);
+
+                        List<byte[]> bytes = new ArrayList<byte[]>();
+                        bytes.add(gameStateByteArray);
+
+                        BackgroundGameSaverTask backgroundGameSaverTask = new BackgroundGameSaverTask();
+                        backgroundGameSaverTask.setGoogleApiClient(getApiClient());
+                        backgroundGameSaverTask.setMatchId(mMatch.getMatchId());
+                        backgroundGameSaverTask.setParticipantId(mCurrentPlayerParticipantId);
+                        backgroundGameSaverTask.execute(bytes);
+                    }
                 }
             });
+            gameStatesAsStringTask.execute(mGames);
         }
     }
 
@@ -276,10 +288,16 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                     String gameState = (String) result;
                     byte[] gameStateByteArray = getGameStatesAsByteArray(gameState);
 
+                    if (!getApiClient().isConnected()) {
+                        getApiClient().blockingConnect(5000, TimeUnit.MILLISECONDS);
+                    }
+
                     if (getApiClient().isConnected()) {
                         Games.TurnBasedMultiplayer.takeTurn(getApiClient(), mMatch.getMatchId(), gameStateByteArray, participantId)
                                 .setResultCallback(resultCallback);
                     }
+
+
                 }
             }
         });
