@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
@@ -28,6 +29,7 @@ import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.LocationHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayStatusViewAdapter;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.LocationHelperListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.*;
@@ -41,7 +43,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener, LocationHelperListener {
+public class MultiplayerGamePlayActivity extends BaseGameActivity implements GamePlayListener, LocationHelperListener, GamePlayStatusViewAdapter {
 
     @InjectView(R.id.loading_container)
     RelativeLayout loadingContainer;
@@ -155,6 +157,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             gamePlayFragment.setPuzzleDrawableId(R.drawable.puzzle_1);
         }
         gamePlayFragment.setGamePlayListener(this);
+        gamePlayFragment.setGamePlayStatusViewAdapter(this);
         if (getCurrentPlayersGame() != null) {
             gamePlayFragment.setUnfinishedGame2(getCurrentPlayersGame());
         } else if (getOriginalGame() != null) {
@@ -678,6 +681,45 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     @Override
     public void onLocationClientConnectionFailed() {
 
+    }
+
+    @Override
+    public void handleStatusViewInitializing(GamePlayFragment fragment) {
+        fragment.initializeGame();
+    }
+
+    @Override
+    public void handleStatusViewPlaying(Game game, GamePlayFragment fragment) {
+        fragment.playGame();
+    }
+
+    @Override
+    public void handleStatusViewBeforePlaying(Game game, final GamePlayFragment fragment) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View statusBarView = layoutInflater.inflate(R.layout.fragment_game_play_statusbar_initializing, null, false);
+
+        fragment.setStatusBarView(statusBarView);
+
+        final TextView statusText = ButterKnife.findById(statusBarView, R.id.status_initializing);
+
+        CountDownTimer countDownTimer = new CountDownTimer(3000, 500) {
+            public void onTick(long millisUntilFinished) {
+                statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));
+            }
+
+            public void onFinish() {
+                if (fragment.isAdded()) {
+                    fragment.startGame();
+                }
+            }
+        };
+
+        countDownTimer.start();
+    }
+
+    @Override
+    public void handleStatusViewEnded(Game game, GamePlayFragment fragment) {
+        fragment.finishGame();
     }
 
     public class MultiplayerGameFinishedFragment extends Fragment {

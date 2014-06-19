@@ -1,32 +1,28 @@
 package nl.rubenernst.han.mad.android.puzzle.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.*;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import nl.rubenernst.han.mad.android.puzzle.GameFinishedActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
 import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
-import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayStatusViewAdapter;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.GameInitializationTask;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 import nl.rubenernst.han.mad.android.puzzle.utils.OnTouchListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +50,7 @@ public class GamePlayFragment extends Fragment {
     private boolean mUnfinishedGame;
     private Game mUnfinishedGame2;
     private GamePlayListener mGamePlayListener;
+    private GamePlayStatusViewAdapter mGamePlayStatusViewAdapter;
 
     @InjectView(R.id.game_layout)
     RelativeLayout mGameLayout;
@@ -150,7 +147,9 @@ public class GamePlayFragment extends Fragment {
     private void onViewCreatedNewGame() {
         updateUI();
 
-        startGame();
+        if (mGamePlayStatusViewAdapter != null) {
+            mGamePlayStatusViewAdapter.handleStatusViewInitializing(GamePlayFragment.this);
+        }
     }
 
     @Override
@@ -217,48 +216,33 @@ public class GamePlayFragment extends Fragment {
         }
     }
 
-    private void startGame() {
-        setStatusBarContent(R.layout.fragment_game_play_statusbar_initializing);
-        final TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_initializing);
 
-        statusText.setText("Loading...");
-
-        mCountDownTimer = new CountDownTimer(COUNTDOWN_TIMER_MILISECONDS, COUNTDOWN_INTERVAL) {
-            public void onTick(long millisUntilFinished) {
-                statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));
-            }
-
-            public void onFinish() {
-                mCountDownTimer = null;
-                if (mStatusBar != null) {
-                    setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
-
-                    TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
-                    statusText.setText("Turns: 0");
-
-                    mGame.startGame();
-
-                    if (mGamePlayListener != null) {
-                        mGamePlayListener.onGameStarted(mGame);
-                    }
-
-                    updateUI();
-                }
-            }
-        };
-
+    public void initializeGame() {
         GameInitializationTask gameInitializationTask = new GameInitializationTask();
         gameInitializationTask.setTaskFinishedListener(new TaskFinishedListener() {
             @Override
             public void onTaskFinished(Object result, String message) {
                 if (result instanceof Game) {
                     GamePlayFragment.this.mGame = (Game) result;
-                    mCountDownTimer.start();
+
+                    if (mGamePlayStatusViewAdapter != null) {
+                        mGamePlayStatusViewAdapter.handleStatusViewBeforePlaying(mGame, GamePlayFragment.this);
+                    }
                 }
             }
         });
 
         gameInitializationTask.execute(mGame);
+    }
+
+    public void startGame() {
+        mGame.startGame();
+
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameStarted(mGame);
+        }
+
+        updateUI();
     }
 
     private int getOrientationWidth() {
@@ -309,24 +293,13 @@ public class GamePlayFragment extends Fragment {
         mGrid.setLayoutParams(gridParams);
     }
 
-    public void updateUI() {
-        updateLayoutPositions();
-
-        if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
-            setStatusBarContent(R.layout.fragment_game_play_statusbar_finished);
-
-            TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_finished);
-
-            statusText.setText("You won!");
-
-            if (mGamePlayListener != null) {
-                mGamePlayListener.onGameFinished(mGame);
-            }
-        } else if (mGame.isPlayable()) {
-            TextView statusText = ButterKnife.findById(mStatusBar, R.id.status_playing);
-            statusText.setText("Turns: " + mGame.getTurns().size());
+    public void finishGame() {
+        if (mGamePlayListener != null) {
+            mGamePlayListener.onGameFinished(mGame);
         }
+    }
 
+    public void playGame() {
         if (mGamePlayListener != null) {
             mGamePlayListener.onGameUIUpdating(mGame);
         }
@@ -439,6 +412,22 @@ public class GamePlayFragment extends Fragment {
         }
     }
 
+    public void updateUI() {
+        updateLayoutPositions();
+
+        if (mGame.isPlayable() && mGame.allPositionsCorrect()) {
+            if (mGamePlayStatusViewAdapter != null) {
+                mGamePlayStatusViewAdapter.handleStatusViewEnded(mGame, this);
+            }
+        } else if (mGame.isPlayable()) {
+            if (mGamePlayStatusViewAdapter != null) {
+                mGamePlayStatusViewAdapter.handleStatusViewPlaying(mGame, this);
+            }
+        } else {
+            playGame();
+        }
+    }
+
     public void setupGame() {
         mGame = new Game();
         mGame.setPuzzleId(mPuzzleDrawableId);
@@ -490,10 +479,15 @@ public class GamePlayFragment extends Fragment {
         return BitmapGameHelper.addBorderAroundBitmap(correctTile, BORDER_SIZE);
     }
 
-    private void setStatusBarContent(int layoutId) {
+    public void setStatusBarContent(int layoutId) {
         View content = mLayoutInflater.inflate(layoutId, null, false);
         mStatusBar.removeAllViews();
         mStatusBar.addView(content);
+    }
+
+    public void setStatusBarView(View view) {
+        mStatusBar.removeAllViews();
+        mStatusBar.addView(view);
     }
 
     public void setUnfinishedGame(Boolean unfinishedGame) {
@@ -505,7 +499,7 @@ public class GamePlayFragment extends Fragment {
     }
 
     public Bitmap getEmptyTile() {
-        if(mEmptyTile == null) {
+        if (mEmptyTile == null) {
             int pieceWidth = getPieceWidth();
 
             mEmptyTile = generateEmptyTile(pieceWidth, pieceWidth);
@@ -526,5 +520,13 @@ public class GamePlayFragment extends Fragment {
 
     public void setGamePlayListener(GamePlayListener gamePlayListener) {
         this.mGamePlayListener = gamePlayListener;
+    }
+
+    public GamePlayStatusViewAdapter getGamePlayStatusViewAdapter() {
+        return mGamePlayStatusViewAdapter;
+    }
+
+    public void setGamePlayStatusViewAdapter(GamePlayStatusViewAdapter gamePlayStatusViewAdapter) {
+        this.mGamePlayStatusViewAdapter = gamePlayStatusViewAdapter;
     }
 }
