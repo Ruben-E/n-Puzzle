@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_id">79174655410</string>
+    <string name="achievement_play_5_singleplayer_games">CgkIsru1-aYCEAIQBQ</string>
+    <string name="achievement_play_10_singleplayer_games">CgkIsru1-aYCEAIQBg</string>
+    <string name="achievement_play_20_singleplayer_games">CgkIsru1-aYCEAIQBw</string>
+    <string name="achievement_play_5_multiplayer_games">CgkIsru1-aYCEAIQCA</string>
+    <string name="achievement_play_10_multiplayer_games">CgkIsru1-aYCEAIQCQ</string>
+    <string name="achievement_play_20_multiplayer_games">CgkIsru1-aYCEAIQCg</string>
+    <string name="leaderboard_dumb">CgkIsru1-aYCEAIQAg</string>
+    <string name="leaderboard_easy">CgkIsru1-aYCEAIQAw</string>
+    <string name="leaderboard_medium">CgkIsru1-aYCEAIQAQ</string>
+    <string name="leaderboard_hard">CgkIsru1-aYCEAIQBA</string>
 </resources>
