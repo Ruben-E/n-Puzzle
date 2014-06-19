@@ -27,6 +27,7 @@ import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
+import nl.rubenernst.han.mad.android.puzzle.helpers.MatchHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MultiplayerHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
@@ -262,13 +263,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public Participant getOpponent(ArrayList<Participant> participants) {
-        for (Participant participant : participants) {
-            if (!participant.getPlayer().getPlayerId().equals(getCurrentPlayerId())) {
-                return participant;
-            }
-        }
-
-        return null;
+        return MatchHelper.getOpponent(participants, getCurrentPlayerId());
     }
 
 
@@ -277,7 +272,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     private String getCurrentPlayerId() {
-        return Games.Players.getCurrentPlayerId(apiClient);
+        return MatchHelper.getCurrentPlayerId(apiClient);
     }
 
     @Override

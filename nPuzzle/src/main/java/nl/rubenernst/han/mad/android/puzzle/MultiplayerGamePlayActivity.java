@@ -16,7 +16,6 @@ import butterknife.InjectView;
 import com.afollestad.cardsui.*;
 import com.google.android.gms.common.api.Result;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesStatusCodes;
 import com.google.android.gms.games.multiplayer.Participant;
@@ -27,6 +26,7 @@ import com.google.example.games.basegameutils.BaseGameActivity;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
 import nl.rubenernst.han.mad.android.puzzle.helpers.LocationHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.MatchHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayStatusViewAdapter;
@@ -690,6 +690,35 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     @Override
     public void handleStatusViewPlaying(Game game, GamePlayFragment fragment) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View statusBarView = layoutInflater.inflate(R.layout.fragment_game_play_statusbar_multiplayer_playing, null, false);
+
+        fragment.setStatusBarView(statusBarView);
+
+        Participant opponent = MatchHelper.getOpponent(mMatch.getParticipants(), MatchHelper.getCurrentPlayerId(getApiClient()));
+
+        TextView playerOneName = ButterKnife.findById(statusBarView, R.id.player_one_name);
+        TextView playerTwoName = ButterKnife.findById(statusBarView, R.id.player_two_name);
+        TextView playerOneScore = ButterKnife.findById(statusBarView, R.id.player_one_score);
+        TextView playerTwoScore = ButterKnife.findById(statusBarView, R.id.player_two_score);
+
+        playerOneName.setText("You");
+        playerOneScore.setText("" + game.getTurns().size());
+
+        playerTwoName.setText("");
+        playerTwoScore.setText("");
+
+        if (opponent != null) {
+            Game opponentGame = mGames.get(opponent.getParticipantId());
+            if (opponentGame != null) {
+                playerTwoName.setText(opponent.getDisplayName());
+                playerTwoScore.setText("" + opponentGame.getTurns().size());
+            } else {
+                playerTwoName.setText(opponent.getDisplayName());
+                playerTwoScore.setText("-");
+            }
+        }
+
         fragment.playGame();
     }
 

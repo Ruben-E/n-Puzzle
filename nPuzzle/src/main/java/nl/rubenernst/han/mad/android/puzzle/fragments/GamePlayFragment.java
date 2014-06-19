@@ -135,8 +135,6 @@ public class GamePlayFragment extends Fragment {
     }
 
     private void onViewCreatedUnfinishedGame() {
-        setStatusBarContent(R.layout.fragment_game_play_statusbar_playing);
-
         if (mGamePlayListener != null) {
             mGamePlayListener.onGameStarted(mGame);
         }
@@ -282,7 +280,7 @@ public class GamePlayFragment extends Fragment {
     private void updateLayoutPositions() {
         int gridWidth = getGridWidth();
 
-        RelativeLayout.LayoutParams statusBarParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, getResources().getDisplayMetrics()));
+        RelativeLayout.LayoutParams statusBarParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, getResources().getDisplayMetrics()));
         statusBarParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         statusBarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         mStatusBar.setLayoutParams(statusBarParams);
