@@ -35,5 +35,8 @@
         until the match is sent to the server.
     </string>
     <string name="new_game_button">New game</string>
+    <string name="dismiss_label">Dismiss</string>
+    <string name="accept_label">Accept</string>
+    <string name="decline_label">Decline</string>
 
 </resources>

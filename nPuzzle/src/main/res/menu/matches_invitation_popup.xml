@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools">
+
+    <item android:id="@+id/action_accept"
+          android:title="@string/accept_label"
+          android:orderInCategory="100"
+          app:showAsAction="never" />
+    <item android:id="@+id/action_decline"
+          android:title="@string/decline_label"
+          android:orderInCategory="100"
+          app:showAsAction="never" />
+</menu>

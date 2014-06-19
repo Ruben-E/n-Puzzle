@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -241,6 +242,19 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         if (opponent != null) {
             card = new Card("Playing with " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
             card.setTag(match);
+            card.setPopupMenu(R.menu.matches_match_popup, new Card.CardMenuListener<Card>() {
+                @Override
+                public void onMenuItemClick(Card card, MenuItem item) {
+                    if (item.getItemId() == R.id.action_dismiss) {
+                        Object tag = card.getTag();
+                        if (tag instanceof TurnBasedMatch) {
+                            TurnBasedMatch match = (TurnBasedMatch) tag;
+                            Games.TurnBasedMultiplayer.dismissMatch(apiClient, match.getMatchId());
+                            refreshGames();
+                        }
+                    }
+                }
+            });
 
             if (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN) {
                 card.setClickable(false);
@@ -257,6 +271,41 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         if (opponent != null) {
             card = new Card("Invitation from " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, invitation.getCreationTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
             card.setTag(invitation);
+
+            card.setPopupMenu(R.menu.matches_invitation_popup, new Card.CardMenuListener<Card>() {
+                @Override
+                public void onMenuItemClick(Card card, MenuItem item) {
+                    if (item.getItemId() == R.id.action_accept) {
+                        Object tag = card.getTag();
+                        if (tag instanceof Invitation) {
+                            Invitation invitation = (Invitation) tag;
+                            Games.TurnBasedMultiplayer.acceptInvitation(apiClient, invitation.getInvitationId())
+                                    .setResultCallback(new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
+                                        @Override
+                                        public void onResult(TurnBasedMultiplayer.InitiateMatchResult initiateMatchResult) {
+                                            if (initiateMatchResult.getStatus().getStatusCode() == GamesStatusCodes.STATUS_OK) {
+                                                TurnBasedMatch match = initiateMatchResult.getMatch();
+
+                                                Intent intent = new Intent(activity, MultiplayerGamePlayIntentActivity.class);
+                                                intent.putExtra("matchId", match.getMatchId());
+
+                                                startActivity(intent);
+                                            }
+                                        }
+                                    });
+                        }
+                    }
+
+                    if (item.getItemId() == R.id.action_decline) {
+                        Object tag = card.getTag();
+                        if (tag instanceof Invitation) {
+                            Invitation invitation = (Invitation) tag;
+                            Games.TurnBasedMultiplayer.declineInvitation(apiClient, invitation.getInvitationId());
+                            refreshGames();
+                        }
+                    }
+                }
+            });
         }
 
         return card;
