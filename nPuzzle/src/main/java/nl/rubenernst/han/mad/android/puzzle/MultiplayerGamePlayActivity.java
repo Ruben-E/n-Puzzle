@@ -703,7 +703,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
         TextView playerTwoScore = ButterKnife.findById(statusBarView, R.id.player_two_score);
 
         playerOneName.setText("You");
-        playerOneScore.setText("" + game.getTurns().size());
+        playerOneScore.setText("" + game.getScore());
 
         playerTwoName.setText("");
         playerTwoScore.setText("");
@@ -712,7 +712,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             Game opponentGame = mGames.get(opponent.getParticipantId());
             if (opponentGame != null) {
                 playerTwoName.setText(opponent.getDisplayName());
-                playerTwoScore.setText("" + opponentGame.getTurns().size());
+                playerTwoScore.setText("" + opponentGame.getScore());
             } else {
                 playerTwoName.setText(opponent.getDisplayName());
                 playerTwoScore.setText("-");
@@ -797,7 +797,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                 String scoreText = "Did not play yet";
                 Game game = mGames.get(participant.getParticipantId());
                 if (game != null) {
-                    scoreText = "Score: " + game.getTurns().size();
+                    scoreText = "Score: " + game.getScore();
                 }
 
                 String imageUrl = participant.getIconImageUrl();

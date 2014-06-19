@@ -126,6 +126,10 @@ public class Game {
         }
     }
 
+    public int getScore() {
+        return getTurns().size();
+    }
+
     private Integer getPuzzleShuffleNumber() {
         return getGridSize() * SHUFFLE_MULTIPLIER;
     }

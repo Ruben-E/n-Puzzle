@@ -203,7 +203,7 @@ public class GamePlayActivity extends FragmentActivity implements GamePlayListen
         SaveGameStateHelper.removeSavedGameState(getApplicationContext());
 
         Intent intent = new Intent(this, GameFinishedActivity.class);
-        intent.putExtra("number_of_turns", game.getTurns().size());
+        intent.putExtra("number_of_turns", game.getScore());
         intent.putExtra("difficulty", Difficulty.fromGridSize(game.getGridSize()));
 
         startActivity(intent);
