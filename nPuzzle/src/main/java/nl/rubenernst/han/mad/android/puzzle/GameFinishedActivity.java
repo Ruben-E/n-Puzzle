@@ -92,8 +92,10 @@ public class GameFinishedActivity extends BaseGameActivity {
 
     @Override
     public void onSignInSucceeded() {
-        Games.Leaderboards.submitScore(getApiClient(), mDifficulty.getLeaderboardId(), mScore);
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_5_singleplayer_games), 1);
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_10_singleplayer_games), 1);
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_20_singleplayer_games), 1);
 
-        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(getApiClient(), mDifficulty.getLeaderboardId()), 123);
+        Games.Leaderboards.submitScore(getApiClient(), mDifficulty.getLeaderboardId(), mScore);
     }
 }
