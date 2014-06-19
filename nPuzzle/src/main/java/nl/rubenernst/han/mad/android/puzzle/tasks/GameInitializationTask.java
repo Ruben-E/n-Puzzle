@@ -15,12 +15,13 @@ public class GameInitializationTask extends AsyncTask<Game, Void, Game> {
         Game game = games[0];
         game.randomize();
 
-        onCompleted(game);
-
         return game;
     }
 
-    private void onCompleted(Game game) {
+    @Override
+    protected void onPostExecute(Game game) {
+        super.onPostExecute(game);
+
         if(taskFinishedListener != null) {
             taskFinishedListener.onTaskFinished(game, null);
         }
