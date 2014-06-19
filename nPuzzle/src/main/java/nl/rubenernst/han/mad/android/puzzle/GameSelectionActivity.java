@@ -3,15 +3,18 @@ package nl.rubenernst.han.mad.android.puzzle;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GameSelectionFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
-public class GameSelectionActivity extends ActionBarActivity {
+public class GameSelectionActivity extends FragmentActivity {
 
     private Difficulty mDifficulty = Difficulty.MEDIUM;
     private GameSelectionFragment mGameSelectionFragment;
@@ -20,6 +23,9 @@ public class GameSelectionActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_selection);
+
+        TintHelper.setupTransparentTints(this);
+        InsetsHelper.setInsets(this, findViewById(R.id.container), true, false);
 
         if (SaveGameStateHelper.hasSavedGameState(getApplicationContext())) {
             showNotFinishedGameDialog();

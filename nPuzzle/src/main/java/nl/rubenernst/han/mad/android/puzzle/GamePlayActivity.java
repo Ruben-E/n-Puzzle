@@ -1,22 +1,25 @@
 package nl.rubenernst.han.mad.android.puzzle;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 import android.view.*;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.fragments.GamePlayFragment;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 /**
  * Created by rubenernst on 14-03-14.
  */
-public class GamePlayActivity extends ActionBarActivity implements GamePlayListener {
+public class GamePlayActivity extends FragmentActivity implements GamePlayListener {
 
     private Boolean mUnfinishedGame;
     private Difficulty mDifficulty;
@@ -29,6 +32,9 @@ public class GamePlayActivity extends ActionBarActivity implements GamePlayListe
         super.onCreate(savedInstanceState);
         try {
             setContentView(R.layout.activity_game_play);
+
+            TintHelper.setupTransparentTints(this);
+            InsetsHelper.setInsets(this, findViewById(R.id.container), true, false);
 
             Class res = R.drawable.class;
 

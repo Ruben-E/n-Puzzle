@@ -17,7 +17,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import nl.rubenernst.han.mad.android.puzzle.helpers.BitmapGameHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
 import com.google.example.games.basegameutils.BaseGameActivity;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
@@ -44,6 +46,9 @@ public class GameFinishedActivity extends BaseGameActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_finished);
+
+        TintHelper.setupTransparentTints(this);
+        InsetsHelper.setInsets(this, findViewById(R.id.content_frame), true, false);
 
         ButterKnife.inject(this);
 
