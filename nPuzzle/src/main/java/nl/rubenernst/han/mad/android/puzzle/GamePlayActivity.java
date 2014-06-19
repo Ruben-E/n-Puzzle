@@ -14,12 +14,13 @@ import nl.rubenernst.han.mad.android.puzzle.helpers.InsetsHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.TintHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayListener;
+import nl.rubenernst.han.mad.android.puzzle.interfaces.GamePlayStatusViewAdapter;
 import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 /**
  * Created by rubenernst on 14-03-14.
  */
-public class GamePlayActivity extends FragmentActivity implements GamePlayListener {
+public class GamePlayActivity extends FragmentActivity implements GamePlayListener, GamePlayStatusViewAdapter {
 
     private Boolean mUnfinishedGame;
     private Difficulty mDifficulty;
@@ -51,6 +52,7 @@ public class GamePlayActivity extends FragmentActivity implements GamePlayListen
             gamePlayFragment.setDifficulty(mDifficulty);
             gamePlayFragment.setPuzzleDrawableId(mPuzzleDrawableId);
             gamePlayFragment.setGamePlayListener(this);
+            gamePlayFragment.setGamePlayStatusViewAdapter(this);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -158,6 +160,8 @@ public class GamePlayActivity extends FragmentActivity implements GamePlayListen
         GamePlayFragment gamePlayFragment = new GamePlayFragment();
         gamePlayFragment.setDifficulty(difficulty);
         gamePlayFragment.setPuzzleDrawableId(mPuzzleDrawableId);
+        gamePlayFragment.setGamePlayStatusViewAdapter(this);
+        gamePlayFragment.setGamePlayListener(this);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, gamePlayFragment)
@@ -213,5 +217,25 @@ public class GamePlayActivity extends FragmentActivity implements GamePlayListen
     @Override
     public void onGameResumed(Game game) {
 
+    }
+
+    @Override
+    public void handleStatusViewInitializing(GamePlayFragment fragment) {
+        fragment.initializeGame();
+    }
+
+    @Override
+    public void handleStatusViewPlaying(Game game, GamePlayFragment fragment) {
+        fragment.playGame();
+    }
+
+    @Override
+    public void handleStatusViewBeforePlaying(Game game, GamePlayFragment fragment) {
+        fragment.startGame();
+    }
+
+    @Override
+    public void handleStatusViewEnded(Game game, GamePlayFragment fragment) {
+        fragment.finishGame();
     }
 }
