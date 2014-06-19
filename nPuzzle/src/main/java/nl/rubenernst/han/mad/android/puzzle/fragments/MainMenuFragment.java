@@ -1,7 +1,5 @@
 package nl.rubenernst.han.mad.android.puzzle.fragments;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.afollestad.cardsui.*;
@@ -29,6 +26,7 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
     private MainMenuActivity activity;
     private GoogleApiClient apiClient;
     private CardAdapter adapter;
+    private boolean isVisible = false;
 
     @InjectView(R.id.menu)
     CardListView menuList;
@@ -56,12 +54,13 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
 
         ButterKnife.inject(this, rootView);
 
-        initializeMenu();
+        setMenuItems();
+        showMenu();
 
         return rootView;
     }
 
-    public void initializeMenu() {
+    public void setMenuItems() {
         adapter.clear();
         adapter.notifyDataSetChanged();
 
@@ -78,13 +77,17 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
         highscoresCard.setTag(HIGHSCORES_TAG);
 
         adapter.add(new CardHeader("What do you want to do?"));
+        adapter.add(singleplayerCard);
         if (apiClient.isConnected()) {
-            adapter.add(singleplayerCard);
             adapter.add(multiplayerCard);
             adapter.add(achievementsCard);
             adapter.add(highscoresCard);
+        } else {
+            adapter.add(new CardCenteredHeader("Multiplayer not available"));
         }
+    }
 
+    public void showMenu() {
         menuList.setAdapter(adapter);
 
         menuList.setOnCardClickListener(new CardListView.CardClickListener() {
@@ -134,12 +137,26 @@ public class MainMenuFragment extends Fragment implements GameHelper.GameHelperL
 
     @Override
     public void onSignInFailed() {
-        initializeMenu();
+        setMenuItems();
+
+        if (isVisible) {
+            showMenu();
+        }
     }
 
     @Override
     public void onSignInSucceeded() {
-        initializeMenu();
+        setMenuItems();
+
+        if (isVisible) {
+            showMenu();
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        isVisible = isVisibleToUser;
     }
 
     public void setApiClient(GoogleApiClient apiClient) {
