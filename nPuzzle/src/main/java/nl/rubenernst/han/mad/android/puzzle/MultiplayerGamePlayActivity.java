@@ -648,6 +648,12 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameFinished(Game game) {
         Log.d(TAG, "Finished");
 
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_5_multiplayer_games), 1);
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_10_multiplayer_games), 1);
+        Games.Achievements.increment(getApiClient(), getResources().getString(R.string.achievement_play_20_multiplayer_games), 1);
+
+        Games.Leaderboards.submitScore(getApiClient(), game.getDifficulty().getLeaderboardId(), game.getScore());
+
         takeNextTurn();
     }
 

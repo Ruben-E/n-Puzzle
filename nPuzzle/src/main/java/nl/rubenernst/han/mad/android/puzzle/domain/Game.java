@@ -1,6 +1,7 @@
 package nl.rubenernst.han.mad.android.puzzle.domain;
 
 import nl.rubenernst.han.mad.android.puzzle.utils.Constants;
+import nl.rubenernst.han.mad.android.puzzle.utils.Difficulty;
 
 import java.util.*;
 
@@ -128,6 +129,10 @@ public class Game {
 
     public int getScore() {
         return getTurns().size();
+    }
+
+    public Difficulty getDifficulty() {
+        return Difficulty.fromGridSize(gridSize);
     }
 
     private Integer getPuzzleShuffleNumber() {
