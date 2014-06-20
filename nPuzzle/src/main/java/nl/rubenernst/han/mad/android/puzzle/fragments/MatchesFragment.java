@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -332,8 +333,27 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public void hideProgressBar() {
-        progressBar.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0));
         progressBar.progressiveStop();
+
+        long timer = 1500; //TODO: Magic number
+
+        Log.d("TEST", "Timer: " + timer);
+
+        CountDownTimer countDownTimer = new CountDownTimer(timer, 500) {
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                if (progressBar != null) {
+                    progressBar.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0));
+                }
+            }
+        };
+
+        countDownTimer.start();
     }
 
     public void setApiClient(GoogleApiClient apiClient) {
