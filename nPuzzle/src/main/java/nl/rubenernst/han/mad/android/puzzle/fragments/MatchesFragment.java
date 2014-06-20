@@ -31,11 +31,13 @@ import com.google.example.games.basegameutils.GameHelper;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
+import nl.rubenernst.han.mad.android.puzzle.UI.MultiLineCard;
 import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MatchHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MultiplayerHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
+import nl.rubenernst.han.mad.android.puzzle.tasks.GameStringAsGameScoreTask;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 
 import java.io.UnsupportedEncodingException;
@@ -73,6 +75,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     public MatchesFragment(Activity activity) {
         this.activity = activity;
         this.adapter = new CardAdapter(activity, R.color.main_color);
+        this.adapter.registerLayout(R.layout.multi_line_card);
     }
 
 
@@ -136,8 +139,6 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                 .setResultCallback(new ResultCallback<TurnBasedMultiplayer.LoadMatchesResult>() {
                     public void onResult(TurnBasedMultiplayer.LoadMatchesResult r) {
                         adapter.clear();
-                        adapter.notifyDataSetChanged();
-
                         LoadMatchesResponse matches = r.getMatches();
 
                         ArrayList<Card> inviteCards = getCardsForInvitations(matches.getInvitations());
@@ -187,6 +188,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                         });
 
                         hideProgressBar();
+                        adapter.notifyDataSetChanged();
                         matchesList.setAdapter(adapter);
 
                     }
@@ -251,14 +253,13 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public Card getCardForMatch(final TurnBasedMatch match) {
-        Participant opponent = getOpponent(match.getParticipants());
-        Card card = null;
+        final Participant opponent = getOpponent(match.getParticipants());
+        MultiLineCard card = null;
 
         if (opponent != null) {
-            String scoreString = "";
-            CharSequence dateString = DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0);
+            final CharSequence dateString = DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0);
 
-            card = new Card("Playing with " + opponent.getDisplayName(), "");
+            card = new MultiLineCard("Playing with " + opponent.getDisplayName(), "");
             card.setTag(match);
             card.setPopupMenu(R.menu.matches_match_popup, new Card.CardMenuListener<Card>() {
                 @Override
@@ -280,26 +281,42 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
             if (match.getData() != null) {
                 try {
-                    String JSON = new String(match.getData(), "UTF-16");
-                    HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(activity, JSON);
+                    final String JSON = new String(match.getData(), "UTF-16");
+                    final MultiLineCard finalCard = card;
 
-                    String myParticipantId = match.getParticipantId(MatchHelper.getCurrentPlayerId(apiClient));
+                    GameStringAsGameScoreTask gameScoreTask = new GameStringAsGameScoreTask();
+                    gameScoreTask.setContext(activity);
+                    gameScoreTask.setTaskFinishedListener(new TaskFinishedListener() {
+                        @Override
+                        public void onTaskFinished(Object result, String message) {
+                            if (result != null) {
+                                HashMap<String, Game> games = (HashMap<String, Game>) result;
+                                String scoreString = "";
 
-                    Game opponentGame = games.get(opponent.getParticipantId());
-                    Game myGame = games.get(myParticipantId);
-                    if (opponentGame != null && myGame != null) {
-                        scoreString = "You: " + myGame.getScore() + ". Opponent: " + opponentGame.getScore();
-                    } else if (opponentGame != null) {
-                        scoreString = "You: N/A. Opponent: " + opponentGame.getScore();
-                    } else if (myGame != null) {
-                        scoreString = "You: " + myGame.getScore() + ". Opponent: N/A";
-                    }
+                                String myParticipantId = match.getParticipantId(MatchHelper.getCurrentPlayerId(apiClient));
+
+                                Game opponentGame = games.get(opponent.getParticipantId());
+                                Game myGame = games.get(myParticipantId);
+                                if (opponentGame != null && myGame != null) {
+                                    scoreString = "\nPoints: " + myGame.getScore() + " (you) - " + opponentGame.getScore() + " ("+ opponent.getDisplayName() +")";
+                                } else if (opponentGame != null) {
+                                    scoreString = "\nPoints: N/A (you) - " + opponentGame.getScore() + " ("+ opponent.getDisplayName() +")";
+                                } else if (myGame != null) {
+                                    scoreString = "\nPoints: " + myGame.getScore() + " (you) - N/A ("+ opponent.getDisplayName() +")";
+                                }
+
+                                finalCard.setContent(dateString + " " + scoreString);
+                                adapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
+                    gameScoreTask.execute(JSON);
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
             }
 
-            card.setContent(dateString + " " + scoreString);
+            card.setContent(dateString);
         }
 
         return card;

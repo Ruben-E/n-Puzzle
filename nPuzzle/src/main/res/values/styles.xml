@@ -25,4 +25,9 @@
         <item name="spb_generate_background_with_colors">false</item>
     </style>
 
+    <style name="card_multi_line" parent="@style/card_content">
+        <item name="android:singleLine">false</item>
+        <item name="android:maxLines">3</item>
+    </style>
+
 </resources>
