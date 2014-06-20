@@ -272,8 +272,13 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     private boolean allPlayersPlayed() {
         for (Participant participant : mMatch.getParticipants()) {
             String participantId = participant.getParticipantId();
+            Game participantGame = mGames.get(participantId);
 
-            if (mGames.get(participantId) == null) {
+            if (participantGame != null) {
+                if (participantGame.isPlayable() && !participantGame.allPositionsCorrect()) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         }
