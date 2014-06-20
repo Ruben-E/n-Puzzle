@@ -125,6 +125,8 @@ public class Game {
 
             randomPosition.move();
         }
+
+        getTurns().clear();
     }
 
     public int getScore() {
@@ -153,7 +155,6 @@ public class Game {
 
     public void startGame() {
         setGameState(Constants.GameState.PLAYABLE);
-        getTurns().clear();
     }
 
     public void setLocation(Location location) {

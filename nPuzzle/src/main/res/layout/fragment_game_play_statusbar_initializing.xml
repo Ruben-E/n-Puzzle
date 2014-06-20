@@ -4,6 +4,7 @@
           android:layout_width="fill_parent"
           android:layout_height="fill_parent"
           android:textSize="40sp"
+          android:text="Loading..."
           android:textColor="@android:color/holo_blue_light"
           android:id="@+id/status_initializing"
           android:gravity="center|left"/>

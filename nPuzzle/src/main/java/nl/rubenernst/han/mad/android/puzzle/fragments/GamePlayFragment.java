@@ -140,6 +140,10 @@ public class GamePlayFragment extends Fragment {
         }
 
         updateUI();
+
+        if (mGamePlayStatusViewAdapter != null) {
+            mGamePlayStatusViewAdapter.handleStatusViewBeforePlaying(mGame, GamePlayFragment.this);
+        }
     }
 
     private void onViewCreatedNewGame() {

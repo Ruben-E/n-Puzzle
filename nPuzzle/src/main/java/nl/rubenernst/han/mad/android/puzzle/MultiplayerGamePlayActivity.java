@@ -613,32 +613,9 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void onGameStarted(Game game) {
         Log.d(TAG, "Started");
 
-        if (mGames != null && mGames.get(ORIGINAL_GAME_KEY) == null) {
-            showLoadingIndicator("Loading...");
-
-            GameCloneTask gameCloneTask = new GameCloneTask();
-            gameCloneTask.setContext(getApplicationContext());
-            gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
-                @Override
-                public void onTaskFinished(Object result, String message) {
-                    if (result != null) {
-                        Game originalGame = (Game) result;
-                        if (mGames != null) {
-                            mGames.put(ORIGINAL_GAME_KEY, originalGame);
-
-                            hideLoadingIndicator();
-
-                            setLocationToGame();
-                        }
-                    }
-                }
-            });
-            gameCloneTask.execute(game);
-        } else {
-            setLocationToGame();
-        }
-
         mGames.put(getCurrentPlayerParticipantId(), game);
+
+        setLocationToGame();
     }
 
     @Override
@@ -744,7 +721,7 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
         final TextView statusText = ButterKnife.findById(statusBarView, R.id.status_initializing);
 
-        CountDownTimer countDownTimer = new CountDownTimer(3000, 500) {
+        final CountDownTimer countDownTimer = new CountDownTimer(3000, 500) {
             public void onTick(long millisUntilFinished) {
                 statusText.setText("" + (int) Math.ceil(millisUntilFinished / 1000d));
             }
@@ -756,7 +733,30 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
             }
         };
 
-        countDownTimer.start();
+        if (mGames != null && mGames.get(ORIGINAL_GAME_KEY) == null) {
+            showLoadingIndicator("Loading...");
+
+            GameCloneTask gameCloneTask = new GameCloneTask();
+            gameCloneTask.setContext(getApplicationContext());
+            gameCloneTask.setTaskFinishedListener(new TaskFinishedListener() {
+                @Override
+                public void onTaskFinished(Object result, String message) {
+                    if (result != null) {
+                        Game originalGame = (Game) result;
+                        if (mGames != null) {
+                            mGames.put(ORIGINAL_GAME_KEY, originalGame);
+
+                            hideLoadingIndicator();
+
+                            countDownTimer.start();
+                        }
+                    }
+                }
+            });
+            gameCloneTask.execute(game);
+        } else {
+            countDownTimer.start();
+        }
     }
 
     @Override
