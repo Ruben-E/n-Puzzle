@@ -629,6 +629,8 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
                 }
             });
             gameCloneTask.execute(game);
+        } else {
+            setLocationToGame();
         }
 
         mGames.put(getCurrentPlayerParticipantId(), game);
