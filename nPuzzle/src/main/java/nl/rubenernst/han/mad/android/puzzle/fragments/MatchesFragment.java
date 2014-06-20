@@ -31,11 +31,14 @@ import com.google.example.games.basegameutils.GameHelper;
 import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
+import nl.rubenernst.han.mad.android.puzzle.domain.Game;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MatchHelper;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MultiplayerHelper;
+import nl.rubenernst.han.mad.android.puzzle.helpers.SaveGameStateHelper;
 import nl.rubenernst.han.mad.android.puzzle.interfaces.TaskFinishedListener;
 import nl.rubenernst.han.mad.android.puzzle.tasks.ImageDownloaderTask;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -252,7 +255,10 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Card card = null;
 
         if (opponent != null) {
-            card = new Card("Playing with " + opponent.getDisplayName(), DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0));
+            String scoreString = "";
+            CharSequence dateString = DateUtils.getRelativeDateTimeString(activity, match.getLastUpdatedTimestamp(), 60000, DateUtils.MINUTE_IN_MILLIS, 0);
+
+            card = new Card("Playing with " + opponent.getDisplayName(), "");
             card.setTag(match);
             card.setPopupMenu(R.menu.matches_match_popup, new Card.CardMenuListener<Card>() {
                 @Override
@@ -271,6 +277,29 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
             if (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN) {
                 card.setClickable(false);
             }
+
+            if (match.getData() != null) {
+                try {
+                    String JSON = new String(match.getData(), "UTF-16");
+                    HashMap<String, Game> games = SaveGameStateHelper.getSavedGameStatesFromJson(activity, JSON);
+
+                    String myParticipantId = match.getParticipantId(MatchHelper.getCurrentPlayerId(apiClient));
+
+                    Game opponentGame = games.get(opponent.getParticipantId());
+                    Game myGame = games.get(myParticipantId);
+                    if (opponentGame != null && myGame != null) {
+                        scoreString = "You: " + myGame.getScore() + ". Opponent: " + opponentGame.getScore();
+                    } else if (opponentGame != null) {
+                        scoreString = "You: N/A. Opponent: " + opponentGame.getScore();
+                    } else if (myGame != null) {
+                        scoreString = "You: " + myGame.getScore() + ". Opponent: N/A";
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            card.setContent(dateString + " " + scoreString);
         }
 
         return card;

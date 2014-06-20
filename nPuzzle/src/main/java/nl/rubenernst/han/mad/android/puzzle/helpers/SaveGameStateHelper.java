@@ -2,10 +2,6 @@ package nl.rubenernst.han.mad.android.puzzle.helpers;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.util.Base64;
 import android.util.JsonWriter;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.domain.*;
@@ -15,7 +11,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -140,6 +135,20 @@ public class SaveGameStateHelper {
         return null;
     }
 
+    public static Game getSavedGameStateScoreFromJson(Context context, String JSON) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            if (!JSON.equals("")) {
+                return saveGameStateHelper.getSavedGameStateScoreFromJson(JSON);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static boolean hasSavedGameState(Context context) {
         try {
             SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
@@ -171,6 +180,20 @@ public class SaveGameStateHelper {
 
             if (!JSON.equals("")) {
                 return saveGameStateHelper.getSavedGameStatesFromJson(JSON);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static HashMap<String, Game> getSavedGameStatesScoresFromJson(Context context, String JSON) {
+        try {
+            SaveGameStateHelper saveGameStateHelper = new SaveGameStateHelper(context);
+
+            if (!JSON.equals("")) {
+                return saveGameStateHelper.getSavedGameStatesScoresFromJson(JSON);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -339,8 +362,12 @@ public class SaveGameStateHelper {
             while (keys.hasNext()) {
                 String key = keys.next();
                 try {
-                    JSONObject value = jsonObject.getJSONObject(key);
-                    Game game = getSavedGameStateFromJson(value.toString());
+                    Game game = null;
+                    if (!jsonObject.isNull(key)) {
+
+                        JSONObject value = jsonObject.getJSONObject(key);
+                        game = getSavedGameStateFromJson(value.toString());
+                    }
 
                     if (game != null) {
                         games.put(key, game);
@@ -354,6 +381,50 @@ public class SaveGameStateHelper {
         }
 
         return games;
+    }
+
+    private HashMap<String, Game> getSavedGameStatesScoresFromJson(String JSON) {
+        HashMap<String, Game> games = new HashMap<String, Game>();
+
+        try {
+            JSONObject jsonObject = new JSONObject(JSON);
+            Iterator<String> keys = jsonObject.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                try {
+                    Game game = null;
+                    if (!jsonObject.isNull(key)) {
+
+                        JSONObject value = jsonObject.getJSONObject(key);
+                        game = getSavedGameStateFromJson(value.toString());
+                    }
+
+                    if (game != null) {
+                        games.put(key, game);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return games;
+    }
+
+    private Game getSavedGameStateScoreFromJson(String JSON) throws FileNotFoundException {
+        Game game = null;
+        try {
+            game = new Game();
+            JSONObject jsonObject = new JSONObject(JSON);
+
+            getTurnsFromJson(jsonObject, game);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return game;
     }
 
     private void getTurnsFromJson(JSONObject jsonObject, Game game) throws JSONException {
