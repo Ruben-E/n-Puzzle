@@ -761,6 +761,14 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
 
     @Override
     public void handleStatusViewEnded(Game game, GamePlayFragment fragment) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View statusBarView = layoutInflater.inflate(R.layout.fragment_game_play_statusbar_finished, null, false);
+
+        fragment.setStatusBarView(statusBarView);
+
+        TextView finished = ButterKnife.findById(statusBarView, R.id.status_finished);
+        finished.setText("Solved!");
+
         fragment.finishGame();
     }
 
