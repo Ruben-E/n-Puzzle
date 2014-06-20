@@ -292,6 +292,7 @@ public class GamePlayFragment extends Fragment {
     }
 
     public void finishGame() {
+        updateUI();
         if (mGamePlayListener != null) {
             mGamePlayListener.onGameFinished(mGame);
         }
@@ -330,71 +331,74 @@ public class GamePlayFragment extends Fragment {
                 if (currentPosition != null) {
                     tileButton.setImageBitmap(currentPosition.getImage().getBitmap());
 
-                    tileButton.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
-                        @Override
-                        public void onPress() {
-                            if (mGame.isPlayable()) {
-                                currentPosition.move();
-                                updateUI();
+                    if (mGame.isPlayable() && !mGame.allPositionsCorrect()) {
+
+                        tileButton.setOnTouchListener(new OnTouchListener(getActivity().getApplicationContext()) {
+                            @Override
+                            public void onPress() {
+                                if (mGame.isPlayable()) {
+                                    currentPosition.move();
+                                    updateUI();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onLongPress() {
-                            if (mGame.isPlayable()) {
-                                final ImageButton correctButton = (ImageButton) mGrid.getChildAt(currentPosition.getCorrectPosition().getPosition());
-                                final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
+                            @Override
+                            public void onLongPress() {
+                                if (mGame.isPlayable()) {
+                                    final ImageButton correctButton = (ImageButton) mGrid.getChildAt(currentPosition.getCorrectPosition().getPosition());
+                                    final CurrentPosition correctPosition = mGame.getCurrentPositionAt(currentPosition.getCorrectPosition().getPosition());
 
-                                // correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
-                                correctButton.setImageBitmap(getCorrectTile());
+                                    // correctButton.setBackgroundColor(Color.parseColor(CORRECT_COLOR));
+                                    correctButton.setImageBitmap(getCorrectTile());
 
-                                new CountDownTimer(1500, 1000) {
-                                    public void onTick(long millisUntilFinished) {
-                                    }
-
-                                    public void onFinish() {
-                                        if (correctButton != null && correctPosition != null) {
-                                            correctButton.setImageBitmap(correctPosition.getImage().getBitmap());
-                                        } else if (correctPosition == null) {
-                                            correctButton.setImageBitmap(getEmptyTile());
+                                    new CountDownTimer(1500, 1000) {
+                                        public void onTick(long millisUntilFinished) {
                                         }
-                                    }
-                                }.start();
-                            }
-                        }
 
-                        @Override
-                        public void onSwipeTop() {
-                            if (mGame.isPlayable()) {
-                                currentPosition.moveToDirection(Position.Directions.TOP);
-                                updateUI();
+                                        public void onFinish() {
+                                            if (correctButton != null && correctPosition != null) {
+                                                correctButton.setImageBitmap(correctPosition.getImage().getBitmap());
+                                            } else if (correctPosition == null) {
+                                                correctButton.setImageBitmap(getEmptyTile());
+                                            }
+                                        }
+                                    }.start();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onSwipeBottom() {
-                            if (mGame.isPlayable()) {
-                                currentPosition.moveToDirection(Position.Directions.BOTTOM);
-                                updateUI();
+                            @Override
+                            public void onSwipeTop() {
+                                if (mGame.isPlayable()) {
+                                    currentPosition.moveToDirection(Position.Directions.TOP);
+                                    updateUI();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onSwipeLeft() {
-                            if (mGame.isPlayable()) {
-                                currentPosition.moveToDirection(Position.Directions.LEFT);
-                                updateUI();
+                            @Override
+                            public void onSwipeBottom() {
+                                if (mGame.isPlayable()) {
+                                    currentPosition.moveToDirection(Position.Directions.BOTTOM);
+                                    updateUI();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onSwipeRight() {
-                            if (mGame.isPlayable()) {
-                                currentPosition.moveToDirection(Position.Directions.RIGHT);
-                                updateUI();
+                            @Override
+                            public void onSwipeLeft() {
+                                if (mGame.isPlayable()) {
+                                    currentPosition.moveToDirection(Position.Directions.LEFT);
+                                    updateUI();
+                                }
                             }
-                        }
-                    });
+
+                            @Override
+                            public void onSwipeRight() {
+                                if (mGame.isPlayable()) {
+                                    currentPosition.moveToDirection(Position.Directions.RIGHT);
+                                    updateUI();
+                                }
+                            }
+                        });
+                    }
 
                 } else {
                     //tileButton.getBackground().setAlpha(256);
