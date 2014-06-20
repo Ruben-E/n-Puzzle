@@ -1,11 +1,23 @@
-<com.afollestad.cardsui.CardListView
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:context="nl.rubenernst.han.mad.android.puzzle.fragments.MatchesFragment"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/matches"
-        >
-</com.afollestad.cardsui.CardListView>
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+    <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:id="@+id/progress_bar"
+            app:spb_progressiveStart_activated="false"/>
+
+    <com.afollestad.cardsui.CardListView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/matches"
+            android:layout_below="@+id/progress_bar"
+            >
+    </com.afollestad.cardsui.CardListView>
+</RelativeLayout>
 
 

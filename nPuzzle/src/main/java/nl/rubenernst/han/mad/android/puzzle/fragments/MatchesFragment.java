@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.afollestad.cardsui.*;
@@ -26,6 +27,7 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.*;
 import com.google.example.games.basegameutils.GameHelper;
+import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
 import nl.rubenernst.han.mad.android.puzzle.MultiplayerGamePlayIntentActivity;
 import nl.rubenernst.han.mad.android.puzzle.R;
 import nl.rubenernst.han.mad.android.puzzle.helpers.MatchHelper;
@@ -42,6 +44,11 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
 
     @InjectView(R.id.matches)
     CardListView matchesList;
+
+    @InjectView(R.id.progress_bar)
+    SmoothProgressBar progressBar;
+
+    Button newGameButton;
 
     private GoogleApiClient apiClient;
     private Activity activity;
@@ -73,7 +80,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         ButterKnife.inject(this, rootView);
 
         View headerView = inflater.inflate(R.layout.fragment_matches_listview_header, matchesList, false);
-        Button newGameButton = ButterKnife.findById(headerView, R.id.new_game);
+        newGameButton = ButterKnife.findById(headerView, R.id.new_game);
 
         newGameButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,8 +121,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
     }
 
     public void refreshGames() {
-        adapter.clear();
-        adapter.notifyDataSetChanged();
+        showProgressBar();
 
         int[] games = {TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE,
                 TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN,
@@ -125,6 +131,9 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         Games.TurnBasedMultiplayer.loadMatchesByStatus(apiClient, games)
                 .setResultCallback(new ResultCallback<TurnBasedMultiplayer.LoadMatchesResult>() {
                     public void onResult(TurnBasedMultiplayer.LoadMatchesResult r) {
+                        adapter.clear();
+                        adapter.notifyDataSetChanged();
+
                         LoadMatchesResponse matches = r.getMatches();
 
                         ArrayList<Card> inviteCards = getCardsForInvitations(matches.getInvitations());
@@ -173,7 +182,9 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                             }
                         });
 
+                        hideProgressBar();
                         matchesList.setAdapter(adapter);
+
                     }
                 });
     }
@@ -315,6 +326,15 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
         return MatchHelper.getOpponent(participants, getCurrentPlayerId());
     }
 
+    public void showProgressBar() {
+        progressBar.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+        progressBar.progressiveStart();
+    }
+
+    public void hideProgressBar() {
+        progressBar.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0));
+        progressBar.progressiveStop();
+    }
 
     public void setApiClient(GoogleApiClient apiClient) {
         this.apiClient = apiClient;
