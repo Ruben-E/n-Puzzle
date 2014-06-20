@@ -289,7 +289,7 @@ public class MatchesFragment extends Fragment implements GameHelper.GameHelperLi
                     gameScoreTask.setTaskFinishedListener(new TaskFinishedListener() {
                         @Override
                         public void onTaskFinished(Object result, String message) {
-                            if (result != null) {
+                            if (result != null && apiClient.isConnected()) {
                                 HashMap<String, Game> games = (HashMap<String, Game>) result;
                                 String scoreString = "";
 
