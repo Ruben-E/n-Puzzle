@@ -551,6 +551,12 @@ public class MultiplayerGamePlayActivity extends BaseGameActivity implements Gam
     public void rematch() {
         showLoadingIndicator("Loading rematch...");
 
+        Game previousGame = mGames.get(ORIGINAL_GAME_KEY);
+        if (previousGame != null) {
+            difficulty = previousGame.getDifficulty();
+            puzzleId = previousGame.getPuzzleId();
+        }
+
         Games.TurnBasedMultiplayer.rematch(getApiClient(), mMatch.getMatchId()).setResultCallback(
                 new ResultCallback<TurnBasedMultiplayer.InitiateMatchResult>() {
                     @Override
